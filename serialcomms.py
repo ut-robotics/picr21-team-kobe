@@ -24,7 +24,7 @@ class Connection:
 
             received_data = self.ser.read(data_size)
             data = struct.unpack('<hhhH', received_data)
-            print(data)
+            #print(data)
         except Exception as e:
             print(e)
             raise
