@@ -18,6 +18,10 @@ profile = pipeline.start(config)
 color_sensor = profile.get_device().query_sensors()[1]
 color_sensor.set_option(rs.option.enable_auto_exposure, False)
 color_sensor.set_option(rs.option.enable_auto_white_balance, False)
+color_sensor.set_option(rs.option.white_balance, 3500)
+color_sensor.set_option(rs.option.exposure, 50)
+
+
 
 
 
@@ -94,7 +98,7 @@ cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
 
 blobparams = cv2.SimpleBlobDetector_Params()
 blobparams.minDistBetweenBlobs = 50
-blobparams.filterByCircularity = True
+blobparams.filterByCircularity = False
 blobparams.filterByArea = True
 blobparams.minArea = 25
 blobparams.maxArea = 100000
@@ -143,9 +147,9 @@ while True:
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
     thresholded = cv2.bitwise_not(thresholded)
 
+    #Morphological operations
+    thresholded = cv2.erode(thresholded,kernel, iterations=1)
 
-    #Closing morphology
-    thresholded = cv2.morphologyEx(cv2.bitwise_and(thresholded), cv2.MORPH_CLOSE, kernel)
 
     cv2.imshow('Thresholded', thresholded)
 
@@ -172,7 +176,7 @@ while True:
             if dist < 0.1:
                 drive.stop()
             elif x <  350 and x > 270:
-                drive.move([10,10,10,0], direction)
+                drive.move([20,20,20,0], direction)
             elif x > 350 and x < 400:
                 drive.spinRight([-5,-5,-5,0])
             elif x < 270 and x > 200:
@@ -186,7 +190,7 @@ while True:
             #     # TODO2: also check if ball is further than 10cm if not stop
             #     drive.spinRight([-5,-5,-5,0]) # add speed value with func
     else:
-        pass#drive.spinRight([-5,-5,-5,0])
+        drive.spinRight([-5,-5,-5,0])
 
 
     outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
