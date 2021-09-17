@@ -38,11 +38,8 @@ def stop():
     set_speeds(wheel_speeds)
 
 def shutdown():
-    ser.write_speeds("d:10\r\n")
-
-def close_connection():
-    print("Closing serial port" + ser.port + ".")
-    ser.close()
+    stop()
+    ser.close_connection()
 
 def pid(kp, ki, kd, target, position, error_prev, integral_prev, t_prev, t):
     error = target - position
