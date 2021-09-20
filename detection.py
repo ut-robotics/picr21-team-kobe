@@ -9,7 +9,6 @@ lValue = 0
 hHue = 0
 hSaturation = 0
 hValue = 0 # highest value h
-cap = cv2.VideoCapture(1)
 
 
 # Thresholds an image and writes values into file to later use again
@@ -61,13 +60,13 @@ try:
 except IOError:
     pass
 
-cv2.namedWindow("Original")
-cv2.createTrackbar("lHue", "Original", lHue, 179, updateValue)
-cv2.createTrackbar("lSaturation", "Original", lSaturation, 255, updateValue1)
-cv2.createTrackbar("lValue", "Original", lValue, 255, updateValue2)
-cv2.createTrackbar("hHue", "Original", hHue, 179, updateValue3)
-cv2.createTrackbar("hSaturation", "Original", hSaturation, 255, updateValue4)
-cv2.createTrackbar("hValue", "Original", hValue, 255, updateValue5)
+cv2.namedWindow("Processed")
+cv2.createTrackbar("lHue", "Processed", lHue, 179, updateValue)
+cv2.createTrackbar("lSaturation", "Processed", lSaturation, 255, updateValue1)
+cv2.createTrackbar("lValue", "Processed", lValue, 255, updateValue2)
+cv2.createTrackbar("hHue", "Processed", hHue, 179, updateValue3)
+cv2.createTrackbar("hSaturation", "Processed", hSaturation, 255, updateValue4)
+cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
 
 blobparams = cv2.SimpleBlobDetector_Params()
 blobparams.minDistBetweenBlobs = 50
@@ -84,25 +83,38 @@ def writevalues():
     with open("trackbar_defaults.txt", "w") as writer:
         writer.write(str(lHue) + "," + str(lSaturation) + "," + str(lValue) + "," + str(hHue) + "," + str(hSaturation) + "," + str(hValue))
 
+cap = cv2.VideoCapture(0)
+
 while True:
     ret, frame = cap.read()
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    lHue = cv2.getTrackbarPos("lHue", "Processed")
+    lSaturation = cv2.getTrackbarPos("lSaturation", "Processed")
+    lValue = cv2.getTrackbarPos("lValue", "Processed")
+    hHue = cv2.getTrackbarPos("hHue", "Processed")
+    hSaturation = cv2.getTrackbarPos("hSaturation", "Processed")
+    hValue = cv2.getTrackbarPos("hValue", "Processed")
+
     lowerLimits = np.array([lHue, lSaturation, lValue])
     upperLimits = np.array([hHue, hSaturation, hValue])
     
     # Our operations on the frame come here
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
     thresholded = cv2.bitwise_not(thresholded)
-    outimage = cv2.bitwise_and(frame, frame, mask = thresholded)
+    cv2.imshow('Thresholded', thresholded)
+
+    outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
 
     for kp in keypoints:
         x = int(kp.pt[0])
         y = int(kp.pt[1])
-        cv2.putText(frame, str(x)+ "," + str(y), (x,y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
+        cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
 
-    frame = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
     cv2.imshow("Original", frame)
     cv2.imshow("Processed", outimage)
 
@@ -111,11 +123,6 @@ while True:
         writevalues()
         
         break
-
-
-    
-    #TODO: use threshold values defined in the code
-
 
 cap.release()
 writevalues()
