@@ -15,7 +15,7 @@ while (True):
     depth_frame = frameset.get_depth_frame()
     depth = np.asanyarray(depth_frame.get_data())
 
-    point = [300, 300]
+    point = [320, 240]
     dist = depth_frame.get_distance(point[0], point[1])
     print(dist)
 
