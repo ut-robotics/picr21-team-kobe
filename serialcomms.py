@@ -20,7 +20,8 @@ def WriteCommand(speed1, speed2, speed3, thrower_speed, disable_failsafe):
         data = struct.unpack('<hhhH', received_data)
         #actual_speed1, actual_speed2, actual_speed_3, feedback_delimiter = data
         print(data)
-        time.sleep(0.25)
+        time.sleep(0.05)
+        ser.flush()
     except:
         print("error occured couldnt write to serial")
         ser.close()

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
+import test_drive as drive
+from math import atan2
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
 lSaturation = 0
@@ -108,10 +110,26 @@ while True:
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
 
-    for kp in keypoints:
-        x = int(kp.pt[0])
-        y = int(kp.pt[1])
-        cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
+    if len(keypoints) >= 2:
+        for kp in keypoints:
+            x = int(kp.pt[0])
+            y = int(kp.pt[1])
+            cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+            direction = atan2(kp.pt[0], kp.pt[1])
+            # Check if the detected blob is left or right from the center of the camera's screen
+
+            drive.wheelSpeed([50,50,50,0], direction, angle) #Experimental
+
+
+
+            if x < 320 - 20 or x > 320 + 20:
+                drive.moveForward([30,30,30,0]) # add speed value with func
+            elif x < 320: #TODO: replace x value with camera resolution x-axis/2
+                drive.spinLeft([30,30,30,0]) # add speed value with func  
+            elif x > 320:   #TODO: replace x value with camera resolution x-axis/2
+                # TODO2: also check if ball is further than 10cm if not stop
+                drive.spinRight([-30,-30,-30,0]) # add speed value with func
+
 
     outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
