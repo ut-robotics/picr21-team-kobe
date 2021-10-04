@@ -2,7 +2,7 @@ import time
 import serial
 import struct
 
-ser=serial.Serial('COM3', 115200, timeout=2)
+ser=serial.Serial('/dev/ttyACM0', 115200, timeout=2)
 data_size = struct.calcsize('<hhhH')
 
 def WriteCommand(speed1, speed2, speed3, thrower_speed, disable_failsafe):
