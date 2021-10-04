@@ -4,6 +4,9 @@ import cv2
 import numpy as np
 import test_drive as drive
 from math import atan2
+import pyrealsense2
+
+from realsense_depth import *
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
 lSaturation = 0
@@ -12,6 +15,8 @@ hHue = 0
 hSaturation = 0
 hValue = 0 # highest value h
 
+
+cap = DepthCamera()
 
 # Thresholds an image and writes values into file to later use again
 
@@ -85,10 +90,11 @@ def writevalues():
     with open("trackbar_defaults.txt", "w") as writer:
         writer.write(str(lHue) + "," + str(lSaturation) + "," + str(lValue) + "," + str(hHue) + "," + str(hSaturation) + "," + str(hValue))
 
-cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(0)
 
 while True:
-    ret, frame = cap.read()
+    #ret, frame = cap.read()
+    ret, frame = dc.get_frame()
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -114,7 +120,7 @@ while True:
         for kp in keypoints:
             x = int(kp.pt[0])
             y = int(kp.pt[1])
-            cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+            #cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
             direction = atan2(kp.pt[0], kp.pt[1])
             # Check if the detected blob is left or right from the center of the camera's screen
 
