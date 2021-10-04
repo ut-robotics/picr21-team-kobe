@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-import test_drive as drive
+#import test_drive as drive
 from math import atan2
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
@@ -118,17 +118,17 @@ while True:
             direction = atan2(kp.pt[0], kp.pt[1])
             # Check if the detected blob is left or right from the center of the camera's screen
 
-            drive.move([50,50,50], direction) #Experimental #TODO: Define angle
+            # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
 
 
 
-            if x < 320 - 20 or x > 320 + 20:
-                drive.moveForward([30,30,30,0]) # add speed value with func
-            elif x < 320: #TODO: replace x value with camera resolution x-axis/2
-                drive.spinLeft([30,30,30,0]) # add speed value with func  
-            elif x > 320:   #TODO: replace x value with camera resolution x-axis/2
-                # TODO2: also check if ball is further than 10cm if not stop
-                drive.spinRight([-30,-30,-30,0]) # add speed value with func
+            # if x < 320 - 20 or x > 320 + 20:
+            #     drive.moveForward([30,30,30,0]) # add speed value with func
+            # elif x < 320: #TODO: replace x value with camera resolution x-axis/2
+            #     drive.spinLeft([30,30,30,0]) # add speed value with func  
+            # elif x > 320:   #TODO: replace x value with camera resolution x-axis/2
+            #     # TODO2: also check if ball is further than 10cm if not stop
+            #     drive.spinRight([-30,-30,-30,0]) # add speed value with func
 
 
     outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
