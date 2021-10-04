@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-#import test_drive as drive
+import test_drive as drive
 from math import atan2
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
@@ -62,13 +62,13 @@ try:
 except IOError:
     pass
 
-cv2.namedWindow("Processed")
-cv2.createTrackbar("lHue", "Processed", lHue, 179, updateValue)
-cv2.createTrackbar("lSaturation", "Processed", lSaturation, 255, updateValue1)
-cv2.createTrackbar("lValue", "Processed", lValue, 255, updateValue2)
-cv2.createTrackbar("hHue", "Processed", hHue, 179, updateValue3)
-cv2.createTrackbar("hSaturation", "Processed", hSaturation, 255, updateValue4)
-cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
+# cv2.namedWindow("Processed")
+# cv2.createTrackbar("lHue", "Processed", lHue, 179, updateValue)
+# cv2.createTrackbar("lSaturation", "Processed", lSaturation, 255, updateValue1)
+# cv2.createTrackbar("lValue", "Processed", lValue, 255, updateValue2)
+# cv2.createTrackbar("hHue", "Processed", hHue, 179, updateValue3)
+# cv2.createTrackbar("hSaturation", "Processed", hSaturation, 255, updateValue4)
+# cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
 
 blobparams = cv2.SimpleBlobDetector_Params()
 blobparams.minDistBetweenBlobs = 50
@@ -120,7 +120,8 @@ while True:
 
             # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
 
-
+            if x < 320 - 20 or x > 320 + 20:
+                drive.stop()
 
             # if x < 320 - 20 or x > 320 + 20:
             #     drive.moveForward([30,30,30,0]) # add speed value with func
@@ -133,10 +134,10 @@ while True:
         drive.spinRight([-10,-10,-10,0])
 
 
-    outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    #outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    cv2.imshow("Original", frame)
-    cv2.imshow("Processed", outimage)
+    #cv2.imshow("Original", frame)
+    #cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("writing values")
