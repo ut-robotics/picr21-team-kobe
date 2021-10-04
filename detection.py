@@ -118,7 +118,7 @@ while True:
             direction = atan2(kp.pt[0], kp.pt[1])
             # Check if the detected blob is left or right from the center of the camera's screen
 
-            drive.wheelSpeed([50,50,50,0], direction, angle) #Experimental
+            drive.move([50,50,50], direction) #Experimental #TODO: Define angle
 
 
 
