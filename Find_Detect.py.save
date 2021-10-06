@@ -116,7 +116,7 @@ while True:
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
 
-    if len(keypoints) >= 1:
+    if len(keypoints) >= 2:
         for kp in keypoints:
             x = int(kp.pt[0])
             y = int(kp.pt[1])
@@ -137,13 +137,13 @@ while True:
             #     # TODO2: also check if ball is further than 10cm if not stop
             #     drive.spinRight([-30,-30,-30,0]) # add speed value with func
     else:
-        drive.spinRight([-5,-5,-5,0])
+        drive.spinRight([-10,-10,-10,0])
 
 
-    outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+   #outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    cv2.imshow("Original", frame)
-    cv2.imshow("Processed", outimage)
+    #cv2.imshow("Original", frame)
+    #cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("writing values")
