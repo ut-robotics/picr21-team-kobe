@@ -79,7 +79,7 @@ blobparams = cv2.SimpleBlobDetector_Params()
 blobparams.minDistBetweenBlobs = 50
 blobparams.filterByCircularity = False
 blobparams.filterByArea = True
-blobparams.minArea = 200
+blobparams.minArea = 100
 blobparams.maxArea = 100000
 blobparams.filterByInertia = False
 blobparams.filterByConvexity = False
@@ -126,7 +126,7 @@ while True:
             print(frame)
             # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
             print("x", x, "y" ,y)
-            if x < 320 - 20 or x > 320 + 20:
+            if x < 320 and x > 290:
                 drive.stop()
 
             # if x < 320 - 20 or x > 320 + 20:
