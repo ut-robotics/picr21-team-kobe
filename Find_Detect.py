@@ -123,9 +123,9 @@ while True:
             #cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
             direction = atan2(kp.pt[0], kp.pt[1])
             # Check if the detected blob is left or right from the center of the camera's screen
-
+            print(frame)
             # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
-
+            print("x", x, "y" ,y)
             if x < 320 - 20 or x > 320 + 20:
                 drive.stop()
 
