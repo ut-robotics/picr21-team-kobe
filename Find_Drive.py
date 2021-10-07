@@ -14,7 +14,13 @@ pipeline = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60)
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-pipeline.start(config)
+profile = pipeline.start(config)
+color_sensor = profile.get_device().query_sensors()[1]
+color_sensor.set_option(rs.option.enable_auto_exposure, False)
+color_sensor.set_option(rs.option.enable_auto_white_balance, False)
+
+
+
 
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
@@ -23,6 +29,8 @@ lValue = 0
 hHue = 0
 hSaturation = 0
 hValue = 0 # highest value h
+
+kernel = np.ones((5,5),np.uint8)
 
 
 #cap = DepthCamera()
@@ -86,7 +94,7 @@ cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
 
 blobparams = cv2.SimpleBlobDetector_Params()
 blobparams.minDistBetweenBlobs = 50
-blobparams.filterByCircularity = False
+blobparams.filterByCircularity = True
 blobparams.filterByArea = True
 blobparams.minArea = 25
 blobparams.maxArea = 100000
@@ -134,6 +142,11 @@ while True:
     # Our operations on the frame come here
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
     thresholded = cv2.bitwise_not(thresholded)
+
+
+    #Closing morphology
+    thresholded = cv2.morphologyEx(cv2.bitwise_and(thresholded), cv2.MORPH_CLOSE, kernel)
+
     cv2.imshow('Thresholded', thresholded)
 
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
