@@ -125,16 +125,21 @@ while True:
             # Check if the detected blob is left or right from the center of the camera's screen
             # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
             print("x", x, "y" ,y)
-            # if x < 320 and x > 290:
-            #     drive.stop()
+            if x < 320 and x > 290:
+                drive.move([5,5,5,0], direction)
+            elif x < 320:
+                drive.spinRight([-5,-5,-5,0])
+            
+            elif x > 320:
+                drive.spinLeft[5,5,5,0]
 
-            if x < 320 - 20 or x > 320 + 20:
-                drive.moveForward([30,30,30,0]) # add speed value with func
-            elif x < 320: #TODO: replace x value with camera resolution x-axis/2
-                drive.spinLeft([10,10,10,0]) # add speed value with func  
-            elif x > 320:   #TODO: replace x value with camera resolution x-axis/2
-                # TODO2: also check if ball is further than 10cm if not stop
-                drive.spinRight([-10,-10,-10,0]) # add speed value with func
+            # if x < 320 - 20 or x > 320 + 20:
+            #     drive.moveForward([0,5,5,0]) # add speed value with func
+            # elif x < 320: #TODO: replace x value with camera resolution x-axis/2
+            #     drive.spinLeft([5,5,5,0]) # add speed value with func  
+            # elif x > 320:   #TODO: replace x value with camera resolution x-axis/2
+            #     # TODO2: also check if ball is further than 10cm if not stop
+            #     drive.spinRight([-5,-5,-5,0]) # add speed value with func
     else:
         drive.spinRight([-5,-5,-5,0])
 
