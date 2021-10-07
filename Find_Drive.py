@@ -6,7 +6,7 @@ from numpy.lib.ufunclike import _dispatcher
 import test_drive as drive
 from math import atan2
 import pyrealsense2 as rs
-
+import math
 #from realsense_depth import *
 
 
@@ -163,23 +163,27 @@ while True:
             #depth = cap.get_frame(depth)
             #dist = depth.get_distance(x, y)
             dist = depth_frame.get_distance(x, y)
-            print("size ", kp.size)
+            speed = math.sqrt((320-x)**2 + (480-y)**2)*0.1
+            #print("size ", kp.size)
+            #print("speed", speed)
 
-            print("dist", dist)
+            #print("dist", dist)
 
             #cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-            direction = atan2(340 - kp.pt[0], 480 - kp.pt[1])
+            direction = atan2(320 - x, 480 - y)
             # Check if the detected blob is left or right from the center of the camera's screen
             # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
             #print("x", x, "y" ,y)
-            #print(x)
+            print(x)
             if dist < 0.1:
                 drive.stop()
-            elif x <  350 and x > 270:
-                drive.move([20,20,20,0], direction)
-            elif x > 350 and x < 400:
+            elif x < 350 and x > 270:
+                 drive.move(speed, direction)
+            elif x < 270 and x > 0:
+                drive.spinLeft([5,5,5,0])
+            elif x < 590 and x > 350:
                 drive.spinRight([-5,-5,-5,0])
-            elif x < 270 and x > 200:
+            else:
                 drive.spinLeft([5,5,5,0])
 
             # if x < 320 - 20 or x > 320 + 20:
