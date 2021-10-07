@@ -2,11 +2,20 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
+from numpy.lib.ufunclike import _dispatcher
 import test_drive as drive
 from math import atan2
-import pyrealsense2
+import pyrealsense2 as rs
 
-from realsense_depth import *
+#from realsense_depth import *
+
+
+pipeline = rs.pipeline()
+config = rs.config()
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60)
+config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+pipeline.start(config)
+
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
 lSaturation = 0
@@ -16,7 +25,7 @@ hSaturation = 0
 hValue = 0 # highest value h
 
 
-cap = DepthCamera()
+#cap = DepthCamera()
 
 # Thresholds an image and writes values into file to later use again
 
@@ -94,7 +103,21 @@ def writevalues():
 
 while True:
     #ret, frame = cap.read()
-    ret,depth, frame = cap.get_frame()
+    #ret,depth, frame = cap.get_frame()
+
+    frames = pipeline.wait_for_frames()
+    aligned_frames = rs.align(rs.stream.color).process(frames)
+    color_frame = aligned_frames.get_color_frame()
+    frame = np.asanyarray(color_frame.get_data())
+    depth_frame = aligned_frames.get_depth_frame()
+    depth = np.asanyarray(depth_frame.get_data())
+
+    #colorizer = rs.colorizer()
+    #colorized_depth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
+    #cv2.circle(colorized_depth, point, 10, (0, 0, 255))
+
+    #print(dist)
+
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -111,7 +134,7 @@ while True:
     # Our operations on the frame come here
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
     thresholded = cv2.bitwise_not(thresholded)
-    cv2.imshow('Thresholded', thresholded)
+    #cv2.imshow('Thresholded', thresholded)
 
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
@@ -120,18 +143,26 @@ while True:
         for kp in keypoints:
             x = int(kp.pt[0])
             y = int(kp.pt[1])
+            #depth = cap.get_frame(depth)
+            #dist = depth.get_distance(x, y)
+            dist = depth_frame.get_distance(x, y)
+
+            print("dist", dist)
+
             #cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-            direction = atan2(kp.pt[0], kp.pt[1])
+            direction = atan2(340 - kp.pt[0], 480 - kp.pt[1])
             # Check if the detected blob is left or right from the center of the camera's screen
             # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
-            print("x", x, "y" ,y)
-            if x < 320 and x > 290:
-                drive.move([5,5,5,0], direction)
-            elif x < 320:
+            #print("x", x, "y" ,y)
+            #print(x)
+            if dist < 0.1:
+                drive.stop()
+            elif x <  350 and x > 270:
+                drive.move([10,10,10,0], direction)
+            elif x > 350 and x < 400:
                 drive.spinRight([-5,-5,-5,0])
-            
-            elif x > 320:
-                drive.spinLeft[5,5,5,0]
+            elif x < 270 and x > 200:
+                drive.spinLeft([5,5,5,0])
 
             # if x < 320 - 20 or x > 320 + 20:
             #     drive.moveForward([0,5,5,0]) # add speed value with func
@@ -146,7 +177,7 @@ while True:
 
     outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    cv2.imshow("Original", frame)
+    #cv2.imshow("Original", frame)
     cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
