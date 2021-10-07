@@ -88,7 +88,7 @@ blobparams = cv2.SimpleBlobDetector_Params()
 blobparams.minDistBetweenBlobs = 50
 blobparams.filterByCircularity = False
 blobparams.filterByArea = True
-blobparams.minArea = 100
+blobparams.minArea = 25
 blobparams.maxArea = 100000
 blobparams.filterByInertia = False
 blobparams.filterByConvexity = False
@@ -134,7 +134,7 @@ while True:
     # Our operations on the frame come here
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
     thresholded = cv2.bitwise_not(thresholded)
-    #cv2.imshow('Thresholded', thresholded)
+    cv2.imshow('Thresholded', thresholded)
 
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
@@ -146,6 +146,7 @@ while True:
             #depth = cap.get_frame(depth)
             #dist = depth.get_distance(x, y)
             dist = depth_frame.get_distance(x, y)
+            print("size ", kp.size)
 
             print("dist", dist)
 
@@ -172,12 +173,12 @@ while True:
             #     # TODO2: also check if ball is further than 10cm if not stop
             #     drive.spinRight([-5,-5,-5,0]) # add speed value with func
     else:
-        drive.spinRight([-5,-5,-5,0])
+        pass#drive.spinRight([-5,-5,-5,0])
 
 
     outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    #cv2.imshow("Original", frame)
+    cv2.imshow("Original", frame)
     cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
