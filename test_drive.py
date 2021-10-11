@@ -18,7 +18,7 @@ def moveForward(speed):
 
 
 def wheelSpeed(speed, dir, angle):
-    wheelLinearVelocity = speed * math.cos(dir - math.radians(angle+35))
+    wheelLinearVelocity = speed * math.cos(dir - math.radians(angle+30))
     #print(wheelLinearVelocity, "velocity")
     return wheelLinearVelocity
 

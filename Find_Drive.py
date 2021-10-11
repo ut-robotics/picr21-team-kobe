@@ -88,13 +88,13 @@ try:
 except IOError:
     pass
 
-cv2.namedWindow("Processed")
-cv2.createTrackbar("lHue", "Processed", lHue, 179, updateValue)
-cv2.createTrackbar("lSaturation", "Processed", lSaturation, 255, updateValue1)
-cv2.createTrackbar("lValue", "Processed", lValue, 255, updateValue2)
-cv2.createTrackbar("hHue", "Processed", hHue, 179, updateValue3)
-cv2.createTrackbar("hSaturation", "Processed", hSaturation, 255, updateValue4)
-cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
+# cv2.namedWindow("Processed")
+# cv2.createTrackbar("lHue", "Processed", lHue, 179, updateValue)
+# cv2.createTrackbar("lSaturation", "Processed", lSaturation, 255, updateValue1)
+# cv2.createTrackbar("lValue", "Processed", lValue, 255, updateValue2)
+# cv2.createTrackbar("hHue", "Processed", hHue, 179, updateValue3)
+# cv2.createTrackbar("hSaturation", "Processed", hSaturation, 255, updateValue4)
+# cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
 
 blobparams = cv2.SimpleBlobDetector_Params()
 blobparams.minDistBetweenBlobs = 50
@@ -133,12 +133,12 @@ while True:
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    lHue = cv2.getTrackbarPos("lHue", "Processed")
-    lSaturation = cv2.getTrackbarPos("lSaturation", "Processed")
-    lValue = cv2.getTrackbarPos("lValue", "Processed")
-    hHue = cv2.getTrackbarPos("hHue", "Processed")
-    hSaturation = cv2.getTrackbarPos("hSaturation", "Processed")
-    hValue = cv2.getTrackbarPos("hValue", "Processed")
+    #lHue = cv2.getTrackbarPos("lHue", "Processed")
+    #lSaturation = cv2.getTrackbarPos("lSaturation", "Processed")
+    #lValue = cv2.getTrackbarPos("lValue", "Processed")
+    #hHue = cv2.getTrackbarPos("hHue", "Processed")
+    #hSaturation = cv2.getTrackbarPos("hSaturation", "Processed")
+    #hValue = cv2.getTrackbarPos("hValue", "Processed")
 
     lowerLimits = np.array([lHue, lSaturation, lValue])
     upperLimits = np.array([hHue, hSaturation, hValue])
@@ -151,7 +151,7 @@ while True:
     thresholded = cv2.erode(thresholded,kernel, iterations=1)
 
 
-    cv2.imshow('Thresholded', thresholded)
+    #cv2.imshow('Thresholded', thresholded)
 
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
@@ -163,28 +163,30 @@ while True:
             #depth = cap.get_frame(depth)
             #dist = depth.get_distance(x, y)
             dist = depth_frame.get_distance(x, y)
-            speed = math.sqrt((320-x)**2 + (480-y)**2)*0.1
+            speed = math.sqrt((320-x)**2 + (480-y)**2)*0.2
             #print("size ", kp.size)
             #print("speed", speed)
 
-            #print("dist", dist)
+            print("dist", dist)
 
             #cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
             direction = atan2(320 - x, 480 - y)
+            #if direction < 1 and direction > 0:
+            print("dir", direction)
             # Check if the detected blob is left or right from the center of the camera's screen
             # drive.move([50,50,50], direction) #Experimental #TODO: Define angle
             #print("x", x, "y" ,y)
-            print(x)
-            if dist < 0.1:
+            #print(x)
+            if dist < 0.4:
                 drive.stop()
-            elif x < 350 and x > 270:
-                 drive.move(speed, direction)
-            elif x < 270 and x > 0:
-                drive.spinLeft([5,5,5,0])
-            elif x < 590 and x > 350:
-                drive.spinRight([-5,-5,-5,0])
-            else:
-                drive.spinLeft([5,5,5,0])
+            #elif x < 350 and x > 270:
+            drive.move(speed, direction)
+            # elif x < 270 and x > 0:
+            #     drive.spinLeft([5,5,5,0])
+            # elif x < 590 and x > 350:
+            #     drive.spinRight([-5,-5,-5,0])
+            # else:
+            #     drive.spinLeft([5,5,5,0])
 
             # if x < 320 - 20 or x > 320 + 20:
             #     drive.moveForward([0,5,5,0]) # add speed value with func
@@ -194,13 +196,13 @@ while True:
             #     # TODO2: also check if ball is further than 10cm if not stop
             #     drive.spinRight([-5,-5,-5,0]) # add speed value with func
     else:
-        drive.spinRight([-5,-5,-5,0])
+        drive.spinRight([-15,-15,-15,0])
 
 
-    outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    #outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    cv2.imshow("Original", frame)
-    cv2.imshow("Processed", outimage)
+    #cv2.imshow("Original", frame)
+    #cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("writing values")

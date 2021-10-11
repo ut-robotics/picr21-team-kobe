@@ -17,7 +17,7 @@ def get_speeds(moving_speed, thrower_speed, direction):
     speeds = [0, 0, 0, 0]
     speeds[0] = int(calc_wheel_speed(moving_speed, direction, wheelAngle1))
     speeds[1] = int(calc_wheel_speed(moving_speed, direction, wheelAngle2))
-    speeds[2] = - int(calc_wheel_speed(moving_speed, direction, wheelAngle3))
+    speeds[2] = int(calc_wheel_speed(moving_speed, direction, wheelAngle3))
     speeds[3] = thrower_speed
     return speeds
 
@@ -31,29 +31,29 @@ def calc_wheel_speed(moving_speed, direction, wheel_angle):
     return wheel_speed
 
 def spinRight(speed):
-    send_speeds([-5, -5, -5, 0])
+    send_speeds([-30, -30, -30, 0])
 
 def spinLeft(speed):
-    send_speeds([5, 5, 5, 0])
+    send_speeds([30, 30, 30, 0])
 
 def keyBoardControl():
     cv2.namedWindow("Controller")
-    movingSpeed = 5
+    movingSpeed = 30
     throwingSpeed = 5
     while(True):
         key = cv2.waitKey(1) & 0xFF
         if key == ord("w"):
             print("Moving forward.")
-            move(movingSpeed, 0, 90)
+            move(movingSpeed, 0,330)
         if key == ord("d"):
             print("Moving right.")
-            move(movingSpeed, 0, 180)
+            move(movingSpeed, 0, 270)#225
         if key == ord("s"):
             print("Moving backwards.")
-            move(movingSpeed, 0, 270)
+            move(movingSpeed, 0, 150)
         if key == ord("a"):
             print("Moving left.")
-            move(movingSpeed, 0, 0)
+            move(movingSpeed, 0, 90)#45
         if key == ord("e"):
             print("Spinning right.")
             spinRight(movingSpeed)
