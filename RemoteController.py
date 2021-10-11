@@ -38,29 +38,31 @@ def spinLeft(speed):
 
 def keyBoardControl():
     cv2.namedWindow("Controller")
+    movingSpeed = 5
+    throwingSpeed = 5
     while(True):
         key = cv2.waitKey(1) & 0xFF
         if key == ord("w"):
             print("Moving forward.")
-            move(5, 0, 90)
+            move(movingSpeed, 0, 90)
         if key == ord("d"):
             print("Moving right.")
-            move(5, 0, 180)
+            move(movingSpeed, 0, 180)
         if key == ord("s"):
             print("Moving backwards.")
-            move(5, 0, 270)
+            move(movingSpeed, 0, 270)
         if key == ord("a"):
             print("Moving left.")
-            move(5, 0, 0)
+            move(movingSpeed, 0, 0)
         if key == ord("e"):
             print("Spinning right.")
-            spinRight(5)
+            spinRight(movingSpeed)
         if key == ord("q"):
             print("Spinning left.")
-            spinLeft(5)
+            spinLeft(movingSpeed)
         if key == ord("t"):
             print("Throwing.")
-            move(0, 5, 0)
+            move(0, throwingSpeed, 0)
         if key == ord("c"):
             print("Stopping.")
             stop()
