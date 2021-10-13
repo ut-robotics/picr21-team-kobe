@@ -64,15 +64,16 @@ while True:
     elif state == "Driving":
         center_x = len(frame[1])/2
         print("center_x", center_x)
-        if len(keypoints >= 1):
+        if len(keypoints) >= 1:
             for kp in keypoints:
                 x = int(kp.pt[0])
                 y = int(kp.pt[1])
                 dist = depth_frame.get_distance(x, y)
-                speed = math.sqrt((320-x)**2 + (480-y)**2)*0.2 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
-                direction = atan2(320 - x, 480 - y) #frame[1]-x, frame[0]-y
+                speed = math.sqrt((320-x)**2 + (480-y)**2)*0.1 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
+                direction = atan2(320 - x, 480 - y)
+                print("speed", int(speed)) #frame[1]-x, frame[0]-y
                 drive.move(speed, direction)
-        elif len(keypoints <= 0):
+        elif len(keypoints) <= 0:
             state = "Find"
 
 
