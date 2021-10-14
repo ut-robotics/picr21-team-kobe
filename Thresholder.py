@@ -7,7 +7,7 @@ import pyrealsense2 as rs
 import CameraConfig
 import ReadValues
 
-pipeline = CameraConfig.init()
+pipeline, camera_x, camera_y = CameraConfig.init()
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
 lSaturation = 0

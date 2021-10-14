@@ -11,7 +11,7 @@ import Blobparams
 import CameraConfig
 import ReadValues
 
-pipeline = CameraConfig.init()
+pipeline, camera_x, camera_y = CameraConfig.init()
 lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold()
 kernel = np.ones((5,5),np.uint8)
 detector = Blobparams.CreateDetector()
@@ -38,7 +38,7 @@ while True:
 
     #Morphological operations
     thresholded = cv2.erode(thresholded,kernel, iterations=1)
-    #cv2.imshow('Thresholded', thresholded)
+    cv2.imshow('Thresholded', thresholded)
 
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
@@ -55,32 +55,32 @@ while True:
 
             # if dist < 0.4:
             #     drive.stop()
-            # drive.move(speed, direction)
+            # drive.move(speed, direction)x
     if state == "Find":
-        drive.spinRight([-15,-15,-15,0])
+        drive.spinRight([-10,-10,-10,0])
         if len(keypoints) >= 1:
             state = "Driving"
     
     elif state == "Driving":
-        center_x = len(frame[1])/2
-        print("center_x", center_x)
+        
+        print("y", camera_y)
         if len(keypoints) >= 1:
             for kp in keypoints:
                 x = int(kp.pt[0])
                 y = int(kp.pt[1])
                 dist = depth_frame.get_distance(x, y)
-                speed = math.sqrt((320-x)**2 + (480-y)**2)*0.1 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
-                direction = atan2(320 - x, 480 - y)
+                speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.1 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
+                direction = atan2(camera_x/2 - x, camera_y - y)
                 print("speed", int(speed)) #frame[1]-x, frame[0]-y
                 drive.move(speed, direction)
         elif len(keypoints) <= 0:
             state = "Find"
 
 
-    #outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
     #cv2.imshow("Original", frame)
-    #cv2.imshow("Processed", outimage)
+    cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
