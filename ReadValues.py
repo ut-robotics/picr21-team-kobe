@@ -1,9 +1,9 @@
 from os import lseek
 
 
-def ReadThreshold():
+def ReadThreshold(filename):
     try:
-        with open("trackbar_defaults.txt", 'r') as reader:
+        with open(filename, 'r') as reader:
             values = reader.readline().split(",")
 
             # only read from the file if there are enough items to read
