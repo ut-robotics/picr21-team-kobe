@@ -12,6 +12,7 @@ import math
 #import ReadValues
 import Image_processing as ip
 
+#speed, direction, dist, keypoints = ip.ProcessFrame()
 
 #pipeline, camera_x, camera_y = CameraConfig.init()
 #lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("trackbar_defaults.txt")
@@ -23,7 +24,9 @@ import Image_processing as ip
 
 state = "Find"
 while True:
+    print(state)
     speed, direction, dist, keypoints = ip.ProcessFrame()
+    print(keypoints)
     # frames = pipeline.wait_for_frames()
     # aligned_frames = rs.align(rs.stream.color).process(frames)
     # color_frame = aligned_frames.get_color_frame()
@@ -46,6 +49,8 @@ while True:
 
     # outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     # keypoints = detector.detect(thresholded)
+    if keypoints >= 1:
+        state = "Driving"
 
     if state == "Find":
         drive.spinRight([-10,-10,-10,0])
@@ -63,7 +68,7 @@ while True:
             #    direction = atan2(camera_x/2 - x, camera_y - y)
             #    print("speed", int(speed)) #frame[1]-x, frame[0]-y
                 drive.move(speed, direction)
-        elif len(keypoints) <= 0:
+        elif keypoints <= 0:
             state = "Find"
 
 

@@ -57,7 +57,7 @@ def updateValue5(new_value5):
 #             hValue = int(values[5])
 # except Exception as e:
 #     print(e)
-lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold()
+lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("trackbar_defaults.txt")
 
 
 cv2.namedWindow("Processed")
@@ -130,5 +130,5 @@ while True:
         break
         
 
-writevalues()
+#writevalues()
 cv2.destroyAllWindows()
