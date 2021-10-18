@@ -47,13 +47,13 @@ def keyBoardControl():
             move(movingSpeed, 0,330)
         if key == ord("d"):
             print("Moving right.")
-            move(movingSpeed, 0, 270)
+            move(movingSpeed, 0, 240)
         if key == ord("s"):
             print("Moving backwards.")
             move(movingSpeed, 0, 150)
         if key == ord("a"):
             print("Moving left.")
-            move(movingSpeed, 0, 90)
+            move(movingSpeed, 0, 60)
         if key == ord("e"):
             print("Spinning right.")
             spinRight(movingSpeed)
