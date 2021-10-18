@@ -1,10 +1,16 @@
 import time
 import serial
 import struct
+import serial.tools.list_ports
 
 data_size = struct.calcsize('<hhhH')
 
-ser=serial.Serial(port='/dev/ttyACM0', baudrate = 115200, timeout = 2)
+ports = serial.tools.list_ports.comports()
+
+print([port.name for port in ports])
+
+
+#ser=serial.Serial(port='/dev/ttyACM0', baudrate = 115200, timeout = 2)
 def WriteCommand(speed1, speed2, speed3, thrower_speed, disable_failsafe):
     try:
         
