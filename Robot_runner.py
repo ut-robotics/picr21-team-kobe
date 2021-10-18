@@ -11,6 +11,10 @@ import math
 #import CameraConfig
 #import ReadValues
 import Image_processing as ip
+import serialcomms 
+
+ser = serialcomms.Connection()
+
 
 #speed, direction, dist, keypoints = ip.ProcessFrame()
 
