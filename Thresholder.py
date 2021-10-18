@@ -68,12 +68,14 @@ cv2.createTrackbar("hHue", "Processed", hHue, 179, updateValue3)
 cv2.createTrackbar("hSaturation", "Processed", hSaturation, 255, updateValue4)
 cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
 
+
+
 #Creates the blobdetector with parameters
 detector = Blobparams.CreateDetector()
 
-def writevalues():
+def writevalues(filename):
     print("saving values")
-    with open("trackbar_defaults.txt", "w") as writer:
+    with open(filename, "w") as writer:
         writer.write(str(lHue) + "," + str(lSaturation) + "," + str(lValue) + "," + str(hHue) + "," + str(hSaturation) + "," + str(hValue))
         print("values saved successfully.")
 
@@ -92,6 +94,7 @@ while True:
     hHue = cv2.getTrackbarPos("hHue", "Processed")
     hSaturation = cv2.getTrackbarPos("hSaturation", "Processed")
     hValue = cv2.getTrackbarPos("hValue", "Processed")
+
 
     lowerLimits = np.array([lHue, lSaturation, lValue])
     upperLimits = np.array([hHue, hSaturation, hValue])
@@ -116,8 +119,16 @@ while True:
     cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        writevalues()
+        writevalues("trackbar_defaults.txt")
         break
+    elif cv2.waitKey(1) & 0xFF == ord('s'):
+        writevalues("blue_basket.txt")
+        break
+    
+    elif cv2.waitKey(1) & 0xFF == ord('d'):
+        writevalues("pink_basket.txt")
+        break
+        
 
 writevalues()
 cv2.destroyAllWindows()
