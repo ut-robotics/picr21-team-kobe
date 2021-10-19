@@ -14,15 +14,9 @@ class Connection:
     def __init__(self, port):
 
         self.ser = serial.Serial(port, baudrate = 115200, timeout = 2)
-        self.ser.open()
-        isopen = self.ser.is_open
-        #return self.ser
-
-
-
 
 #ser=serial.Serial(port='/dev/ttyACM0', baudrate = 115200, timeout = 2)
-    def WriteCommand(speed1, speed2, speed3, thrower_speed, disable_failsafe, self):
+    def WriteCommand(self, speed1, speed2, speed3, thrower_speed, disable_failsafe):
         try:
             
             data = struct.pack('<hhhHBH', speed1, speed2, speed3, thrower_speed, disable_failsafe, 0xAAAA)
