@@ -3,7 +3,6 @@ import math
 
 
 ser = serialcomms.Connection('/dev/ttyACM0')
-print(ser)
 
 
 def move(movspeed, dir):

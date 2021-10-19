@@ -27,4 +27,5 @@ class Connection:
             print(data)
         except Exception as e:
             print(e)
-            
+            raise
+
