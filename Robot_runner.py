@@ -13,7 +13,7 @@ import math
 import Image_processing as ip
 import serialcomms 
 
-ser = serialcomms.Connection()
+#ser = serialcomms.Connection()
 
 
 #speed, direction, dist, keypoints = ip.ProcessFrame()
