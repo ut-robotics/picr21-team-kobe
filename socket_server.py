@@ -6,9 +6,10 @@ import json
 class Server:
 
     def __init__(self):
-        self = self
-        self.host = "localhost"
-        self.port = 8765
+        f = open('WebsocketConfig.json', "r")
+        websocketConfig = json.loads(f.read())
+        self.host = websocketConfig['host']
+        self.port = websocketConfig['port']
 
     async def send_to_client(self, websocket, path):
         while True:

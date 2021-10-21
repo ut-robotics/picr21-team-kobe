@@ -8,8 +8,10 @@ class Client:
     def __init__(self):
         self.run = None
         self.blueIsTarget = True
-        self.host = "localhost"
-        self.port = 8765
+        f = open('WebsocketConfig.json', "r")
+        websocketConfig = json.loads(f.read())
+        self.host = websocketConfig['host']
+        self.port = websocketConfig['port']
 
     async def listen_to_server(self):
         print("Starting client...")
