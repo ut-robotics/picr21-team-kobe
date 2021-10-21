@@ -1,6 +1,6 @@
 import serialcomms
 import math
-
+import time
 
 ser = serialcomms.Connection('/dev/ttyACM0')
 
@@ -41,4 +41,9 @@ def stop():
     speed = [0,0,0,0]
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
     #serialcomms.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
+
+
+def orbit():
+    speed = [-10,0,0,0]
+    ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 

@@ -6,8 +6,8 @@ def CreateDetector():
     blobparams.minDistBetweenBlobs = 50
     blobparams.filterByCircularity = False
     blobparams.filterByArea = True
-    blobparams.minArea = 25
-    blobparams.maxArea = 100000
+    blobparams.minArea = 25#255
+    blobparams.maxArea = 100000000
     blobparams.filterByInertia = False
     blobparams.filterByConvexity = False
     detector = cv2.SimpleBlobDetector_create(blobparams)

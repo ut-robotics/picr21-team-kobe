@@ -6,6 +6,7 @@ import Blobparams
 import pyrealsense2 as rs
 import CameraConfig
 import ReadValues
+import time
 
 pipeline, camera_x, camera_y = CameraConfig.init()
 
@@ -15,6 +16,9 @@ lValue = 0
 hHue = 0
 hSaturation = 0
 hValue = 0 # highest value h
+
+prev_time_frame = 0.0
+cur_time_frame = 0.0
 
 
 # Thresholds an image and writes values into file to later use again
@@ -57,7 +61,8 @@ def updateValue5(new_value5):
 #             hValue = int(values[5])
 # except Exception as e:
 #     print(e)
-lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("trackbar_defaults.txt")
+lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("blue_basket.txt")
+lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThreshold("trackbar_defaults.txt")
 
 
 cv2.namedWindow("Processed")
@@ -80,6 +85,12 @@ def writevalues(filename):
         print("values saved successfully.")
 
 while True:
+    
+    cur_time_frame = time.time()
+    fps = 1/ (cur_time_frame - prev_time_frame)
+    prev_time_frame = cur_time_frame
+    fps = str(int(fps))
+    print(fps)
 
     frames = pipeline.wait_for_frames()
     aligned_frames = rs.align(rs.stream.color).process(frames)
@@ -98,14 +109,34 @@ while True:
 
     lowerLimits = np.array([lHue, lSaturation, lValue])
     upperLimits = np.array([hHue, hSaturation, hValue])
+
+
+    lowerLimits1 = np.array([lHue1, lSaturation1, lValue1])
+    upperLimits1 = np.array([hHue1, hSaturation1, hValue1])
     
+
+
     # Our operations on the frame come here
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
+    thresholded1 = cv2.inRange(hsv, lowerLimits1, upperLimits1)
+    
+
+    contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    contours = max(contours, key= cv2.contourArea)
+
+    #cv2.imshow('Thresholded1', thresholded)
     thresholded = cv2.bitwise_not(thresholded)
-    cv2.imshow('Thresholded', thresholded)
+    thresholded1 = cv2.bitwise_not(thresholded1)
+    cv2.imshow('Thresholded', thresholded1)
+
 
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
-    keypoints = detector.detect(thresholded)
+
+    #print(contours)
+    if len(contours) > 0:
+        cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
+
+    keypoints = detector.detect(thresholded1)
 
     if len(keypoints) >= 1:
         for kp in keypoints:
@@ -119,7 +150,6 @@ while True:
     cv2.imshow("Processed", outimage)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        writevalues("trackbar_defaults.txt")
         break
     elif cv2.waitKey(1) & 0xFF == ord('s'):
         writevalues("blue_basket.txt")
@@ -127,6 +157,10 @@ while True:
     
     elif cv2.waitKey(1) & 0xFF == ord('d'):
         writevalues("pink_basket.txt")
+        break
+
+    elif cv2.waitKey(1) & 0xFF == ord('x'):
+        writevalues("trackbar_defaults.txt")
         break
         
 

@@ -6,6 +6,9 @@ wheelAngle1 = 240
 wheelAngle2 = 120
 wheelAngle3 = 0
 
+ser = serialcomms.Connection('/dev/ttyACM0')
+
+
 def stop():
     send_speeds([0, 0, 0, 0])
 
@@ -24,7 +27,9 @@ def get_speeds(moving_speed, thrower_speed, direction):
 def send_speeds(speeds):
     print("Sending: " + str(speeds))
     #order: motor1, motor2, motor3, thrower, failsafe
-    serialcomms.WriteCommand(speeds[0], speeds[1], speeds[2], speeds[3], 0)
+    ser.WriteCommand(speeds[0], speeds[1], speeds[2], speeds[3], 0)
+
+    #wwwserialcomms.WriteCommand(speeds[0], speeds[1], speeds[2], speeds[3], 0)
 
 def calc_wheel_speed(moving_speed, direction, wheel_angle):
     wheel_speed = moving_speed * math.cos(math.radians(direction - wheel_angle))
