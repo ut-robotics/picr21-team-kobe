@@ -13,7 +13,7 @@ import ReadValues
 
 pipeline, camera_x, camera_y = CameraConfig.init()
 lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("trackbar_defaults.txt")
-#lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThreshold("blue_basket.txt")
+lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThreshold("blue_basket.txt")
 #lHue2, lSaturation2, lValue2, hHue2, hSaturation2, hValue2 = ReadValues.ReadThreshold("pink_basket.txt")
 kernel = np.ones((5,5),np.uint8)
 detector = Blobparams.CreateDetector()
@@ -37,10 +37,26 @@ def ProcessFrame():
 
     lowerLimits = np.array([lHue, lSaturation, lValue])
     upperLimits = np.array([hHue, hSaturation, hValue])
+
+
+    lowerLimits1 = np.array([lHue1, lSaturation1, lValue1])
+    upperLimits1 = np.array([hHue1, hSaturation1, hValue1])
     
     # Our operations on the frame come here
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
     thresholded = cv2.bitwise_not(thresholded)
+
+    thresholded1 = cv2.inRange(hsv, lowerLimits1, upperLimits1)
+    
+
+    contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    contours = max(contours, key= cv2.contourArea)
+
+    thresholded1 = cv2.bitwise_not(thresholded1)
+
+    if len(contours) > 0:
+        cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
+
 
     #Morphological operations
     thresholded = cv2.erode(thresholded,kernel, iterations=1)

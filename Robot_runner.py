@@ -30,29 +30,7 @@ state = "Find"
 while True:
     print(state)
     speed, direction, dist, keypoints = ip.ProcessFrame()
-    print(keypoints)
-    # frames = pipeline.wait_for_frames()
-    # aligned_frames = rs.align(rs.stream.color).process(frames)
-    # color_frame = aligned_frames.get_color_frame()
-    # frame = np.asanyarray(color_frame.get_data())
-    # depth_frame = aligned_frames.get_depth_frame()
-    # depth = np.asanyarray(depth_frame.get_data())
 
-    # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # lowerLimits = np.array([lHue, lSaturation, lValue])
-    # upperLimits = np.array([hHue, hSaturation, hValue])
-    
-    # # Our operations on the frame come here
-    # thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
-    # thresholded = cv2.bitwise_not(thresholded)
-
-    # #Morphological operations
-    # thresholded = cv2.erode(thresholded,kernel, iterations=1)
-    # cv2.imshow('Thresholded', thresholded)
-
-    # outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
-    # keypoints = detector.detect(thresholded)
     if keypoints >= 1:
         state = "Driving"
 
@@ -64,22 +42,12 @@ while True:
     elif state == "Driving":
         
         if keypoints >= 1:
-            # for kp in keypoints:
-            #     x = int(kp.pt[0])
-            #     y = int(kp.pt[1])
-            #    dist = depth_frame.get_distance(x, y)
-            #    speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.1 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
-            #    direction = atan2(camera_x/2 - x, camera_y - y)
-            #    print("speed", int(speed)) #frame[1]-x, frame[0]-y
-                drive.move(speed, direction)
+            drive.move(speed, direction)
         elif keypoints <= 0:
             state = "Find"
 
-
-    #outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-    #cv2.imshow("Original", frame)
-    #cv2.imshow("Processed", outimage)
+    elif state == "Find basket":
+        drive.orbit()
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
