@@ -1,5 +1,3 @@
-from os import lseek
-
 
 def ReadThreshold(filename):
     try:

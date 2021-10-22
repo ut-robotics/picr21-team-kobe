@@ -29,8 +29,6 @@ def send_speeds(speeds):
     #order: motor1, motor2, motor3, thrower, failsafe
     ser.WriteCommand(speeds[0], speeds[1], speeds[2], speeds[3], 0)
 
-    #wwwserialcomms.WriteCommand(speeds[0], speeds[1], speeds[2], speeds[3], 0)
-
 def calc_wheel_speed(moving_speed, direction, wheel_angle):
     wheel_speed = moving_speed * math.cos(math.radians(direction - wheel_angle))
     return wheel_speed

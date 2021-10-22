@@ -1,35 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import cv2
-import numpy as np
-#from numpy.lib.ufunclike import _dispatcher
 import Movement as drive
-from math import atan2
-import pyrealsense2 as rs
-import math
-#import Blobparams
-#import CameraConfig
-#import ReadValues
 import Image_processing as ip
-import serialcomms 
-
-#ser = serialcomms.Connection()
-
-
-#speed, direction, dist, keypoints = ip.ProcessFrame()
-
-#pipeline, camera_x, camera_y = CameraConfig.init()
-#lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("trackbar_defaults.txt")
-#lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThreshold("blue_basket.txt")
-#lHue2, lSaturation2, lValue2, hHue2, hSaturation2, hValue2 = ReadValues.ReadThreshold("pink_basket.txt")
-#kernel = np.ones((5,5),np.uint8)
-#detector = Blobparams.CreateDetector()
-
+import time
 
 state = "Find"
 while True:
     print(state)
-    speed, direction, dist, keypoints = ip.ProcessFrame()
+    speed, direction, dist, keypoints, y, basket_center = ip.ProcessFrame()
 
     if keypoints >= 1:
         state = "Driving"
@@ -43,11 +22,27 @@ while True:
         
         if keypoints >= 1:
             drive.move(speed, direction)
+
+        elif y <= 200: # specify better y value that is near robot, represents ball y value in reference with camera y
+            drive.stop()
+            state = "Find basket"
         elif keypoints <= 0:
             state = "Find"
 
     elif state == "Find basket":
         drive.orbit()
+        if basket_center < 350 and basket_center > 290:
+            drive.stop()
+            state = "Throwing"
+
+    elif state == "Throwing":
+        for i in range(4):
+            #calculate some speed for thrower motor here and send it to serial, figure out some formula, probably polynomial regression for curve fitting
+            thrower_speed = 800
+            drive.moveForward([0,10,-10,thrower_speed])
+            time.sleep(0.3)
+        state = "Find"
+
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-#from numpy.lib.ufunclike import _dispatcher
-import Movement as drive
 from math import atan2
 import pyrealsense2 as rs
 import math
@@ -22,9 +20,11 @@ speed = 0
 direction = 0
 dist = 0
 keypointnr = 0
+y = 0
+basket_center = 0
 
 def ProcessFrame():
-    global speed, direction, dist, keypointnr
+    global speed, direction, dist, keypointnr, y, basket_center
 
     frames = pipeline.wait_for_frames()
     aligned_frames = rs.align(rs.stream.color).process(frames)
@@ -51,10 +51,18 @@ def ProcessFrame():
 
     contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     contours = max(contours, key= cv2.contourArea)
+    for c in contours:
+    	# compute the center of the contour
+        M = cv2.moments(c)
+        #x axis
+        basket_center = int(M["m10"] / M["m00"])
+        #cY = int(M["m01"] / M["m00"])
+        return basket_center
+
 
     thresholded1 = cv2.bitwise_not(thresholded1)
 
-    if len(contours) > 0:
+    if len(contours) != []:
         cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
 
 
@@ -72,5 +80,5 @@ def ProcessFrame():
             dist = depth_frame.get_distance(x, y)
             speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
             direction = atan2(camera_x/2 - x, camera_y - y)
-            return speed, direction, dist, len(keypoints)
-    return speed, direction, dist, keypointnr
+            return speed, direction, dist, len(keypoints), y
+    return speed, direction, dist, keypointnr, y, basket_center
