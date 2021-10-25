@@ -90,7 +90,7 @@ while True:
     fps = 1/ (cur_time_frame - prev_time_frame)
     prev_time_frame = cur_time_frame
     fps = str(int(fps))
-    print(fps)
+    #print(fps)
 
     frames = pipeline.wait_for_frames()
     aligned_frames = rs.align(rs.stream.color).process(frames)
@@ -124,10 +124,10 @@ while True:
     contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     contours = max(contours, key= cv2.contourArea)
 
-    #cv2.imshow('Thresholded1', thresholded)
+    cv2.imshow('Thresholded1', thresholded)
     thresholded = cv2.bitwise_not(thresholded)
     thresholded1 = cv2.bitwise_not(thresholded1)
-    cv2.imshow('Thresholded', thresholded1)
+    #cv2.imshow('Thresholded', thresholded1)
 
 
     outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
@@ -135,6 +135,11 @@ while True:
     #print(contours)
     if len(contours) > 0:
         cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
+        #print(cv2.contourArea(contours))
+        M = cv2.moments(contours)
+        basket_center = int(M["m10"] / M["m00"])
+        print(basket_center)
+                
 
     keypoints = detector.detect(thresholded1)
 
@@ -148,18 +153,16 @@ while True:
 
     cv2.imshow("Original", frame)
     cv2.imshow("Processed", outimage)
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1)
+    if key == ord('q'):
         break
-    elif cv2.waitKey(1) & 0xFF == ord('s'):
+    elif key == ord('s'):
         writevalues("blue_basket.txt")
         break
-    
-    elif cv2.waitKey(1) & 0xFF == ord('d'):
+    elif key == ord('d'):
         writevalues("pink_basket.txt")
         break
-
-    elif cv2.waitKey(1) & 0xFF == ord('x'):
+    elif key == ord('x'):
         writevalues("trackbar_defaults.txt")
         break
         

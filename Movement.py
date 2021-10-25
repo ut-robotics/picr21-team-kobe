@@ -4,11 +4,11 @@ import math
 ser = serialcomms.Connection('/dev/ttyACM0')
 
 
-def move(movspeed, dir):
+def move(movspeed, dir, rot):
     speed = [0,0,0,0]
-    speed[0] = int(wheelSpeed(movspeed, dir, 240))
-    speed[1] = int(wheelSpeed(movspeed, dir, 120))
-    speed[2] = int(wheelSpeed(movspeed, dir, 0))
+    speed[0] = int(wheelSpeed(movspeed, dir, 240))+rot
+    speed[1] = int(wheelSpeed(movspeed, dir, 120))+rot
+    speed[2] = int(wheelSpeed(movspeed, dir, 0))+rot
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 
 def moveForward(speed):
@@ -36,7 +36,6 @@ def stop():
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 
 
-def orbit():
-    speed = [-10,0,0,0]
+def orbit(speed):
+    #speed = [-10,0,0,0]
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
-
