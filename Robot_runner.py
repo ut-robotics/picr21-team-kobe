@@ -28,7 +28,7 @@ while True:
     elif state == "Driving":
         
         if keypoints >= 1 and y < 380:
-            rotSpd = int((x - 320)/320.0 * -5.0)
+            rotSpd = int((x - 320)/320.0 * -15.0)
             drive.move(speed, direction, rotSpd)
             print("y", y)
 
@@ -41,13 +41,14 @@ while True:
     elif state == "basket":
         print("Here")
         #print("center342", basket_center)
-        if basket_center > 340:
+        speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.1
+        if basket_center >= 320:
             drive.stop()
-            state = "Throwing"
+            #state = "Throwing"
         else:
-            rotSpd = int((basket_center - 320)/320.0 * -5.0)
+            #rotSpd = int((basket_center - 320)/320.0 * -15.0)
 
-            drive.move(speed, direction, rotSpd)
+            drive.move(speed, direction, 0)
 
     elif state == "Throwing":
         for i in range(4):

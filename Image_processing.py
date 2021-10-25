@@ -47,7 +47,7 @@ def ProcessFrame(pipeline, camera_x, camera_y):
     thresholded = cv2.bitwise_not(thresholded)
 
     thresholded1 = cv2.inRange(hsv, lowerLimits1, upperLimits1)
-    print(lowerLimits1, upperLimits1)
+    #print(lowerLimits1, upperLimits1)
     
 
     contours, hierarchy = cv2.findContours(thresholded1, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -58,12 +58,12 @@ def ProcessFrame(pipeline, camera_x, camera_y):
     #thresholded1 = cv2.bitwise_not(thresholded1)
 
     if len(contours) > 0:
-        print(contours)
+        #print(contours)
         contours = max(contours, key= cv2.contourArea)
         cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
 
         M = cv2.moments(contours)
-        print(M)
+        #print(M)
         if M["m00"] > 0:
             basket_center = int(M["m10"] / M["m00"])
         print("center", basket_center)
@@ -73,6 +73,7 @@ def ProcessFrame(pipeline, camera_x, camera_y):
     #Morphological operations
     thresholded = cv2.erode(thresholded,kernel, iterations=1)
     cv2.imshow('Thresholded', frame)
+    cv2.imshow('test', thresholded)
 
     #outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
