@@ -37,12 +37,12 @@ while True:
             state = "basket"
         elif keypoints <= 0:
             state = "Find"
-
+    
     elif state == "basket":
         print("Here")
         #print("center342", basket_center)
         speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.1
-        if basket_center >= 320:
+        if 300 <= basket_center <= 340:
             drive.stop()
             #state = "Throwing"
         else:
@@ -51,7 +51,7 @@ while True:
             drive.move(speed, direction, 0)
 
     elif state == "Throwing":
-        for i in range(4):
+        for i in range(8):
             #calculate some speed for thrower motor here and send it to serial, figure out some formula, probably polynomial regression for curve fitting
             thrower_speed = 800
             drive.moveForward([0,-10,10,thrower_speed])

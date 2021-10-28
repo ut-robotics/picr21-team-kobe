@@ -14,4 +14,5 @@ def ReadThreshold(filename):
                 hValue = int(values[5])
     except Exception as e:
         print(e)
+        raise
     return lHue, lSaturation, lValue, hHue, hSaturation, hValue
