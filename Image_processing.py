@@ -16,15 +16,18 @@ lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThre
 kernel = np.ones((5,5),np.uint8)
 detector = Blobparams.CreateDetector()
 
+basket_x_center = 0
+basket_y_center = 0
 
 def ProcessFrame(pipeline, camera_x, camera_y):
+    global basket_x_center, basket_y_center
     speed = 0
     direction = 0
     dist = 0
     keypointnr = 0
     y = 0
     x = 0
-    basket_center = 0
+    basket_x_center = 0
 
     frames = pipeline.wait_for_frames()
     aligned_frames = rs.align(rs.stream.color).process(frames)
@@ -65,8 +68,9 @@ def ProcessFrame(pipeline, camera_x, camera_y):
         M = cv2.moments(contours)
         #print(M)
         if M["m00"] > 0:
-            basket_center = int(M["m10"] / M["m00"])
-        print("center", basket_center)
+            basket_x_center = int(M["m10"] / M["m00"])
+            basket_y_center = int(M["m01"] / M["m00"])
+        #print("center", basket_center)
         
 
 
@@ -77,14 +81,14 @@ def ProcessFrame(pipeline, camera_x, camera_y):
 
     #outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
-    keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=True)
+    keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=False)
     keypointnr = len(keypoints)
     if len(keypoints) >= 1:
         for kp in keypoints:
             x = int(kp.pt[0])
             y = int(kp.pt[1])
-            dist = depth_frame.get_distance(x, y)
-            speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
-            direction = atan2(camera_x/2 - x, camera_y - y)
+            # dist = depth_frame.get_distance(x, y)
+            # speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
+            # direction = atan2(camera_x/2 - x, camera_y - y)
             #return speed, direction, dist, len(keypoints), y, basket_center
-    return keypointnr, y, x, basket_center
+    return keypointnr, y, x, basket_x_center, basket_y_center

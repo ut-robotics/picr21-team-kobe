@@ -41,7 +41,7 @@ def spinLeft(speed):
 
 def keyBoardControl():
     cv2.namedWindow("Controller")
-    movingSpeed = 30
+    movingSpeed = 15
     throwingSpeed = 5
     while(True):
         key = cv2.waitKey(1) & 0xFF
@@ -65,10 +65,12 @@ def keyBoardControl():
             spinLeft(movingSpeed)
         if key == ord("t"):
             print("Throwing.")
+            send_speeds([15+10])
             move(0, throwingSpeed, 0)
         if key == ord("c"):
+            send_speeds([-20,1,1,0]) #25, -10, 15, 0   
             print("Stopping.")
-            stop()
+            #stop()
         if key == ord("x"):
             print("Shutting down.")
             stop()

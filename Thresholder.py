@@ -7,6 +7,7 @@ import pyrealsense2 as rs
 import CameraConfig
 import ReadValues
 import time
+import Image_processing as ip
 
 pipeline, camera_x, camera_y = CameraConfig.init()
 
@@ -85,12 +86,12 @@ def writevalues(filename):
         print("values saved successfully.")
 
 while True:
-    
+    keypoints, y, x, basket_center = ip.ProcessFrame(pipeline, camera_x, camera_y)
     cur_time_frame = time.time()
     fps = 1/ (cur_time_frame - prev_time_frame)
     prev_time_frame = cur_time_frame
     fps = str(int(fps))
-    #print(fps)
+    print(fps)
 
     frames = pipeline.wait_for_frames()
     aligned_frames = rs.align(rs.stream.color).process(frames)
@@ -150,7 +151,7 @@ while True:
             cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
     outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
+    print("y", y, "x", x)
     cv2.imshow("Original", frame)
     cv2.imshow("Processed", outimage)
     key = cv2.waitKey(1)

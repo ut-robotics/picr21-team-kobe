@@ -11,10 +11,10 @@ pipeline, camera_x, camera_y = CameraConfig.init()
 state = "Find"
 while True:
     print(state)
-    keypoints, y, x, basket_center = ip.ProcessFrame(pipeline, camera_x, camera_y)
+    keypoints, y, x, basket_x_center, basket_y_center = ip.ProcessFrame(pipeline, camera_x, camera_y)
     #print(y,basket_center)
     # if keypoints >= 1:
-    #     state = "Driving"
+    #     state = "Driving"dd
     #dist = depth_frame.get_distance(x, y)
     speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
     direction = math.atan2(camera_x/2 - x, camera_y - y)
@@ -27,28 +27,36 @@ while True:
     
     elif state == "Driving":
         
-        if keypoints >= 1 and y < 380:
+        if keypoints >= 1:
             rotSpd = int((x - 320)/320.0 * -15.0)
             drive.move(speed, direction, rotSpd)
-            print("y", y)
+            print("kp", keypoints)
 
-        elif y >= 380: # specify better y value that is near robot, represents ball y value in reference with camera y
+        if y >= 400: # specify better y value that is near robot, represents ball y value in reference with camera y
             #drive.stop()
-            state = "basket"
-        elif keypoints <= 0:
+            state = "Find basket"
+        if keypoints <= 0:
             state = "Find"
     
-    elif state == "basket":
-        print("Here")
+    elif state == "Find basket":
+        print("y", y, "x", x, "basket", basket_x_center)
         #print("center342", basket_center)
-        speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.1
-        if 300 <= basket_center <= 340:
+        speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05
+        print('speed', speed)
+        if 300 <= basket_x_center <= 320:
+            
             drive.stop()
-            #state = "Throwing"
-        else:
-            #rotSpd = int((basket_center - 320)/320.0 * -15.0)
-
-            drive.move(speed, direction, 0)
+            state = "Throwing"
+        if  basket_x_center <= 320:
+            print("rotate left")
+            rotSpd = int((basket_x_center - 320)/320.0 * 5.0)
+            drive.orbit([15, -1,-1, 0])
+            #drive.move(10, direction, rotSpd)
+        if  basket_x_center >= 320:
+            print("rotate right")
+            rotSpd = int((basket_x_center - 320)/320.0 * -5.0)
+            #drive.move(10, direction, rotSpd)
+            drive.orbit([-10,1,1,0])
 
     elif state == "Throwing":
         for i in range(8):
