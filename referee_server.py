@@ -6,9 +6,9 @@ import json
 class Server:
 
     def __init__(self):
-        self.run = None
+        self.run = False
         self.blueIsTarget = True
-        f = open('WebsocketConfig.json', "r")
+        f = open('./websocket_config.json', "r")
         websocket_config = json.loads(f.read())
         self.host = websocket_config['host']
         self.port = websocket_config['port']
@@ -19,7 +19,7 @@ class Server:
     def get_port(self):
         return self.port
 
-    async def echo(self, websocket, path):
+    async def listen(self, websocket, path):
         print("A client connected")
         try:
             async for message in websocket:
@@ -44,10 +44,11 @@ class Server:
     def get_current_referee_command(self):
         return self.run, self.blueIsTarget
 
+    def start(self):
+        start_server = websockets.serve(self.listen, self.get_host(), self.get_port())
+        asyncio.get_event_loop().run_until_complete(start_server)
+        asyncio.get_event_loop().run_forever()
+
 
 srv = Server()
-
-start_server = websockets.serve(srv.echo, srv.get_host(), srv.get_port())
-
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+srv.start()

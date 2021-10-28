@@ -6,12 +6,12 @@ import json
 class Client:
 
     def __init__(self):
-        f = open('WebsocketConfig.json', "r")
+        f = open('./websocket_config.json', "r")
         websocket_config = json.loads(f.read())
         self.host = websocket_config['host']
         self.port = websocket_config['port']
 
-    async def listen(self):
+    async def send(self):
         print("Connecting to Server " + str(self.host) + " on port " + str(self.port))
         uri = "ws://" + str(self.host) + ":" + str(self.port)
         async with websockets.connect(uri) as ws:
@@ -39,8 +39,9 @@ class Client:
                 msg = await ws.recv()
                 print(msg)
 
+    def start(self):
+        asyncio.get_event_loop().run_until_complete(self.send())
+
 
 cl = Client()
-
-asyncio.get_event_loop().run_until_complete(cl.listen())
-asyncio.get_event_loop().run_forever()
+cl.start()
