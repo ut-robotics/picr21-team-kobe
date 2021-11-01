@@ -86,7 +86,7 @@ def writevalues(filename):
         print("values saved successfully.")
 
 while True:
-    keypoints, y, x, basket_center = ip.ProcessFrame(pipeline, camera_x, camera_y)
+    keypoints, y, x, basket_x_center, basket_y_center = ip.ProcessFrame(pipeline, camera_x, camera_y)
     cur_time_frame = time.time()
     fps = 1/ (cur_time_frame - prev_time_frame)
     prev_time_frame = cur_time_frame

@@ -37,12 +37,12 @@ def spinRight(speed):
     send_speeds([-30, -30, -30, 0])
 
 def spinLeft(speed):
-    send_speeds([30, 30, 30, 0])
+    send_speeds([15, 15, 15, 0])
 
 def keyBoardControl():
     cv2.namedWindow("Controller")
     movingSpeed = 15
-    throwingSpeed = 5
+    throwingSpeed = 1500
     while(True):
         key = cv2.waitKey(1) & 0xFF
         if key == ord("w"):
@@ -65,10 +65,10 @@ def keyBoardControl():
             spinLeft(movingSpeed)
         if key == ord("t"):
             print("Throwing.")
-            send_speeds([15+10])
+            #send_speeds([15+10])
             move(0, throwingSpeed, 0)
         if key == ord("c"):
-            send_speeds([-20,1,1,0]) #25, -10, 15, 0   
+            send_speeds([-22,-11, 11, 0]) #25, -10, 15, 0   
             print("Stopping.")
             #stop()
         if key == ord("x"):
