@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from _typeshed import ReadOnlyBuffer
 import cv2
 import Movement as drive
 import Image_processing as ip
