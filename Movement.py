@@ -4,17 +4,18 @@ import math
 ser = serialcomms.Connection('/dev/ttyACM0')
 
 
-def move2(xspd, yspd, rotspd):
+def move2(xspd, yspd, rotspd, thrower):
 
     speed = [0,0,0,0]
 
-    movspeed = math.sqrt((xspd)**2 + (yspd)**2) * 0.01
+    movspeed = math.sqrt((xspd)**2 + (yspd)**2)
     print("movspeed", movspeed)
     dir = math.atan2(xspd, yspd)
 
     speed[0] = int(wheelSpeed(movspeed, dir, 240))+rotspd
     speed[1] = int(wheelSpeed(movspeed, dir, 120))+rotspd
     speed[2] = int(wheelSpeed(movspeed, dir, 0))+rotspd
+    speed[3] = int(thrower)
 
 
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
