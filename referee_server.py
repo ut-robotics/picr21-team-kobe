@@ -1,4 +1,5 @@
 import asyncio
+import threading
 import websockets
 import json
 
@@ -31,9 +32,9 @@ class Server:
             print("A client disconnected")
 
     def process_command(self, cmd):
+        print("Processing cmd")
         if cmd["signal"] == "stop":
             self.run = False
-            self.blueIsTarget = None
         elif cmd["signal"] == "start":
             if cmd["basketTarget"] == "blue":
                 self.blueIsTarget = True
@@ -44,11 +45,12 @@ class Server:
     def get_current_referee_command(self):
         return self.run, self.blueIsTarget
 
+    def start_loop(self, loop, server):
+        loop.run_until_complete(server)
+        loop.run_forever()
+
     def start(self):
-        start_server = websockets.serve(self.listen, self.get_host(), self.get_port())
-        asyncio.get_event_loop().run_until_complete(start_server)
-        asyncio.get_event_loop().run_forever()
-
-
-srv = Server()
-srv.start()
+        new_loop = asyncio.new_event_loop()
+        server = websockets.serve(self.listen, self.get_host(), self.get_port(), loop=new_loop)
+        t = threading.Thread(target=self.start_loop, args=(new_loop, server))
+        t.start()
