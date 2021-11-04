@@ -7,7 +7,7 @@ import json
 class Server:
 
     def __init__(self):
-        self.run = False
+        self.run = True
         self.blueIsTarget = True
         f = open('./websocket_config.json', "r")
         websocket_config = json.loads(f.read())
@@ -32,7 +32,6 @@ class Server:
             print("A client disconnected")
 
     def process_command(self, cmd):
-        print("Processing cmd")
         if cmd["signal"] == "stop":
             self.run = False
         elif cmd["signal"] == "start":
