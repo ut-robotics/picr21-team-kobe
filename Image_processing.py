@@ -83,12 +83,12 @@ def ProcessFrame(pipeline, camera_x, camera_y):
     keypoints = detector.detect(thresholded)
     keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=False)
     keypointnr = len(keypoints)
+    dist = depth_frame.get_distance(camera_x/2, camera_y/2)
     if len(keypoints) >= 1:
         for kp in keypoints:
             x = int(kp.pt[0])
             y = int(kp.pt[1])
-            # dist = depth_frame.get_distance(x, y)
             # speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05 #proportional robot speed, maybe try 640 for x? #frame[1]-x, frame[0]-y
             # direction = atan2(camera_x/2 - x, camera_y - y)
             #return speed, direction, dist, len(keypoints), y, basket_center
-    return keypointnr, y, x, basket_x_center, basket_y_center
+    return keypointnr, y, x, basket_x_center, basket_y_center, dist

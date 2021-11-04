@@ -1,6 +1,25 @@
 import serialcomms
 import math
 import cv2
+import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+import CameraConfig
+import Image_processing as ip
+
+pipeline, camera_x, camera_y = CameraConfig.init()
+#Distance from basket
+X = [100,200,300]
+#Used thrower speed
+Y = [800,1800,2400]
+
+dist = 163
+predicted_function = interp1d(X,Y, kind="linear")
+#predict what speed to use from current distance from basket
+predicted_speed = predicted_function(dist)
+print(predicted_speed)
+
+plt.plot(X,Y)
+plt.show()
 
 wheelAngle1 = 240
 wheelAngle2 = 120
@@ -44,6 +63,7 @@ def keyBoardControl():
     movingSpeed = 15
     throwingSpeed = 1500
     while(True):
+        keypoints, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrame(pipeline, camera_x, camera_y)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("w"):
             print("Moving forward.")
@@ -65,7 +85,7 @@ def keyBoardControl():
             spinLeft(movingSpeed)
         if key == ord("t"):
             print("Throwing.")
-            #send_speeds([15+10])
+            print("distance ---->", distance)
             move(0, throwingSpeed, 0)
         if key == ord("c"):
             send_speeds([-22,-11, 11, 0]) #25, -10, 15, 0   
