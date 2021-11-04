@@ -76,14 +76,16 @@ def ProcessFrame(pipeline, camera_x, camera_y):
 
     #Morphological operations
     thresholded = cv2.erode(thresholded,kernel, iterations=1)
+    #cv2.circle(frame, (320,240), 10,(0,255,0), 2)
     cv2.imshow('Thresholded', frame)
-    cv2.imshow('test', thresholded)
+    #cv2.imshow('test', thresholded)
 
     #outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)
     keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=False)
     keypointnr = len(keypoints)
-    dist = depth_frame.get_distance(camera_x/2, camera_y/2)
+    dist = depth_frame.get_distance(basket_x_center, basket_y_center)
+
     if len(keypoints) >= 1:
         for kp in keypoints:
             x = int(kp.pt[0])

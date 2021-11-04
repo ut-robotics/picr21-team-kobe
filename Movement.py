@@ -8,7 +8,8 @@ def move2(xspd, yspd, rotspd, thrower):
     
     speed = [0,0,0,0]
 
-    movspeed = math.sqrt((xspd)**2 + (yspd)**2)
+    movspeed = math.sqrt(abs((xspd)**2 + (yspd)**2))
+    #realspeed = movspeed/(1+math.e**-1)+3#50/(1+math.e**-2*(movspeed))
     print("movspeed", movspeed)
     dir = math.atan2(xspd, yspd)
 
@@ -21,7 +22,7 @@ def move2(xspd, yspd, rotspd, thrower):
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 
 
-def move(movspeed, dir, rot, side_speed):
+def move(movspeed, dir, rot):
     speed = [0,0,0,0]
     speed[0] = int(wheelSpeed(movspeed, dir, 240))+rot
     speed[1] = int(wheelSpeed(movspeed, dir, 120))+rot

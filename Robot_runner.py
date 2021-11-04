@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from _typeshed import ReadOnlyBuffer
 import cv2
 import Movement as drive
 import Image_processing as ip
@@ -8,9 +7,18 @@ import time
 import CameraConfig
 import math
 import numpy
+from scipy.interpolate import interp1d
+
 
 pipeline, camera_x, camera_y = CameraConfig.init()
-state = "Find"
+#Distance from basket
+X = [0,122,163,198, 233, 328, 450]
+#Used thrower speed
+Y = [600,600,800,900, 1000, 1200, 1500]
+
+predicted_function = interp1d(X,Y, kind="linear")
+
+state = "Find basket"
 i=0
 while True:
     print(state)
@@ -34,36 +42,38 @@ while True:
             drive.move(speed, direction, rotSpd)
             print("kp", keypoints)
 
-        if y >= 400: # specify better y value that is near robot, represents ball y value in reference with camera y
+        if y >= 420: # specify better y value that is near robot, represents ball y value in reference with camera y
             #drive.stop()
             state = "Find basket"
         if keypoints <= 0:
             state = "Find"
     
     elif state == "Find basket":
-        print("y", y, "x", x, "basket", basket_x_center)
-        front_speed = (400-y)/ 480.0 * 20
-        side_speed = (x - basket_x_center)/320.0 * 20
-        
-        if 300 <= basket_x_center <= 320:
-            
+        if 300 <= basket_x_center <= 340:
+            #front_speed = (420-y)/ 480.0 * 30
+            #side_speed = (x - basket_x_center)/320.0 * 50
             drive.stop()
             state = "Throwing"
+        print("y", y, "x", x, "basket", basket_x_center)
+        front_speed = (420-y)/ 480.0 * 30
+        side_speed = (x - basket_x_center)/320.0 * 30
+        
         rotSpd = int((x - 320)/320.0 * 25)
         drive.move2(-side_speed  , front_speed, -rotSpd, 0)
 
     elif state == "Throwing":
-            #calculate some speed for thrower motor here and send it to serial, figure out some formula, probably polynomial regression for curve fitting
-
-        print("i", i)
-        if keypoints <= 0:
-            i += 1
-        if i >= 30:
-            i = 0
-            state = "Find"
-        thrower_speed = 800
-            #drive.moveForward([0,-10,10,thrower_speed])
-        drive.move2(side_speed, 10, -rotSpd, thrower_speed)
+        #     #calculate some speed for thrower motor here and send it to serial, figure out some formula, probably polynomial regression for curve fitting
+        print("here")
+        # #print("i", i)
+        # if keypoints <= 0:
+        #     i += 1
+        # if i >= 5:
+        #     i = 0
+        #     state = "Find"
+        # thrower_speed = int(predicted_function(distance*100))
+        # print("thrower speed ---->", thrower_speed)
+        #     #drive.moveForward([0,-10,10,thrower_speed])
+        # drive.move2(-side_speed, front_speed, -rotSpd, thrower_speed)
 
         #state = "Find"
 

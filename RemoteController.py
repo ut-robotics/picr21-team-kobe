@@ -8,18 +8,15 @@ import Image_processing as ip
 
 pipeline, camera_x, camera_y = CameraConfig.init()
 #Distance from basket
-X = [100,200,300]
+X = [0,122,163,198, 233, 328, 450]
 #Used thrower speed
-Y = [800,1800,2400]
+Y = [0,600,800,900, 1000, 1200, 1500]
 
-dist = 163
 predicted_function = interp1d(X,Y, kind="linear")
 #predict what speed to use from current distance from basket
-predicted_speed = predicted_function(dist)
-print(predicted_speed)
-
-plt.plot(X,Y)
-plt.show()
+#print(predicted_speed)
+#plt.plot(X,Y)
+#plt.show()
 
 wheelAngle1 = 240
 wheelAngle2 = 120
@@ -61,7 +58,7 @@ def spinLeft(speed):
 def keyBoardControl():
     cv2.namedWindow("Controller")
     movingSpeed = 15
-    throwingSpeed = 1500
+    throwingSpeed = 900
     while(True):
         keypoints, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrame(pipeline, camera_x, camera_y)
         key = cv2.waitKey(1) & 0xFF
@@ -84,9 +81,11 @@ def keyBoardControl():
             print("Spinning left.")
             spinLeft(movingSpeed)
         if key == ord("t"):
-            print("Throwing.")
-            print("distance ---->", distance)
-            move(0, throwingSpeed, 0)
+            #print("Throwing.")
+            #print("distance ---->", distance)
+            predicted_speed = int(predicted_function(distance*100))
+            print("predicted speed", predicted_speed)
+            move(0, predicted_speed, 0)
         if key == ord("c"):
             send_speeds([-22,-11, 11, 0]) #25, -10, 15, 0   
             print("Stopping.")
