@@ -50,6 +50,7 @@ def ProcessFrame(pipeline, camera_x, camera_y):
     thresholded = cv2.bitwise_not(thresholded)
 
     thresholded1 = cv2.inRange(hsv, lowerLimits1, upperLimits1)
+    thresholded1 = cv2.erode(thresholded1,kernel, iterations=2)
     #print(lowerLimits1, upperLimits1)
     
 
@@ -78,7 +79,7 @@ def ProcessFrame(pipeline, camera_x, camera_y):
     thresholded = cv2.erode(thresholded,kernel, iterations=1)
     #cv2.circle(frame, (320,240), 10,(0,255,0), 2)
     cv2.imshow('Thresholded', frame)
-    #cv2.imshow('test', thresholded)
+    cv2.imshow('test', thresholded)
 
     #outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
     keypoints = detector.detect(thresholded)

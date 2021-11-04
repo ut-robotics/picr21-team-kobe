@@ -17,7 +17,7 @@ lValue = 0
 hHue = 0
 hSaturation = 0
 hValue = 0 # highest value h
-
+kernel = (5,5)
 prev_time_frame = 0.0
 cur_time_frame = 0.0
 
@@ -67,12 +67,12 @@ lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThre
 
 
 cv2.namedWindow("Processed")
-cv2.createTrackbar("lHue", "Processed", lHue, 179, updateValue)
-cv2.createTrackbar("lSaturation", "Processed", lSaturation, 255, updateValue1)
-cv2.createTrackbar("lValue", "Processed", lValue, 255, updateValue2)
-cv2.createTrackbar("hHue", "Processed", hHue, 179, updateValue3)
-cv2.createTrackbar("hSaturation", "Processed", hSaturation, 255, updateValue4)
-cv2.createTrackbar("hValue", "Processed", hValue, 255, updateValue5)
+cv2.createTrackbar("lHue", "Processed", lHue1, 179, updateValue)
+cv2.createTrackbar("lSaturation", "Processed", lSaturation1, 255, updateValue1)
+cv2.createTrackbar("lValue", "Processed", lValue1, 255, updateValue2)
+cv2.createTrackbar("hHue", "Processed", hHue1, 179, updateValue3)
+cv2.createTrackbar("hSaturation", "Processed", hSaturation1, 255, updateValue4)
+cv2.createTrackbar("hValue", "Processed", hValue1, 255, updateValue5)
 
 
 
@@ -120,6 +120,7 @@ while True:
     # Our operations on the frame come here
     thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
     thresholded1 = cv2.inRange(hsv, lowerLimits1, upperLimits1)
+    thresholded = cv2.erode(thresholded,kernel, iterations=2)
     
 
     contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -127,6 +128,7 @@ while True:
 
     cv2.imshow('Thresholded1', thresholded)
     thresholded = cv2.bitwise_not(thresholded)
+
     thresholded1 = cv2.bitwise_not(thresholded1)
     #cv2.imshow('Thresholded', thresholded1)
 
@@ -151,8 +153,9 @@ while True:
             cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
     outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    #thresholded1 = cv2.erode(thresholded1,kernel, iterations=1)
     print("y", y, "x", x)
-    cv2.imshow("Original", frame)
+    #cv2.imshow("Original", frame)
     cv2.imshow("Processed", outimage)
     key = cv2.waitKey(1)
     if key == ord('q'):

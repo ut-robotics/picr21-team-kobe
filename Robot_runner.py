@@ -49,13 +49,15 @@ while True:
             state = "Find"
     
     elif state == "Find basket":
-        if 300 <= basket_x_center <= 340:
+        if 300 <= basket_x_center <= 340 and y > 400:
             #front_speed = (420-y)/ 480.0 * 30
             #side_speed = (x - basket_x_center)/320.0 * 50
             drive.stop()
             state = "Throwing"
         print("y", y, "x", x, "basket", basket_x_center)
+
         front_speed = (420-y)/ 480.0 * 30
+
         side_speed = (x - basket_x_center)/320.0 * 30
         
         rotSpd = int((x - 320)/320.0 * 25)
@@ -63,17 +65,25 @@ while True:
 
     elif state == "Throwing":
         #     #calculate some speed for thrower motor here and send it to serial, figure out some formula, probably polynomial regression for curve fitting
-        print("here")
-        # #print("i", i)
-        # if keypoints <= 0:
-        #     i += 1
-        # if i >= 5:
-        #     i = 0
-        #     state = "Find"
-        # thrower_speed = int(predicted_function(distance*100))
+        print("y", y)
+        if i >= 3:
+            i = 0
+            state = "Find basket"
+        if keypoints >= 1:
+            if front_speed <= 5:
+                front_speed = 10
+            side_speed = (x - basket_x_center)/320.0 * 15
+            thrower_speed = int(predicted_function(distance*100))
+            
+            rotSpd = int((x - 320)/320.0 * 20)
+            drive.move2(-0, front_speed, -0, thrower_speed)
+
+        #print("i", i)
+        if keypoints <= 0:
+            #drive.move2(-0, 10, -rotSpd, 0)
+            i += 1
         # print("thrower speed ---->", thrower_speed)
         #     #drive.moveForward([0,-10,10,thrower_speed])
-        # drive.move2(-side_speed, front_speed, -rotSpd, thrower_speed)
 
         #state = "Find"
 
