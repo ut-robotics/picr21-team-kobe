@@ -20,32 +20,32 @@ predicted_function = interp1d(X,Y, kind="linear")
 
 state = "Find basket"
 i=0
+#set target value with referee commands
+target = False
 while True:
     #print(state)
-    keypoints, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrame(pipeline, camera_x, camera_y)
+    #keypointcount, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrame(pipeline, camera_x, camera_y)
+    keypointcount, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrames.ProcessFrame(pipeline, camera_x, camera_y, target)
     speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05
     direction = math.atan2(camera_x - x, camera_y - y)
     side_speed = (x - basket_x_center)/320.0 * 5.0
-    #front_speed = (400-y/ 480.0) * 2
-
-
 
     if state == "Find":
         drive.spinRight([-10,-10,-10,0])
-        if keypoints >= 1:
+        if keypointcount >= 1:
             state = "Driving"
     
     elif state == "Driving":
         
-        if keypoints >= 1:
+        if keypointcount >= 1:
             rotSpd = int((x - 320)/320.0 * -15.0)
             drive.move(speed, direction, rotSpd)
-            #print("kp", keypoints)
+            #print("kp", keypointcount)
 
         if y >= 420: # specify better y value that is near robot, represents ball y value in reference with camera y
             #drive.stop()
             state = "Find basket"
-        if keypoints <= 0:
+        if keypointcount <= 0:
             state = "Find"
     
     elif state == "Find basket":
@@ -66,8 +66,8 @@ while True:
         #     front_speed = 10
         # if side_speed <= 2:
         #     side_speed = 10
-        print("side_speed ", side_speed, "front speed", front_speed, "rotspeed", rotSpd, "kp", keypoints, "x", x, "y",y)
-        if keypoints < 1:
+        print("side_speed ", side_speed, "front speed", front_speed, "rotspeed", rotSpd, "kp", keypointcount, "x", x, "y",y)
+        if keypointcount < 1:
                 drive.move2(-side_speed  , front_speed, -0, 0)
             
         drive.move2(-side_speed  , front_speed, -rotSpd, 0)
@@ -79,7 +79,7 @@ while True:
         if i >= 3:
             i = 0
             state = "Find"
-        if keypoints >= 1:
+        if keypointcount >= 1:
             side_speed = (x - basket_x_center)/320.0 * 15
             thrower_speed = int(predicted_function(distance*100))
             # if front_speed <= 5:
@@ -91,7 +91,7 @@ while True:
             drive.move2(-0, 15, -0, thrower_speed)
 
         #print("i", i)
-        if keypoints <= 0:
+        if keypointcount <= 0:
             #drive.move2(-0, 10, -rotSpd, 0)
             thrower_speed = int(predicted_function(distance*100))
 
