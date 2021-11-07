@@ -8,8 +8,7 @@ def move2(xspd, yspd, rotspd, thrower):
     
     speed = [0,0,0,0]
 
-    movspeed = math.sqrt(abs((xspd)**2 + (yspd)**2))
-    #realspeed = movspeed/(1+math.e**-1)+3#50/(1+math.e**-2*(movspeed))
+    movspeed = math.sqrt((xspd)**2 + (yspd)**2)
     print("movspeed", movspeed)
     dir = math.atan2(xspd, yspd)
 

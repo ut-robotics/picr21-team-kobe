@@ -2,12 +2,12 @@ import pyrealsense2 as rs
 
 
 def init():
-    camera_x = 640
-    camera_y = 480
+    camera_x = 960
+    camera_y = 540
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.color, camera_x, camera_y, rs.format.bgr8, 60)
-    config.enable_stream(rs.stream.depth, camera_x, camera_y, rs.format.z16, 30)
+    config.enable_stream(rs.stream.depth, camera_x, camera_y, rs.format.z16, 60)
     profile = pipeline.start(config)
     color_sensor = profile.get_device().query_sensors()[1]
     color_sensor.set_option(rs.option.enable_auto_exposure, False)

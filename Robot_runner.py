@@ -22,11 +22,13 @@ state = "Find basket"
 i=0
 #set target value with referee commands
 target = False
+Processor = ip.ProcessFrames(target)
+
 while True:
     #print(state)
     #keypointcount, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrame(pipeline, camera_x, camera_y)
-    keypointcount, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrames.ProcessFrame(pipeline, camera_x, camera_y, target)
-    speed = math.sqrt((camera_x/2-x)**2 + (camera_y-y)**2)*0.05
+    keypointcount, y, x, basket_x_center, basket_y_center, distance = Processor.ProcessFrame(pipeline, camera_x, camera_y)
+    speed = math.sqrt((camera_x-x)**2 + (camera_y-y)**2)*0.05
     direction = math.atan2(camera_x - x, camera_y - y)
     side_speed = (x - basket_x_center)/320.0 * 5.0
 
@@ -38,7 +40,7 @@ while True:
     elif state == "Driving":
         
         if keypointcount >= 1:
-            rotSpd = int((x - 320)/320.0 * -15.0)
+            rotSpd = int((x - 480)/480.0 * -15.0)
             drive.move(speed, direction, rotSpd)
             #print("kp", keypointcount)
 
@@ -49,7 +51,7 @@ while True:
             state = "Find"
     
     elif state == "Find basket":
-        if 310 <= basket_x_center <= 330 and y >= 380:
+        if 470 <= basket_x_center <= 490 and y >= 480:
             #front_speed = (420-y)/ 480.0 * 30
             #side_speed = (x - basket_x_center)/320.0 * 50
             time.sleep(0.1)
@@ -57,11 +59,11 @@ while True:
             state = "Throwing"
         #print("y", y, "x", x, "basket", basket_x_center)
 
-        front_speed =3 + (440-y)/ 480.0 * 30
+        front_speed =3 + (480-y)/ 540.0 * 30
 
-        side_speed = (x - basket_x_center)/320.0 * 15
+        side_speed = (x - basket_x_center)/480.0 * 15
         
-        rotSpd = int((x - 320)/320.0 * 25)
+        rotSpd = int((x - 480)/480.0 * 25)
         # if front_speed <= 2:
         #     front_speed = 10
         # if side_speed <= 2:
@@ -80,14 +82,14 @@ while True:
             i = 0
             state = "Find"
         if keypointcount >= 1:
-            side_speed = (x - basket_x_center)/320.0 * 15
+            side_speed = (x - basket_x_center)/480.0 * 15
             thrower_speed = int(predicted_function(distance*100))
             # if front_speed <= 5:
             #     front_speed = 15
             # if side_speed <= 5:
             #     side_speed = 5
             
-            rotSpd = int((x - 320)/320.0 * 20)
+            rotSpd = int((x - 480)/480.0 * 20)
             drive.move2(-0, 15, -0, thrower_speed)
 
         #print("i", i)
