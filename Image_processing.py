@@ -78,11 +78,11 @@ class ProcessFrames():
         #outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
         keypoints = self.detector.detect(thresholded)
         keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=False)
-        keypointnr = len(keypoints)
-        dist = depth_frame.get_distance(basket_x_center, basket_y_center)
+        keypointcount = len(keypoints)
+        basket_distance = depth_frame.get_distance(basket_x_center, basket_y_center)
 
         if len(keypoints) >= 1:
             for kp in keypoints:
                 x = int(kp.pt[0])
                 y = int(kp.pt[1])
-        return keypointnr, y, x, basket_x_center, basket_y_center, dist
+        return keypointcount, y, x, basket_x_center, basket_y_center, basket_distance
