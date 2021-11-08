@@ -37,7 +37,7 @@ def WpinLeft(speed):
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 
 
-def WpinRight(speed):
+def SpinRight(speed):
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 
 def Stop():

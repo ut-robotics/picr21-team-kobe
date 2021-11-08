@@ -21,7 +21,7 @@ kernel = (5,5)
 prev_time_frame = 0.0
 cur_time_frame = 0.0
 
-
+Processor = ip.ProcessFrames(True)
 # Thresholds an image and writes values into file to later use again
 
 def updateValue(new_value):
@@ -86,7 +86,7 @@ def writevalues(filename):
         print("values saved successfully.")
 
 while True:
-    keypoints, y, x, basket_x_center, basket_y_center, distance = ip.ProcessFrame(pipeline, camera_x, camera_y)
+    keypoints, y, x, basket_x_center, basket_y_center, distance = Processor.ProcessFrame(pipeline, camera_x, camera_y)
     cur_time_frame = time.time()
     fps = 1/ (cur_time_frame - prev_time_frame)
     prev_time_frame = cur_time_frame

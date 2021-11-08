@@ -2,8 +2,8 @@ import pyrealsense2 as rs
 
 
 def init():
-    camera_x = 960
-    camera_y = 540
+    camera_x = 640
+    camera_y = 480
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.color, camera_x, camera_y, rs.format.bgr8, 60)
