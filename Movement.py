@@ -9,7 +9,7 @@ def Move2(xspd, yspd, rotspd, thrower):
     speed = [0,0,0,0]
 
     movspeed = math.sqrt((xspd)**2 + (yspd)**2)
-    print("movspeed", movspeed)
+    #print("movspeed", movspeed)
     dir = math.atan2(xspd, yspd)
 
     speed[0] = int(WheelSpeed(movspeed, dir, 240))+rotspd
@@ -21,13 +21,13 @@ def Move2(xspd, yspd, rotspd, thrower):
     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 
 
-def Move(movspeed, dir, rot):
-    speed = [0,0,0,0]
-    speed[0] = int(WheelSpeed(movspeed, dir, 240))+rot
-    speed[1] = int(WheelSpeed(movspeed, dir, 120))+rot
-    speed[2] = int(WheelSpeed(movspeed, dir, 0))+rot
+# def Move(movspeed, dir, rot):
+#     speed = [0,0,0,0]
+#     speed[0] = int(WheelSpeed(movspeed, dir, 240))+rot
+#     speed[1] = int(WheelSpeed(movspeed, dir, 120))+rot
+#     speed[2] = int(WheelSpeed(movspeed, dir, 0))+rot
 
-    ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
+#     ser.WriteCommand(speed[0], speed[1], speed[2], speed[3], 0)
 
 def WheelSpeed(speed, dir, angle):
     wheelLinearVelocity = speed * math.cos(dir - math.radians(angle+30))

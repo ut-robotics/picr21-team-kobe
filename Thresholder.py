@@ -9,7 +9,7 @@ import ReadValues
 import time
 import Image_processing as ip
 
-pipeline, camera_x, camera_y = CameraConfig.init()
+Camera = CameraConfig.Config()
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
 lSaturation = 0
@@ -47,7 +47,7 @@ def updateValue4(new_value4):
 def updateValue5(new_value5):
     global hValue
     hValue = new_value5
-
+    
 # try:
 #     with open("trackbar_defaults.txt", 'r') as reader:
 #         values = reader.readline().split(",")
@@ -62,17 +62,18 @@ def updateValue5(new_value5):
 #             hValue = int(values[5])
 # except Exception as e:
 #     print(e)
-lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("blue_basket.txt")
-lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThreshold("trackbar_defaults.txt")
+#lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("blue_basket.txt")
+#lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThreshold("trackbar_defaults.txt")
 
+Processor = ip.ProcessFrames(True)
 
 cv2.namedWindow("Processed")
-cv2.createTrackbar("lHue", "Processed", lHue1, 179, updateValue)
-cv2.createTrackbar("lSaturation", "Processed", lSaturation1, 255, updateValue1)
-cv2.createTrackbar("lValue", "Processed", lValue1, 255, updateValue2)
-cv2.createTrackbar("hHue", "Processed", hHue1, 179, updateValue3)
-cv2.createTrackbar("hSaturation", "Processed", hSaturation1, 255, updateValue4)
-cv2.createTrackbar("hValue", "Processed", hValue1, 255, updateValue5)
+cv2.createTrackbar("lHue", "Processed", Processor.lHue, 179, updateValue)
+cv2.createTrackbar("lSaturation", "Processed", Processor.lSaturation, 255, updateValue1)
+cv2.createTrackbar("lValue", "Processed", Processor.lValue, 255, updateValue2)
+cv2.createTrackbar("hHue", "Processed", Processor.hHue, 179, updateValue3)
+cv2.createTrackbar("hSaturation", "Processed", Processor.hSaturation, 255, updateValue4)
+cv2.createTrackbar("hValue", "Processed", Processor.hValue, 255, updateValue5)
 
 
 
@@ -86,77 +87,32 @@ def writevalues(filename):
         print("values saved successfully.")
 
 while True:
-    keypoints, y, x, basket_x_center, basket_y_center, distance = Processor.ProcessFrame(pipeline, camera_x, camera_y)
     cur_time_frame = time.time()
     fps = 1/ (cur_time_frame - prev_time_frame)
     prev_time_frame = cur_time_frame
-    fps = str(int(fps))
+    fps = int(fps)
     print(fps)
-
-    frames = pipeline.wait_for_frames()
-    aligned_frames = rs.align(rs.stream.color).process(frames)
-    color_frame = aligned_frames.get_color_frame()
-    frame = np.asanyarray(color_frame.get_data())
-
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    lHue = cv2.getTrackbarPos("lHue", "Processed")
-    lSaturation = cv2.getTrackbarPos("lSaturation", "Processed")
-    lValue = cv2.getTrackbarPos("lValue", "Processed")
-    hHue = cv2.getTrackbarPos("hHue", "Processed")
-    hSaturation = cv2.getTrackbarPos("hSaturation", "Processed")
-    hValue = cv2.getTrackbarPos("hValue", "Processed")
-
-
-    lowerLimits = np.array([lHue, lSaturation, lValue])
-    upperLimits = np.array([hHue, hSaturation, hValue])
-
-
-    lowerLimits1 = np.array([lHue1, lSaturation1, lValue1])
-    upperLimits1 = np.array([hHue1, hSaturation1, hValue1])
     
+    Processor.lHue = cv2.getTrackbarPos("lHue", "Processed")
+    Processor.lSaturation = cv2.getTrackbarPos("lSaturation", "Processed")
+    Processor.lValue = cv2.getTrackbarPos("lValue", "Processed")
+    Processor.hHue = cv2.getTrackbarPos("hHue", "Processed")
+    Processor.hSaturation = cv2.getTrackbarPos("hSaturation", "Processed")
+    Processor.hValue = cv2.getTrackbarPos("hValue", "Processed")
 
+    Processor.Threshold()
+    #keypoints = detector.detect(thresholded1)
 
-    # Our operations on the frame come here
-    thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
-    thresholded1 = cv2.inRange(hsv, lowerLimits1, upperLimits1)
-    thresholded = cv2.erode(thresholded,kernel, iterations=2)
-    
+    # if len(keypoints) >= 1:
+    #     for kp in keypoints:
+    #         x = int(kp.pt[0])
+    #         y = int(kp.pt[1])
+    #         cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
-    contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    contours = max(contours, key= cv2.contourArea)
-
-    cv2.imshow('Thresholded1', thresholded)
-    thresholded = cv2.bitwise_not(thresholded)
-
-    thresholded1 = cv2.bitwise_not(thresholded1)
-    #cv2.imshow('Thresholded', thresholded1)
-
-
-    outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
-
-    #print(contours)
-    if len(contours) > 0:
-        cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
-        #print(cv2.contourArea(contours))
-        M = cv2.moments(contours)
-        basket_center = int(M["m10"] / M["m00"])
-        print(basket_center)
-                
-
-    keypoints = detector.detect(thresholded1)
-
-    if len(keypoints) >= 1:
-        for kp in keypoints:
-            x = int(kp.pt[0])
-            y = int(kp.pt[1])
-            cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-
-    outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    #thresholded1 = cv2.erode(thresholded1,kernel, iterations=1)
-    print("y", y, "x", x)
-    #cv2.imshow("Original", frame)
-    cv2.imshow("Processed", outimage)
+    # outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    # #thresholded1 = cv2.erode(thresholded1,kernel, iterations=1)
+    # #cv2.imshow("Original", frame)
+    # cv2.imshow("Processed", outimage)
     key = cv2.waitKey(1)
     if key == ord('q'):
         break

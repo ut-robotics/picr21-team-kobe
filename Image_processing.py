@@ -10,6 +10,9 @@ import Blobparams
 import CameraConfig
 import ReadValues
 
+detector = Blobparams.CreateDetector()
+
+
 
 class ProcessFrames():
     def __init__(self, target):
@@ -24,16 +27,16 @@ class ProcessFrames():
 
         self.kernel = np.ones((5,5),np.uint8)
         self.detector = Blobparams.CreateDetector()
-        #self.basket_x_center = 0
-        #self.basket_y_center = 0
+        
+        self.keypointcount = 0
+        self.y = 0
+        self.x = 0
+        self.basket_x_center = 0
+        self.basket_y_center = 0
+        self.basket_distance = 0
+        self.frame = None
 
     def ProcessFrame(self, pipeline, camera_x, camera_y):
-        basket_x_center = 0
-        basket_y_center = 0
-        x = 0
-        y = 0
-        basket_distance = 0
-        keypointcount = 0
         frames = pipeline.wait_for_frames()
         aligned_frames = rs.align(rs.stream.color).process(frames)
         color_frame = aligned_frames.get_color_frame()
@@ -72,9 +75,9 @@ class ProcessFrames():
 
             M = cv2.moments(contours)
             if M["m00"] > 0:
-                basket_x_center = int(M["m10"] / M["m00"])
-                basket_y_center = int(M["m01"] / M["m00"])
-                basket_distance = depth_frame.get_distance(basket_x_center, basket_y_center)
+                self.basket_x_center = int(M["m10"] / M["m00"])
+                self.basket_y_center = int(M["m01"] / M["m00"])
+                self.basket_distance = depth_frame.get_distance(self.basket_x_center, self.basket_y_center)
             
 
 
@@ -85,15 +88,41 @@ class ProcessFrames():
         keypoints = self.detector.detect(thresholded)
         keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=False)
         if len(keypoints) >= 1:
-            x = keypoints[-1].pt[0]
-            y = keypoints[-1].pt[1]
+            self.x = keypoints[-1].pt[0]
+            self.y = keypoints[-1].pt[1]
 
             #x = int(keypoints[0])
             #y = int(keypoints[1])
 
-        keypointcount = len(keypoints)
+        self.keypointcount = len(keypoints)
+        #return {"count" : keypointcount, "y" : y, "x": x, "basket_x" : basket_x_center, "basket_y" : basket_y_center, "basket_distance" : basket_distance}
+        
+        
+    def Threshold(self):
+        frames = self.pipeline.wait_for_frames()
+        aligned_frames = rs.align(rs.stream.color).process(frames)
+        color_frame = aligned_frames.get_color_frame()
+        frame = np.asanyarray(color_frame.get_data())
 
-            # for kp in keypoints:
-            #     x = int(kp.pt[0])
-            #     y = int(kp.pt[1])
-        return {"count" : keypointcount, "y" : y, "x": x, "basket_x" : basket_x_center, "basket_y" : basket_y_center, "basket_distance" : basket_distance}
+        #Ball threshold
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        lowerLimits = np.array([self.lHue, self.lSaturation, self.lValue])
+        upperLimits = np.array([self.hHue, self.hSaturation, self.hValue])
+
+        thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
+        thresholded = cv2.bitwise_not(thresholded)
+        thresholded = cv2.erode(thresholded,self.kernel, iterations=1)
+        thresholded = cv2.bitwise_not(thresholded)
+        outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
+        keypoints = detector.detect(thresholded)
+
+        if len(keypoints) >= 1:
+            for kp in keypoints:
+                x = int(kp.pt[0])
+                y = int(kp.pt[1])
+                cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+        
+        outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+        cv2.imshow('Thresholded', thresholded)
+        cv2.imshow('Keypoints', outimage)
