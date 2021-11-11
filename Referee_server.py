@@ -9,7 +9,7 @@ class Server:
     def __init__(self):
         self.run = True
         self.blueIsTarget = True
-        f = open('./websocket_config.json', "r")
+        f = open('websocket_config.json', "r")
         websocket_config = json.loads(f.read())
         self.host = websocket_config['host']
         self.port = websocket_config['port']
@@ -50,6 +50,6 @@ class Server:
 
     def start(self):
         new_loop = asyncio.new_event_loop()
-        server = websockets.serve(self.listen, self.get_host(), self.get_port(), loop=new_loop)
+        server = websockets.serve(self.listen, self.get_host(), self.get_port(), loop=new_loop, ping_interval=None, ping_timeout=None)
         t = threading.Thread(target=self.start_loop, args=(new_loop, server))
         t.start()

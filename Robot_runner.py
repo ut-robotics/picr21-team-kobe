@@ -83,7 +83,6 @@ def HandleAim(count, y, x, center_x, center_y, basket_distance):
     print(x)   
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     return State.AIM
-    return State.THROWING
 
 def HandleStopped(count, y, x, center_x, center_y, basket_distance):
     drive.stop()
