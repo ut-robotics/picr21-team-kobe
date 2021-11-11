@@ -6,7 +6,7 @@ import json
 class Client:
 
     def __init__(self):
-        f = open('./websocket_config.json', "r")
+        f = open('websocket_config.json', "r")
         websocket_config = json.loads(f.read())
         self.host = websocket_config['host']
         self.port = websocket_config['port']
