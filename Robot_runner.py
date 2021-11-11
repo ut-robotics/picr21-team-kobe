@@ -78,11 +78,12 @@ def HandleAim(count, y, x, center_x, center_y, basket_distance):
     maxSpeed = 20
     minDelta = 5
     front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, maxSpeed)#3 + (480-y)/ 540.0 * 30
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15 
-    rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#int((x - 480)/480.0 * 25)       
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15
+    rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#int((x - 480)/480.0 * 25)
     print(x)   
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     return State.AIM
+    return State.THROWING
 
 def HandleStopped(count, y, x, center_x, center_y, basket_distance):
     drive.stop()
@@ -104,7 +105,7 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
         thrower_speed = Thrower.ThrowerSpeed(Processor.basket_distance)
         # rotSpd = int((x - 480)/480.0 * 20)
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, maxSpeed)#3 + (480-y)/ 540.0 * 30
-        side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, maxSpeed)#(x - basket_x_center)/480.0 * 15 
+        side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, maxSpeed)#(x - basket_x_center)/480.0 * 15
         rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#int((x - 480)/480.0 * 25)
         drive.Move2(-side_speed, -front_speed, -rotSpd, thrower_speed)
     if Processor.keypointcount <= 0:#data["count"] <= 0:
@@ -115,16 +116,16 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
 data = None
 
 def ListenForRefereeCommands():
-    global Processor
+    global Processor, state
     try:
         run, target = srv.get_current_referee_command()
         print("Target:  " + str(target))
         print("Run: " + str(run))
         Processor = ip.ProcessFrames(target)
         if not run:
-            return State.STOPPED
-        else:
-            return State.FIND
+            state = State.STOPPED
+        if run and state == State.STOPPED:
+            state = State.FIND
     except:
         print("Server client communication failed.")
 
@@ -137,9 +138,10 @@ switcher = {
 }
 
 def Logic(switcher):
+    global state
     try:
         while True:
-            state = ListenForRefereeCommands()
+            ListenForRefereeCommands()
             print(state)
             count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
             state = switcher.get(state)(count, y, x, center_x, center_y, basket_distance)
