@@ -68,12 +68,12 @@ def updateValue5(new_value5):
 Processor = ip.ProcessFrames(True)
 
 cv2.namedWindow("Processed")
-cv2.createTrackbar("lHue", "Processed", Processor.lHue, 179, updateValue)
-cv2.createTrackbar("lSaturation", "Processed", Processor.lSaturation, 255, updateValue1)
-cv2.createTrackbar("lValue", "Processed", Processor.lValue, 255, updateValue2)
-cv2.createTrackbar("hHue", "Processed", Processor.hHue, 179, updateValue3)
-cv2.createTrackbar("hSaturation", "Processed", Processor.hSaturation, 255, updateValue4)
-cv2.createTrackbar("hValue", "Processed", Processor.hValue, 255, updateValue5)
+cv2.createTrackbar("lHue", "Processed", Processor.lHue1, 179, updateValue)
+cv2.createTrackbar("lSaturation", "Processed", Processor.lSaturation1, 255, updateValue1)
+cv2.createTrackbar("lValue", "Processed", Processor.lValue1, 255, updateValue2)
+cv2.createTrackbar("hHue", "Processed", Processor.hHue1, 179, updateValue3)
+cv2.createTrackbar("hSaturation", "Processed", Processor.hSaturation1, 255, updateValue4)
+cv2.createTrackbar("hValue", "Processed", Processor.hValue1, 255, updateValue5)
 
 
 
@@ -83,7 +83,7 @@ detector = Blobparams.CreateDetector()
 def writevalues(filename):
     print("saving values")
     with open(filename, "w") as writer:
-        writer.write(str(lHue) + "," + str(lSaturation) + "," + str(lValue) + "," + str(hHue) + "," + str(hSaturation) + "," + str(hValue))
+        writer.write(str(Processor.lHue1) + "," + str(Processor.lSaturation1) + "," + str(Processor.lValue1) + "," + str(Processor.hHue1) + "," + str(Processor.hSaturation1) + "," + str(Processor.hValue1))
         print("values saved successfully.")
 
 while True:
@@ -93,14 +93,14 @@ while True:
     fps = int(fps)
     print(fps)
     
-    Processor.lHue = cv2.getTrackbarPos("lHue", "Processed")
-    Processor.lSaturation = cv2.getTrackbarPos("lSaturation", "Processed")
-    Processor.lValue = cv2.getTrackbarPos("lValue", "Processed")
-    Processor.hHue = cv2.getTrackbarPos("hHue", "Processed")
-    Processor.hSaturation = cv2.getTrackbarPos("hSaturation", "Processed")
-    Processor.hValue = cv2.getTrackbarPos("hValue", "Processed")
+    Processor.lHue1 = cv2.getTrackbarPos("lHue", "Processed")
+    Processor.lSaturation1 = cv2.getTrackbarPos("lSaturation", "Processed")
+    Processor.lValue1 = cv2.getTrackbarPos("lValue", "Processed")
+    Processor.hHue1 = cv2.getTrackbarPos("hHue", "Processed")
+    Processor.hSaturation1 = cv2.getTrackbarPos("hSaturation", "Processed")
+    Processor.hValue1 = cv2.getTrackbarPos("hValue", "Processed")
 
-    Processor.Threshold()
+    Processor.Threshold(Camera.pipeline)
     #keypoints = detector.detect(thresholded1)
 
     # if len(keypoints) >= 1:
@@ -128,4 +128,6 @@ while True:
         
 
 #writevalues()
+Camera.StopStreams()
+
 cv2.destroyAllWindows()

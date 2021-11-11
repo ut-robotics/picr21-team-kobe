@@ -17,4 +17,4 @@ class Config():
         #return self.pipeline, self.camera_x, self.camera_y
 
     def StopStreams(self):
-        self.config.disable_all_streams(self)
+        self.pipeline.stop()

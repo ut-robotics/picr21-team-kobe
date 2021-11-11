@@ -95,19 +95,20 @@ class ProcessFrames():
             #y = int(keypoints[1])
 
         self.keypointcount = len(keypoints)
+        return self.keypointcount, self.y, self.x, self.basket_x_center, self.basket_y_center, self.basket_distance
         #return {"count" : keypointcount, "y" : y, "x": x, "basket_x" : basket_x_center, "basket_y" : basket_y_center, "basket_distance" : basket_distance}
         
         
-    def Threshold(self):
-        frames = self.pipeline.wait_for_frames()
+    def Threshold(self, pipeline):
+        frames = pipeline.wait_for_frames()
         aligned_frames = rs.align(rs.stream.color).process(frames)
         color_frame = aligned_frames.get_color_frame()
         frame = np.asanyarray(color_frame.get_data())
 
         #Ball threshold
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lowerLimits = np.array([self.lHue, self.lSaturation, self.lValue])
-        upperLimits = np.array([self.hHue, self.hSaturation, self.hValue])
+        lowerLimits = np.array([self.lHue1, self.lSaturation1, self.lValue1])
+        upperLimits = np.array([self.hHue1, self.hSaturation1, self.hValue1])
 
         thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
         thresholded = cv2.bitwise_not(thresholded)

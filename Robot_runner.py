@@ -21,7 +21,7 @@ class State(Enum):
     THROWING = 3
 
 #Use this to set the first state
-state = State.FIND
+state = State.AIM
 #set target value with referee commands
 target = True
 #Create image processing object
@@ -36,16 +36,16 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxSpeed):
     sign = math.copysign(1, speed)
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
-def HandleFind(data):
+def HandleFind(count, y, x, center_x, center_y, basket_distance):
     drive.Move2(0, 0, 10, 0)
-    if Processor.keypointcount >= 1:
+    if count >= 1:
         return State.DRIVE
     return State.FIND
 
-def HandleDrive(data):
-    if Processor.keypointcount >= 1:
-        delta_x = Processor.x - Camera.camera_x/2
-        delta_y = Processor.y - 400
+def HandleDrive(count, y, x, center_x, center_y, basket_distance):
+    if count >= 1:
+        delta_x = x - Camera.camera_x/2
+        delta_y = y - 410
         print(data)
         print(delta_y)
         minSpeed = 2
@@ -54,7 +54,7 @@ def HandleDrive(data):
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 8, 200)#3 + (480-y)/ 540.0 * 30
         #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15 
         rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 100)#int((x - 480)/480.0 * 25)
-        print(front_speed)
+        print(y)
         drive.Move2(-0, -front_speed, -rotSpd, 0)
     if Processor.y >= 420: # specify better y value that is near robot, represents ball y value in reference with camera y
         return State.AIM
@@ -63,23 +63,25 @@ def HandleDrive(data):
 
     return State.DRIVE
 
-def HandleAim(data):
-    if 314 <= Processor.basket_x_center <= 326 and Processor.y >= 440:
+def HandleAim(count, y, x, center_x, center_y, basket_distance):
+    
+    if 314 <= center_x <= 326 and y >= 440:
         drive.Stop()
         return State.THROWING
-    delta_x = Processor.basket_x_center - Processor.x#data["basket_x"] - data["x"]
-    delta_y = Processor.basket_y_center - 440#data["basket_y"] - 440
-    minSpeed = 2
+    delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
+    delta_y = 420 - y#Processor.basket_y_center - Processor.y#data["basket_y"] - 440
+    minSpeed = 5
     maxSpeed = 20
     minDelta = 5
     front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, maxSpeed)#3 + (480-y)/ 540.0 * 30
     side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15 
-    rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 100)#int((x - 480)/480.0 * 25)          
-    drive.Move2(-side_speed, -front_speed, -rotSpd, 0)
+    rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#int((x - 480)/480.0 * 25)       
+    print(x)   
+    drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     return State.AIM
 
 i = 0
-def HandleThrowing(data):
+def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
     global i
     #time.sleep(0.1)
     if i >= 3:
@@ -88,9 +90,10 @@ def HandleThrowing(data):
     if Processor.keypointcount >= 1:#data["count"] >= 1:
         delta_x = Processor.basket_x_center - Processor.x#data["basket_x"] - data["x"]
         delta_y = Processor.basket_y_center - 500#data["basket_y"] - 500
+        
         minSpeed = 10
         maxSpeed = 30
-        minDelta = 3
+        minDelta = 5
         thrower_speed = Thrower.ThrowerSpeed(Processor.basket_distance)
         # rotSpd = int((x - 480)/480.0 * 20)
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, maxSpeed)#3 + (480-y)/ 540.0 * 30
@@ -112,17 +115,17 @@ switcher = {
     State.THROWING: HandleThrowing
 }
 
-def Logic():
+def Logic(state, switcher):
     try:
         while True:
-            data = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
+            count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
             print(state)
 
-            state = switcher.get(state)(data)
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-            #     break
-        #cv2.destroyAllWindows()
+            state = switcher.get(state)(count, y, x, center_x, center_y, basket_distance)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        cv2.destroyAllWindows()
     except KeyboardInterrupt:
         Camera.StopStreams()
 
-        
+Logic(state,switcher)
