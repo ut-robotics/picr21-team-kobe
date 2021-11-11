@@ -25,7 +25,7 @@ class State(Enum):
     STOPPED = 4
 
 #Use this to set the first state
-state = State.AIM
+state = State.FIND
 #set target value with referee commands
 target = True
 #Create image processing object
