@@ -21,7 +21,7 @@ class State(Enum):
     THROWING = 3
 
 #Use this to set the first state
-state = State.AIM
+state = State.FIND
 #set target value with referee commands
 target = True
 #Create image processing object
@@ -43,66 +43,74 @@ def HandleFind(count, y, x, center_x, center_y, basket_distance):
     return State.FIND
 
 def HandleDrive(count, y, x, center_x, center_y, basket_distance):
-    if count >= 1:
+    if count >= 1 and not None:
         delta_x = x - Camera.camera_x/2
-        delta_y = y - 410
-        print(data)
-        print(delta_y)
+        delta_y = y - 425
+        #print(data)
+        #print(delta_y)
         minSpeed = 2
         maxSpeed = 50
         minDelta = 5
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 8, 200)#3 + (480-y)/ 540.0 * 30
+        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 8, 100)#3 + (480-y)/ 540.0 * 30
         #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15 
         rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 100)#int((x - 480)/480.0 * 25)
-        print(y)
+        print(y,x)
         drive.Move2(-0, -front_speed, -rotSpd, 0)
-    if Processor.y >= 420: # specify better y value that is near robot, represents ball y value in reference with camera y
-        return State.AIM
-    if Processor.keypointcount <= 0:
+        print(count)
+        if y >= 410: # specify better y value that is near robot, represents ball y value in reference with camera y
+            return State.AIM
+    if count <= 0 or None:
         return State.FIND
 
     return State.DRIVE
 
 def HandleAim(count, y, x, center_x, center_y, basket_distance):
-    
-    if 314 <= center_x <= 326 and y >= 440:
-        drive.Stop()
-        return State.THROWING
-    delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
-    delta_y = 420 - y#Processor.basket_y_center - Processor.y#data["basket_y"] - 440
+    # if cqreturn State.FIND
+    rot_delta_x = x - Camera.camera_x/2
+    delta_x = x - center_x
+    delta_y = 430 - y
     minSpeed = 5
     maxSpeed = 20
-    minDelta = 5
-    front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, maxSpeed)#3 + (480-y)/ 540.0 * 30
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15 
-    rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#int((x - 480)/480.0 * 25)       
-    print(x)   
+    minDelta = 7
+    front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 30)#3 + (480-y)/ 540.0 * 30
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 30)#(x - data["basket_x"])/480.0 * 15 
+    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 5, 3, 30)#int((x - 480)/480.0 * 25)       
+    print("y", y, "x", x, "center", center_x, "side", side_speed, "front", front_speed,"rot", rotSpd)   
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
+    if 315 <= center_x <= 325 and y >= 425:
+        drive.Stop()
+        return State.THROWING
+
     return State.AIM
 
 i = 0
 def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
     global i
-    #time.sleep(0.1)
-    if i >= 3:
+
+    if i >= 30:
+        
         i = 0
         return State.FIND
-    if Processor.keypointcount >= 1:#data["count"] >= 1:
-        delta_x = Processor.basket_x_center - Processor.x#data["basket_x"] - data["x"]
-        delta_y = Processor.basket_y_center - 500#data["basket_y"] - 500
+    if count >= 1:#data["count"] >= 1:
+        rot_delta_x = x - Camera.camera_x/2
+        delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
+        delta_y = 500 - y
+        # delta_x = Processor.basket_x_center - Processor.x#data["basket_x"] - data["x"]
+        # delta_y = Processor.basket_y_center - 500#data["basket_y"] - 500
         
         minSpeed = 10
         maxSpeed = 30
-        minDelta = 5
-        thrower_speed = Thrower.ThrowerSpeed(Processor.basket_distance)
+        minDelta = 6
+        thrower_speed = Thrower.ThrowerSpeed(basket_distance)
         # rotSpd = int((x - 480)/480.0 * 20)
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, maxSpeed)#3 + (480-y)/ 540.0 * 30
-        side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, maxSpeed)#(x - basket_x_center)/480.0 * 15 
-        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#int((x - 480)/480.0 * 25)
-        drive.Move2(-side_speed, -front_speed, -rotSpd, thrower_speed)
-    if Processor.keypointcount <= 0:#data["count"] <= 0:
-        thrower_speed = Thrower.ThrowerSpeed(Processor.basket_distance)
-        drive.Move2(-side_speed, -front_speed, -rotSpd, thrower_speed)
+        side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - basket_x_center)/480.0 * 15 
+        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, maxSpeed)#int((x - 480)/480.0 * 25)
+        drive.Move2(-0, front_speed, -0, thrower_speed)
+    if count <= 0:#data["count"] <= 0:
+        thrower_speed = Thrower.ThrowerSpeed(basket_distance)
+        drive.Move2(-0, 10, -0, thrower_speed)
+        #time.sleep(0.1)
         i += 1
     return State.THROWING
 data = None
