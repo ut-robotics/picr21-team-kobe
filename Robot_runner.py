@@ -42,7 +42,7 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
 def HandleDrive(count, y, x, center_x, center_y, basket_distance):
     if count > 0:
         delta_x = x - Camera.camera_x/2
-        delta_y = 380-y
+        delta_y = 390-y
         #print(data)
         #print(delta_y)
         minSpeed = 2
@@ -106,6 +106,12 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
         i = 0
         return State.FIND
     if count >= 1:#data["count"] >= 1:
+        basketInFrame = center_x is not None
+
+        if not basketInFrame:
+            delta_x = Camera.camera_x
+        else:
+            delta_x = x - center_x
         rot_delta_x = x - Camera.camera_x/2
         delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
         delta_y = 500 - y
