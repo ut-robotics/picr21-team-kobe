@@ -10,7 +10,6 @@ import numpy
 #from scipy.interpolate import interp1d
 from enum import Enum
 import Thrower
-import workers
 
 Camera = CameraConfig.Config()
 
@@ -115,7 +114,6 @@ switcher = {
 
 def Logic():
     try:
-        workers.CreateThreads()
         while True:
             data = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
             print(state)
@@ -126,5 +124,5 @@ def Logic():
         #cv2.destroyAllWindows()
     except KeyboardInterrupt:
         Camera.StopStreams()
-        workers.StopThreads()
+
         
