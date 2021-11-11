@@ -31,11 +31,11 @@ class ProcessFrames():
 
     def ProcessFrame(self, pipeline, camera_x, camera_y):
         keypointcount=0
-        y=0
-        x=0
-        basket_x_center=0
-        basket_y_center= 0
-        basket_distance= 0
+        y=None
+        x=None
+        basket_x_center=None
+        basket_y_center= None
+        basket_distance= None
         frames = pipeline.wait_for_frames()
         aligned_frames = rs.align(rs.stream.color).process(frames)
         color_frame = aligned_frames.get_color_frame()
@@ -57,7 +57,7 @@ class ProcessFrames():
             basketupperLimits = np.array([self.hHue1, self.hSaturation1, self.hValue1])
 
             basketthresholded = cv2.inRange(hsv, basketlowerLimits, basketupperLimits)
-            basketthresholded = cv2.dilate(basketthresholded, self.kernel, iterations=2)
+            #basketthresholded = cv2.dilate(basketthresholded, self.kernel, iterations=2)
 
             #basketthresholded = cv2.erode(basketthresholded, self.kernel, iterations=1)
             contours, hierarchy = cv2.findContours(basketthresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -67,19 +67,28 @@ class ProcessFrames():
             basketupperLimits = np.array([self.hHue2, self.hSaturation2, self.hValue2])
 
             basketthresholded = cv2.inRange(hsv, basketlowerLimits, basketupperLimits)
-            basketthresholded = cv2.dilate(basketthresholded, self.kernel, iterations=1)
-            basketthresholded = cv2.erode(basketthresholded, self.kernel, iterations=1)
+            # basketthresholded = cv2.dilate(basketthresholded, self.kernel, iterations=1)
+            # basketthresholded = cv2.erode(basketthresholded, self.kernel, iterations=1)
             contours, hierarchy = cv2.findContours(basketthresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
         
         if len(contours) > 0:
-            contours = max(contours, key= cv2.contourArea)
-            cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
+            contour = max(contours, key= cv2.contourArea)
 
-            M = cv2.moments(contours)
-            if M["m00"] > 0:
-                basket_x_center = int(M["m10"] / M["m00"])
-                basket_y_center = int(M["m01"] / M["m00"])
+            if cv2.contourArea(contour) > 200:
+
+                cv2.drawContours(frame, contour, -1, 255, -1)
+                x1, y1, w, h = cv2.boundingRect(contour)
+                cv2.rectangle(frame,(x1,y1),(x1+w,y1+h),(0,255,0),3)
+                basket_x_center = int(x1+(w/2))
+                basket_y_center = int(y1+(h/2))
                 basket_distance = depth_frame.get_distance(basket_x_center, basket_y_center)
+            #cv2.drawContours(frame, [contours], -1, (0,255,255), 3)
+
+
+            #M = cv2.moments(contours)
+            # if M["m00"] > 0:
+            #     #basket_x_center = int(M["m10"] / M["m00"])
+            #     basket_y_center = int(M["m01"] / M["m00"])
             
 
         cv2.imshow("ball", thresholded)
@@ -88,7 +97,7 @@ class ProcessFrames():
 
         #outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
         keypoints = self.detector.detect(thresholded)
-        keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=False)
+        keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=True)
         if len(keypoints) >= 1:
             x = keypoints[0].pt[0]
             y = keypoints[0].pt[1]
@@ -115,10 +124,21 @@ class ProcessFrames():
 
         thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
         thresholded = cv2.bitwise_not(thresholded)
-        thresholded = cv2.erode(thresholded,self.kernel, iterations=1)
+        #thresholded = cv2.erode(thresholded,self.kernel, iterations=1)
         thresholded = cv2.bitwise_not(thresholded)
         outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
         keypoints = detector.detect(thresholded)
+
+        contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
+        if len(contours) > 0:
+            contour = max(contours, key= cv2.contourArea)
+            x1, y1, w, h = cv2.boundingRect(contour)
+            #print(a,b,w,h)
+            center = x1+(w/2)
+            cv2.rectangle(frame,(x1,y1),(x1+w,y1+h),(0,255,0),3)
+
+
 
         if len(keypoints) >= 1:
             for kp in keypoints:
