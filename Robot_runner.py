@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from threading import Thread
+
 import cv2
 import Movement as drive
 import Image_processing as ip
-import time
 import CameraConfig
 import math
-import numpy
-#from scipy.interpolate import interp1d
 from enum import Enum
 import Thrower
+import Referee_server as Server
+
+srv = Server.Server()
+srv.start()
 
 Camera = CameraConfig.Config()
 
@@ -19,9 +22,10 @@ class State(Enum):
     DRIVE = 1
     AIM = 2
     THROWING = 3
+    STOPPED = 4
 
 #Use this to set the first state
-state = State.FIND
+state = State.STOPPED
 #set target value with referee commands
 target = True
 #Create image processing object
@@ -97,12 +101,14 @@ def HandleAim(count, y, x, center_x, center_y, basket_distance):
 
     return State.AIM
 
+def HandleStopped(count, y, x, center_x, center_y, basket_distance):
+    drive.Stop()
+    return State.STOPPED
+
 i = 0
 def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
     global i
-
-    if i >= 30:
-        
+    if i >= 3:
         i = 0
         return State.FIND
     if count >= 1:#data["count"] >= 1:
@@ -135,20 +141,36 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
     return State.THROWING
 data = None
 
+def ListenForRefereeCommands():
+    global Processor, state
+    try:
+        run, target = srv.get_current_referee_command()
+        print("Target:  " + str(target))
+        print("Run: " + str(run))
+        
+        Processor.SetTarget(target)
+        if not run:
+            state = State.STOPPED
+        if run and state == State.STOPPED:
+            state = State.FIND
+    except:
+        print("Server client communication failed.")
 
 switcher = {
     State.FIND: HandleFind,
     State.DRIVE: HandleDrive,
     State.AIM: HandleAim,
-    State.THROWING: HandleThrowing
+    State.THROWING: HandleThrowing,
+    State.STOPPED: HandleStopped
 }
 
-def Logic(state, switcher):
+def Logic(switcher):
+    global state
     try:
         while True:
-            count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
+            ListenForRefereeCommands()
             print(state)
-
+            count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
             state = switcher.get(state)(count, y, x, center_x, center_y, basket_distance)
 
             #state = State.AIM
@@ -156,6 +178,8 @@ def Logic(state, switcher):
                 break
         cv2.destroyAllWindows()
     except KeyboardInterrupt:
+        #Thread.join()
+        
         Camera.StopStreams()
-
-Logic(state,switcher)
+t1 = Thread(target=Logic(switcher))
+t1.start()
