@@ -7,5 +7,8 @@ Y = [700,700,800,900, 1000, 1200, 1600, 2400]
 #Function that estimates the speed to use from robot's current distance from the basket
 def ThrowerSpeed(distance):
     predicted_function = interp1d(X,Y, kind="linear")
-    thrower_speed = int(predicted_function(distance*100))
+    if distance is None:
+        return 700
+    else:
+        thrower_speed = int(predicted_function(distance*100))
     return thrower_speed

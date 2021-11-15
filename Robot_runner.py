@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from threading import Thread
+
 import cv2
 import Movement as drive
 import Image_processing as ip
-import time
 import CameraConfig
 import math
-import numpy
-#from scipy.interpolate import interp1d
 from enum import Enum
 import Thrower
 import Referee_server as Server
@@ -110,9 +109,7 @@ def HandleAim(count, y, x, center_x, center_y, basket_distance):
 i = 0
 def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
     global i
-
-    if i >= 30:
-        
+    if i >= 3:
         i = 0
         return State.FIND
     if count >= 1:#data["count"] >= 1:
@@ -175,7 +172,7 @@ def Logic(switcher):
             ListenForRefereeCommands()
             count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
             print(state)
-
+            count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
             state = switcher.get(state)(count, y, x, center_x, center_y, basket_distance)
 
             #state = State.AIM
@@ -183,6 +180,8 @@ def Logic(switcher):
                 break
         cv2.destroyAllWindows()
     except KeyboardInterrupt:
+        #Thread.join()
+        
         Camera.StopStreams()
 
 Logic(switcher)
