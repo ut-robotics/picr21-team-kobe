@@ -93,8 +93,8 @@ def HandleAim(count, y, x, center_x, center_y, basket_distance):
     minSpeed = 5
     maxSpeed = 20
     minDelta = 7
-    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 2, 150, 30)#3 + (480-y)/ 540.0 * 30
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 2, 150, 30)#(x - data["basket_x"])/480.0 * 15 
+    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 150, 30)#3 + (480-y)/ 540.0 * 30
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 150, 30)#(x - data["basket_x"])/480.0 * 15 
     rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 2, 150, 30)#int((x - 480)/480.0 * 25)
     print("y", y, "x", x, "center", center_x, "side", side_speed, "front", front_speed,"rot", rotSpd)   
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
