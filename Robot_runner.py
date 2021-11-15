@@ -113,7 +113,7 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
         else:
             delta_x = x - center_x
         rot_delta_x = x - Camera.camera_x/2
-        delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
+        #delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
         delta_y = 500 - y
         # delta_x = Processor.basket_x_center - Processor.x#data["basket_x"] - data["x"]
         # delta_y = Processor.basket_y_center - 500#data["basket_y"] - 500
