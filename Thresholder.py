@@ -48,22 +48,6 @@ def updateValue5(new_value5):
     global hValue
     hValue = new_value5
     
-# try:
-#     with open("trackbar_defaults.txt", 'r') as reader:
-#         values = reader.readline().split(",")
-
-#         # only read from the file if there are enough items to read
-#         if len(values) >= 6: 
-#             lHue = int(values[0])
-#             lSaturation = int(values[1])
-#             lValue = int(values[2])
-#             hHue = int(values[3])
-#             hSaturation = int(values[4])
-#             hValue = int(values[5])
-# except Exception as e:
-#     print(e)
-#lHue, lSaturation, lValue, hHue, hSaturation, hValue = ReadValues.ReadThreshold("blue_basket.txt")
-#lHue1, lSaturation1, lValue1, hHue1, hSaturation1, hValue1 = ReadValues.ReadThreshold("trackbar_defaults.txt")
 
 Processor = ip.ProcessFrames(True)
 
@@ -101,18 +85,7 @@ while True:
     Processor.hValue1 = cv2.getTrackbarPos("hValue", "Processed")
 
     Processor.Threshold(Camera.pipeline)
-    #keypoints = detector.detect(thresholded1)
 
-    # if len(keypoints) >= 1:
-    #     for kp in keypoints:
-    #         x = int(kp.pt[0])
-    #         y = int(kp.pt[1])
-    #         cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-
-    # outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    # #thresholded1 = cv2.erode(thresholded1,kernel, iterations=1)
-    # #cv2.imshow("Original", frame)
-    # cv2.imshow("Processed", outimage)
     key = cv2.waitKey(1)
     if key == ord('q'):
         break
@@ -127,7 +100,6 @@ while True:
         break
         
 
-#writevalues()
 Camera.StopStreams()
 
 cv2.destroyAllWindows()

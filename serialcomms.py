@@ -7,7 +7,7 @@ data_size = struct.calcsize('<hhhH')
 
 ports = serial.tools.list_ports.comports()
 
-print([port.name for port in ports])
+#print([port.name for port in ports])
 
 class Connection:
     
