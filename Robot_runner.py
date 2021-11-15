@@ -115,7 +115,7 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
 data = None
 
 def ListenForRefereeCommands():
-    global Processor
+    global Processor, state
     try:
         run, target = srv.get_current_referee_command()
         print("Target:  " + str(target))
@@ -123,9 +123,9 @@ def ListenForRefereeCommands():
         
         Processor.SetTarget(target)
         if not run:
-            return State.STOPPED
+            state = State.STOPPED
         if run and state == State.STOPPED:
-            return State.FIND
+            state = State.FIND
     except:
         print("Server client communication failed.")
 
@@ -137,7 +137,7 @@ switcher = {
     State.STOPPED: HandleStopped
 }
 
-def Logic(switcher, thread):
+def Logic(switcher):
     global state
     try:
         while True:
