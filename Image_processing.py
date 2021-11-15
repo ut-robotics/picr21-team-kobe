@@ -10,6 +10,7 @@ import Blobparams
 import CameraConfig
 import ReadValues
 
+
 detector = Blobparams.CreateDetector()
 
 
@@ -28,6 +29,9 @@ class ProcessFrames():
         self.kernel = np.ones((5,5),np.uint8)
         self.detector = Blobparams.CreateDetector()
         self.frame = None
+
+    def SetTarget(self, target):
+        self.target = target
 
     def ProcessFrame(self, pipeline, camera_x, camera_y):
         keypointcount=0

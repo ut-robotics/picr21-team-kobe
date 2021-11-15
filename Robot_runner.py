@@ -10,6 +10,10 @@ import numpy
 #from scipy.interpolate import interp1d
 from enum import Enum
 import Thrower
+import Referee_server as Server
+
+srv = Server.Server()
+srv.start()
 
 Camera = CameraConfig.Config()
 
@@ -19,9 +23,10 @@ class State(Enum):
     DRIVE = 1
     AIM = 2
     THROWING = 3
+    STOPPED = 4
 
 #Use this to set the first state
-state = State.FIND
+state = State.STOPPED
 #set target value with referee commands
 target = True
 #Create image processing object
@@ -69,6 +74,10 @@ def HandleFind(count, y, x, center_x, center_y, basket_distance):
         return State.DRIVE
     return State.FIND
 
+def HandleStopped(count, y, x, center_x, center_y, basket_distance):
+    drive.Stop()
+    return State.STOPPED
+
 def HandleAim(count, y, x, center_x, center_y, basket_distance):
     
     basketInFrame = center_x is not None
@@ -97,6 +106,7 @@ def HandleAim(count, y, x, center_x, center_y, basket_distance):
 
     return State.AIM
 
+
 i = 0
 def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
     global i
@@ -113,7 +123,7 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
         else:
             delta_x = x - center_x
         rot_delta_x = x - Camera.camera_x/2
-        delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
+        #delta_x = x - center_x# - Processor.x#data["basket_x"] - data["x"]
         delta_y = 500 - y
         # delta_x = Processor.basket_x_center - Processor.x#data["basket_x"] - data["x"]
         # delta_y = Processor.basket_y_center - 500#data["basket_y"] - 500
@@ -135,17 +145,34 @@ def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
     return State.THROWING
 data = None
 
+def ListenForRefereeCommands():
+    global Processor, state
+    try:
+        run, target = srv.get_current_referee_command()
+        print("Target:  " + str(target))
+        print("Run: " + str(run))
+        
+        Processor.SetTarget(target)
+        if not run:
+            state = State.STOPPED
+        if run and state == State.STOPPED:
+            state = State.FIND
+    except:
+        print("Server client communication failed.")
 
 switcher = {
     State.FIND: HandleFind,
     State.DRIVE: HandleDrive,
     State.AIM: HandleAim,
-    State.THROWING: HandleThrowing
+    State.THROWING: HandleThrowing,
+    State.STOPPED: HandleStopped
 }
 
-def Logic(state, switcher):
+def Logic(switcher):
+    global state
     try:
         while True:
+            ListenForRefereeCommands()
             count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
             print(state)
 
@@ -158,4 +185,4 @@ def Logic(state, switcher):
     except KeyboardInterrupt:
         Camera.StopStreams()
 
-Logic(state,switcher)
+Logic(switcher)

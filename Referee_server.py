@@ -7,7 +7,7 @@ import json
 class Server:
 
     def __init__(self):
-        self.run = True
+        self.run = False
         self.blueIsTarget = True
         f = open('websocket_config.json', "r")
         websocket_config = json.loads(f.read())
