@@ -1,7 +1,13 @@
 import asyncio
 import threading
+from ast import literal_eval
+from configparser import ConfigParser
 import websockets
 import json
+
+
+parser = ConfigParser()
+parser.read('config.ini')
 
 
 class Server:
@@ -9,11 +15,9 @@ class Server:
     def __init__(self):
         self.run = False
         self.blueIsTarget = True
-        self.robot = "Kobe"
-        f = open('websocket_config.json', "r")
-        websocket_config = json.loads(f.read())
-        self.host = websocket_config['host']
-        self.port = websocket_config['port']
+        self.robot = literal_eval(parser.get('robot', 'robot_id'))
+        self.host = literal_eval(parser.get('websocket', 'host'))
+        self.port = literal_eval(parser.get('websocket', 'port'))
 
     async def listen(self):
         print("Connecting to " + str(self.host) + " on port " + str(self.port))
@@ -29,6 +33,9 @@ class Server:
     def process_command(self, cmd):
         if cmd["signal"] == "changeID" and self.robot != cmd["robot"]:
             self.robot = cmd["robot"]
+            parser.set('robot', 'robot_id', repr(self.robot))
+            with open('config.ini', "w") as f:
+                parser.write(f)
         elif self.robot in cmd["targets"]:
             if cmd["signal"] == "stop":
                 self.run = False
@@ -53,3 +60,4 @@ class Server:
     def start(self):
         t = threading.Thread(target=self.start_loop)
         t.start()
+        t.join()

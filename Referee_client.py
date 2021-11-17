@@ -1,16 +1,20 @@
 import asyncio
+from ast import literal_eval
+from configparser import ConfigParser
 import websockets
 import json
+
+
+parser = ConfigParser()
+parser.read('config.ini')
 
 
 class Client:
 
     def __init__(self):
-        f = open('websocket_config.json', "r")
-        websocket_config = json.loads(f.read())
-        self.host = websocket_config['host']
-        self.port = websocket_config['port']
-        self.robot = "Kobe"
+        self.host = literal_eval(parser.get('websocket', 'host'))
+        self.port = literal_eval(parser.get('websocket', 'port'))
+        self.robot = literal_eval(parser.get('robot', 'robot_id'))
 
     async def send(self, ws, path):
         while True:
