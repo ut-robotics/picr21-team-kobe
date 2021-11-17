@@ -17,7 +17,7 @@ class Client:
         uri = "ws://" + str(self.host) + ":" + str(self.port)
         async with websockets.connect(uri) as ws:
             while True:
-                cmd = int(input("Enter a command: 1, 2 or 3 \n 1 - signal: start, target: blue\n "
+                cmd = int(input("Enter a command: 1, 2, 3 or 4 \n 1 - signal: start, target: blue\n "
                                 "2 - signal: start, target: magenta \n 3 - signal: stop \n 4 - Change ID"))
                 if cmd == 1:
                     msg = {
