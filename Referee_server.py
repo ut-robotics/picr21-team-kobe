@@ -9,6 +9,7 @@ class Server:
     def __init__(self):
         self.run = False
         self.blueIsTarget = True
+        self.robot_id = "Kobe"
         f = open('websocket_config.json', "r")
         websocket_config = json.loads(f.read())
         self.host = websocket_config['host']
@@ -21,7 +22,7 @@ class Server:
         return self.port
 
     async def listen(self, websocket, path):
-        print("A client connected")
+        print("A client connected to " + str(self.host) + " on port " + str(self.port))
         try:
             async for message in websocket:
                 cmd = json.loads(message)
@@ -32,14 +33,19 @@ class Server:
             print("A client disconnected")
 
     def process_command(self, cmd):
-        if cmd["signal"] == "stop":
-            self.run = False
-        elif cmd["signal"] == "start":
-            if cmd["basketTarget"] == "blue":
-                self.blueIsTarget = True
-            elif cmd["basketTarget"] == "magenta":
-                self.blueIsTarget = False
-            self.run = True
+        if cmd["signal"] == "changeID" and self.robot_id != cmd["robot_id"]:
+            self.robot_id = cmd["robot_id"]
+        elif cmd["robot_id"] == self.robot_id:
+            if cmd["signal"] == "stop":
+                self.run = False
+            elif cmd["signal"] == "start":
+                if cmd["basketTarget"] == "blue":
+                    self.blueIsTarget = True
+                elif cmd["basketTarget"] == "magenta":
+                    self.blueIsTarget = False
+                self.run = True
+        else:
+            pass
 
     def get_current_referee_command(self):
         return self.run, self.blueIsTarget
