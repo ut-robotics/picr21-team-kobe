@@ -37,8 +37,7 @@ class Server:
                 parser.set('robot', 'robot_id', repr(self.robot))
                 with open('config.ini', "w") as f:
                     parser.write(f)
-
-            if cmd["signal"] == "stop":
+            elif cmd["signal"] == "stop":
                 self.run = False
             elif cmd["signal"] == "start":
                 color = cmd["baskets"][cmd["targets"].index(self.robot)]
