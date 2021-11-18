@@ -31,15 +31,15 @@ class Server:
                 await ws.send("Server received message: " + str(msg))
 
     def process_command(self, cmd):
-        if cmd["signal"] == "changeID":
-            if self.robot != cmd["robot"]:
+        if self.robot in cmd["targets"]:
+            if cmd["signal"] == "changeID" and self.robot != cmd["robot"]:
                 self.robot = cmd["robot"]
                 parser.set('robot', 'robot_id', repr(self.robot))
                 with open('config.ini', "w") as f:
                     parser.write(f)
             else:
                 pass
-        elif self.robot in cmd["targets"]:
+
             if cmd["signal"] == "stop":
                 self.run = False
             elif cmd["signal"] == "start":

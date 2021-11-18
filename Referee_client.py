@@ -41,12 +41,14 @@ class Client:
                     "targets": ["Io", self.robot]
                 }
             elif cmd == 4:
+                robot_old = self.robot
                 self.robot = ""
                 while self.robot == "":
                     self.robot = str(input("Enter an ID..."))
                 msg = {
                     "signal": "changeID",
-                    "robot": self.robot,
+                    "targets": robot_old,
+                    "robot": self.robot
                 }
             else:
                 continue
