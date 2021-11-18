@@ -9,7 +9,7 @@ import ReadValues
 import time
 import Image_processing as ip
 
-Camera = CameraConfig.Config()
+#Camera = CameraConfig.Config()
 
 lHue = 0 #lowest value l # 36 61 89 101 255 255
 lSaturation = 0
@@ -75,9 +75,9 @@ while True:
     fps = 1/ (cur_time_frame - prev_time_frame)
     prev_time_frame = cur_time_frame
     fps = int(fps)
-    print(fps)
+    #print(fps)
     
-    Processor.lHue1 = cv2.getTrackbarPos("lHue", "Processed")
+    Processor.lHue = cv2.getTrackbarPos("lHue", "Processed")
     Processor.lSaturation1 = cv2.getTrackbarPos("lSaturation", "Processed")
     Processor.lValue1 = cv2.getTrackbarPos("lValue", "Processed")
     Processor.hHue1 = cv2.getTrackbarPos("hHue", "Processed")
@@ -98,7 +98,10 @@ while True:
     elif key == ord('x'):
         writevalues("trackbar_defaults.txt")
         break
-        
+    elif key == ord('f'):
+        writevalues("floor.txt")
+        break
+
 
 Camera.StopStreams()
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from os import stat
 import cv2
 import Movement as drive
 import Image_processing as ip
@@ -9,6 +10,20 @@ from enum import Enum
 import Thrower
 import Referee_server as Server
 import time
+
+class RobotStateData():
+    def __init__(self) -> None:
+        self.ball_x = None
+        self.ball_y = None
+        self.basket_x = None
+        self.image_processor = None
+        self.state = State.STOPPED
+        self.keypoint_count = None
+        self.has_thrown = False
+        self.after_throw_counter = 0
+        self.floor_area = None
+        self.basket_distance = None
+
 
 srv = Server.Server()
 srv.start()
@@ -23,12 +38,10 @@ class State(Enum):
     THROWING = 3
     STOPPED = 4
 
-#Use this to set the first state
-state = State.STOPPED
 #set target value with referee commands True = Blue, !True = Magenta
 target = True
 #Create image processing object
-Processor = ip.ProcessFrames(target)
+Processor = ip.ProcessFrames(target, Camera)
 
 def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     if abs(delta) < minDelta:
@@ -41,106 +54,128 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
 
 
 
-def HandleDrive(count, y, x, center_x, center_y, basket_distance):
-    if count > 0:
+def HandleDrive(state_data):
+    floorarea = state_data.floor_area
+    count = state_data.keypoint_count
+    x = state_data.ball_x
+    y = state_data.ball_y
+    if floorarea is None or floorarea < 20000:
+        floorarea = 0
+        drive.Move2(0, -10,20,0)
+        time.sleep(0.3)
+        return State.FIND
+    if count > 0 and floorarea > 20000:
+        #print(floorarea)
         delta_x = x - Camera.camera_x/2
         delta_y = 390-y
         minSpeed = 2
         maxSpeed = 50
         minDelta = 5
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 350, 40)#3 + (480-y)/ 540.0 * 30
-        print(front_speed, delta_y, Camera.camera_y)
+        #print(front_speed, delta_y, Camera.camera_y)
         #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15 
         rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, 20)#int((x - 480)/480.0 * 25)
-        print(y,x)
+        #print(y,x)
         drive.Move2(-0, front_speed, -rotSpd, 0)
-        print(count)
+        #print(count)
         if 500 > y > 315 : # How close ball y should be to switch to next state
-            return State.AIM
+            state_data.state = State.AIM
+            return
     if count <= 0 or None:
-        return State.FIND
+        state_data.state = State.FIND
+        return
+    state_data.state = State.DRIVE
 
-    return State.DRIVE
-
-def HandleFind(count, y, x, center_x, center_y, basket_distance):
+def HandleFind(state_data):
     drive.Move2(0, 0, 10, 0)
-    if count >= 1:
-        HandleDrive(count, y, x, center_x, center_y, basket_distance)
-        return State.DRIVE
-    return State.FIND
+    if state_data.keypoint_count >= 1:
+        HandleDrive(state_data)
+        state_data.state = State.DRIVE
+        return
+    state_data.state = State.FIND
 
-def HandleStopped(count, y, x, center_x, center_y, basket_distance):
+def HandleStopped(state_data):
     drive.Stop()
-    return State.STOPPED
+    state_data.state = State.STOPPED
 
-def HandleAim(count, y, x, center_x, center_y, basket_distance):
-    
-    basketInFrame = center_x is not None
-    if x is None :
-        return State.FIND
-
+def HandleAim(state_data):
+    if state_data.floor_area is None or state_data.floor_area < 15000:
+        floorarea = 0
+        state_data.state = State.FIND
+        return
+    basketInFrame = state_data.basket_x is not None
+    if state_data.ball_x is None :
+        state_data.state = State.FIND
+        return
     if not basketInFrame:
         delta_x = Camera.camera_x
     else:
-        delta_x = x - center_x
-    rot_delta_x = x - Camera.camera_x/2
-    delta_y = 450 - y
+        delta_x = state_data.ball_x - state_data.basket_x
+    rot_delta_x = state_data.ball_x - Camera.camera_x/2
+    delta_y = 450 - state_data.ball_y
     front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 150, 30)
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 150, 30)
-    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 2, 150, 30)
-    print("y", y, "x", x, "center", center_x, "side", side_speed, "front", front_speed,"rot", rotSpd)   
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 100, 20)
+    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 150, 30)
+    #print("y", y, "x", x, "center", center_x, "side", side_speed, "front", front_speed,"rot", rotSpd)   
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     
-    if basketInFrame and 315 <= center_x <= 325 and y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
-       drive.Stop()
-       return State.THROWING
+    if basketInFrame and 320 <= state_data.basket_x <= 335 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
+        drive.Stop()                             #prev center 315 to 325
+        state_data.state = State.THROWING
+        return
+    state_data.state = State.AIM
 
-    return State.AIM
+def HandleThrowing(state_data):
+    
+    if state_data.has_thrown:
+        state_data.after_throw_counter += 1
 
+    if state_data.after_throw_counter > 60:
+        state_data.after_throw_counter = 0
+        state_data.state = State.FIND
+        state_data.has_thrown = False
+        return
+    if state_data.keypoint_count >= 1:
 
-i = 0
-def HandleThrowing(count, y, x, center_x, center_y, basket_distance):
-    global i
-    if i >= 20:
-        i = 0
-        return State.FIND
-    if count >= 1:
-        basketInFrame = center_x is not None
+        basketInFrame = state_data.basket_x is not None
 
         if not basketInFrame:
             delta_x = Camera.camera_x
         else:
-            delta_x = x - center_x
-        rot_delta_x = x - Camera.camera_x/2
-        delta_y = 500 - y
+            delta_x = state_data.ball_x - state_data.basket_x
+        rot_delta_x = state_data.ball_x - Camera.camera_x/2 #if no ball and throw true basket_x - camera_x
+        delta_y = 500 - state_data.ball_y
         
-        minSpeed = 10
+        minSpeed = 15
         maxSpeed = 30
         minDelta = 6
-        thrower_speed = Thrower.ThrowerSpeed(basket_distance)
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 150, maxSpeed)
+        thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
+        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
         side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, maxSpeed)
         rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, 100, maxSpeed)
-        drive.Move2(-0, front_speed, -0, thrower_speed)
-    if count <= 0:
-        thrower_speed = Thrower.ThrowerSpeed(basket_distance)
-        drive.Move2(-0, 10, -0, thrower_speed)
-        i += 1
-    return State.THROWING
+        drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
+        state_data.has_thrown = True
+        state_data.state = State.THROWING
+        return
+    elif state_data.keypoint_count == 0 and not state_data.has_thrown:    
+        state_data.state = State.FIND
+    #state_data.has_thrown = False
 data = None
 
-def ListenForRefereeCommands():
-    global Processor, state
+def ListenForRefereeCommands(state_data, Processor):
     try:
         run, target = srv.get_current_referee_command()
-        print("Target:  " + str(target))
-        print("Run: " + str(run))
+        #print("Target:  " + str(target))
+        #print("Run: " + str(run))
         
         Processor.SetTarget(target)
         if not run:
-            state = State.STOPPED
-        if run and state == State.STOPPED:
-            state = State.FIND
+            state_data.state = State.STOPPED
+            return
+        if run and state_data.state == State.STOPPED:
+            print(state_data.state)
+            state_data.state = State.FIND
+            return
     except:
         print("Server client communication failed.")
 
@@ -155,15 +190,22 @@ switcher = {
 def Logic(switcher):
     start_time = time.time()
     counter = 0
-    global state
+    state_data = RobotStateData()
     try:
         while True:
-            
             # Main code
-            ListenForRefereeCommands()
-            count, y, x, center_x, center_y, basket_distance = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
-            print(state)
-            state = switcher.get(state)(count, y, x, center_x, center_y, basket_distance)
+            ListenForRefereeCommands(state_data, Processor)
+             
+            count, y, x, center_x, center_y, basket_distance, floorarea = Processor.ProcessFrame(align_frame = state_data.state == State.THROWING)
+            state_data.ball_x = x 
+            state_data.ball_y = y
+            state_data.keypoint_count = count
+            state_data.basket_x = center_x
+            state_data.floor_area = floorarea
+            state_data.basket_distance = basket_distance
+
+            #print(state_data.state)
+            switcher.get(state_data.state)(state_data)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             

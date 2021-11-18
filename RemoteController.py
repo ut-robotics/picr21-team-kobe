@@ -11,6 +11,8 @@ wheelAngle2 = 120
 wheelAngle3 = 0
 
 ser = serialcomms.Connection('/dev/ttyACM0')
+Processor = ip.ProcessFrames(False)
+Camera = CameraConfig.Config()
 
 
 def stop():
@@ -45,9 +47,14 @@ def spinLeft(speed):
 
 def keyBoardControl():
     cv2.namedWindow("Controller")
+    #print("distance", basket_distance*100)
     movingSpeed = 15
-    throwingSpeed = 900
+    throwingSpeed = 1400
     while(True):
+        count, y, x, center_x, center_y, basket_distance, floorarea = Processor.ProcessFrame(Camera.pipeline,Camera.camera_x, Camera.camera_y)
+        print("distance", basket_distance*100)
+        move(0, throwingSpeed, 0)
+
         key = cv2.waitKey(1) & 0xFF
         if key == ord("w"):
             print("Moving forward.")
