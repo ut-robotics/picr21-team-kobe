@@ -37,8 +37,6 @@ class Server:
                 parser.set('robot', 'robot_id', repr(self.robot))
                 with open('config.ini', "w") as f:
                     parser.write(f)
-            else:
-                pass
 
             if cmd["signal"] == "stop":
                 self.run = False
@@ -49,8 +47,6 @@ class Server:
                 else:
                     self.blueIsTarget = False
                 self.run = True
-        else:
-            pass
 
     def get_current_referee_command(self):
         return self.run, self.blueIsTarget
