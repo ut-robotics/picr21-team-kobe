@@ -22,7 +22,12 @@ class Client:
                            "], baskets: ['magenta', 'blue']\n 2 - signal: start, targets: ['Io', " + self.robot + \
                            "'], baskets: ['blue', 'magenta'] \n 3 - signal: stop, targets: ['Io', " + self.robot + \
                            "] \n 4 - Change ID"
-            cmd = int(await asyncio.get_event_loop().run_in_executor(None, input, instructions))
+
+            try:
+                cmd = int(await asyncio.get_event_loop().run_in_executor(None, input, instructions))
+            except ValueError:
+                continue
+
             if cmd == 1:
                 msg = {
                     "signal": "start",
@@ -52,6 +57,7 @@ class Client:
                 }
             else:
                 continue
+
             await ws.send(json.dumps(msg))
             msg = await ws.recv()
             print(msg)
