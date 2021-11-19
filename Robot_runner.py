@@ -77,8 +77,8 @@ def HandleDrive(state_data, gamepad):
         minSpeed = 2
         maxSpeed = 50
         minDelta = 5
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 350, 40)
-        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, 20)
+        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 500, 50)
+        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 300, 40)
         drive.Move2(-0, front_speed, -rotSpd, 0)
         
         if 500 > state_data.ball_y > 315 : # How close ball y should be to switch to next state
@@ -122,9 +122,9 @@ def HandleAim(state_data, gamepad):
     
     rot_delta_x = state_data.ball_x - Camera.camera_x/2
     delta_y = 450 - state_data.ball_y
-    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 150, 30)
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 150, 20)
-    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 150, 30)
+    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 500, 30)
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 200, 40)
+    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 200, 40)
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     
     if basketInFrame and 320 <= state_data.basket_x <= 335 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
@@ -161,22 +161,29 @@ def HandleThrowing(state_data, gamepad):
         thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
         #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, maxSpeed)
-        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, 100, maxSpeed)
+        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
         drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
         state_data.has_thrown = True
         state_data.state = State.THROWING
         return
     
-    elif state_data.keypoint_count == 0 and state_data.has_thrown: 
-        delta_x = state_data.ball_x - state_data.basket_x
-        delta_y = 500 - state_data.ball_y
-        rot_delta_x = state_data.basket_x - Camera.camera_x
-        thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
-        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, 100, maxSpeed)
-        drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
-        state_data.state = State.THROWING
-        return
+    # elif state_data.keypoint_count == 0 and state_data.has_thrown: 
+    #     basketInFrame = state_data.basket_x is not None
+
+    #     if not basketInFrame:
+    #         delta_x = Camera.camera_x
+    #     else:
+    #         rot_delta_x = state_data.basket_x - Camera.camera_x
+    #     #rot_delta_x = state_data.basket_x - Camera.camera_x
+    
+    #         #delta_x = state_data.ball_x - state_data.basket_x
+    #     delta_y = 0#500 - Camera.camera_y
+    #     thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
+    #     front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
+    #     rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
+    #     drive.Move2(-0, 15, -rotSpd, thrower_speed)
+    #     state_data.state = State.THROWING
+    #     return
     
     elif state_data.keypoint_count == 0 and not state_data.has_thrown:    
         state_data.state = State.FIND

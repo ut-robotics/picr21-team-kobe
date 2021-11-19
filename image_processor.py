@@ -48,7 +48,7 @@ class ProcessedResults():
 
 #Main processor class. processes segmented information
 class ImageProcessor():
-    def __init__(self, camera, color_config = "colors/colors.pkl", debug = False):
+    def __init__(self, camera, color_config = "colors/colors.pkl", debug = True):
         self.camera = camera
 
         self.color_config = color_config
