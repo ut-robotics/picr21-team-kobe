@@ -141,7 +141,7 @@ class ProcessFrames():
         if len(ball_array) > 0:
             x = ball_array[0].x
             y = ball_array[0].y
-
+        cv2.imshow("test", processed.debug_frame)
         return len(ball_array), y, x, basket_x_center, basket_y_center, basket_distance, floorarea
         
         

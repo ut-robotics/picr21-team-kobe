@@ -56,10 +56,12 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
 def HandleManual(yspd, xspd, rotspd, throw):
+    drive.Stop()
     if throw == 1:
-        drive.Move2(yspd,xspd,rotspd, 1000)
+        drive.Move2(int(yspd*10),int(xspd*10),int(rotspd*10), 1000)
     else:
-        drive.Move2(yspd,xspd,rotspd, 0)
+        drive.Move2(int(yspd*10),int(xspd*10),int(rotspd*10),0)
+    
         
 
 def HandleDrive(state_data):
@@ -77,8 +79,8 @@ def HandleDrive(state_data):
         minSpeed = 2
         maxSpeed = 50
         minDelta = 5
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 350, 40)
-        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, 20)
+        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 500, 50)
+        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 300, 40)
         drive.Move2(-0, front_speed, -rotSpd, 0)
         
         if 500 > state_data.ball_y > 315 : # How close ball y should be to switch to next state
@@ -122,9 +124,9 @@ def HandleAim(state_data):
     
     rot_delta_x = state_data.ball_x - Camera.camera_x/2
     delta_y = 450 - state_data.ball_y
-    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 150, 30)
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 150, 20)
-    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 150, 30)
+    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 500, 30)
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 200, 40)
+    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 200, 40)
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     
     if basketInFrame and 320 <= state_data.basket_x <= 335 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
@@ -161,22 +163,29 @@ def HandleThrowing(state_data):
         thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
         #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, maxSpeed)
-        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, 100, maxSpeed)
+        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
         drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
         state_data.has_thrown = True
         state_data.state = State.THROWING
         return
     
-    elif state_data.keypoint_count == 0 and state_data.has_thrown: 
-        delta_x = state_data.ball_x - state_data.basket_x
-        delta_y = 500 - state_data.ball_y
-        rot_delta_x = state_data.basket_x - Camera.camera_x
-        thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
-        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, 100, maxSpeed)
-        drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
-        state_data.state = State.THROWING
-        return
+    # elif state_data.keypoint_count == 0 and state_data.has_thrown: 
+    #     basketInFrame = state_data.basket_x is not None
+
+    #     if not basketInFrame:
+    #         delta_x = Camera.camera_x
+    #     else:
+    #         rot_delta_x = state_data.basket_x - Camera.camera_x
+    #     #rot_delta_x = state_data.basket_x - Camera.camera_x
+    
+    #         #delta_x = state_data.ball_x - state_data.basket_x
+    #     delta_y = 0#500 - Camera.camera_y
+    #     thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
+    #     front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
+    #     rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
+    #     drive.Move2(-0, 15, -rotSpd, thrower_speed)
+    #     state_data.state = State.THROWING
+    #     return
     
     elif state_data.keypoint_count == 0 and not state_data.has_thrown:    
         state_data.state = State.FIND
@@ -228,10 +237,11 @@ def Logic(switcher):
             state_data.floor_area = floorarea
             state_data.basket_distance = basket_distance
 
-            print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
+            #print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
             switcher.get(state_data.state)(state_data)
             #left x left y right x
             lx,ly,rx,abtn,ybtn,start,stop = joy.read()
+            print(lx,ly,rx,abtn,ybtn,start,stop)
             if ybtn == 1:
                 state_data.state = State.MANUAL
                 switcher.get(state_data.state)(lx,ly,rx,abtn)
