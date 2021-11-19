@@ -11,6 +11,7 @@ import ReadValues
 import camera
 import image_processor
 import Color
+import color_sampler
 ##21,36,56,91,179,237 new ball thresh
 
 
@@ -36,83 +37,6 @@ class ProcessFrames():
         self.target = target
 
     def ProcessFrame(self, align_frame = False):
-        # keypointcount = 0
-        # y = None
-        # x = None
-        # basket_x_center = None
-        # basket_y_center = None
-        # basket_distance = None
-        # floorarea = None
-        # frames = pipeline.wait_for_frames()
-        # aligned_frames = rs.align(rs.stream.color).process(frames)
-        # color_frame = aligned_frames.get_color_frame()
-        # frame = np.asanyarray(color_frame.get_data())
-        # depth_frame = aligned_frames.get_depth_frame()
-
-
-        # #Ball threshold
-        # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        # lowerLimits = np.array([self.lHue, self.lSaturation, self.lValue])
-        # upperLimits = np.array([self.hHue, self.hSaturation, self.hValue])
-
-        # thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
-        # thresholded = cv2.bitwise_not(thresholded)
-        # thresholded = cv2.erode(thresholded,self.kernel, iterations=1)
-        # #floor threshold
-        # floorLowerLimits = np.array([self.lHue3, self.lSaturation3, self.lValue3])
-        # floorUpperLimits = np.array([self.hHue3, self.hSaturation3, self.hValue3])
-
-        # floorthresholded = cv2.inRange(hsv, floorLowerLimits, floorUpperLimits)
-        # floorthresholded = cv2.bitwise_not(floorthresholded)
-        # floorcontours, hierarchy = cv2.findContours(floorthresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-        # if len(floorcontours) > 0:
-        #     floorcontour = max(floorcontours, key= cv2.contourArea)
-        #     if cv2.contourArea(floorcontour) > 500:
-
-        #         cv2.drawContours(frame, floorcontour, -1, 255, -1)
-        #     floorarea = cv2.contourArea(floorcontour)
-
-
-        # #blue basket
-        # if self.target == True:
-        #     basketlowerLimits = np.array([self.lHue1, self.lSaturation1, self.lValue1])
-        #     basketupperLimits = np.array([self.hHue1, self.hSaturation1, self.hValue1])
-
-        #     basketthresholded = cv2.inRange(hsv, basketlowerLimits, basketupperLimits)
-        #     contours, hierarchy = cv2.findContours(basketthresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # #magenta basket
-        # if self.target != True:
-        #     basketlowerLimits = np.array([self.lHue2, self.lSaturation2, self.lValue2])
-        #     basketupperLimits = np.array([self.hHue2, self.hSaturation2, self.hValue2])
-
-        #     basketthresholded = cv2.inRange(hsv, basketlowerLimits, basketupperLimits)
-        #     contours, hierarchy = cv2.findContours(basketthresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        
-        # if len(contours) > 0:
-        #     contour = max(contours, key= cv2.contourArea)
-        #     if cv2.contourArea(contour) > 200:
-
-        #         cv2.drawContours(frame, contour, -1, 255, -1)
-        #         x1, y1, w, h = cv2.boundingRect(contour)
-        #         cv2.rectangle(frame,(x1,y1),(x1+w,y1+h),(0,255,0),3)
-        #         basket_x_center = int(x1+(w/2))
-        #         basket_y_center = int(y1+(h/2))
-        #         basket_distance = depth_frame.get_distance(basket_x_center, basket_y_center)
-
-        # #cv2.imshow("ball", thresholded)
-        # cv2.imshow('Thresholded', frame)
-        # cv2.imshow('test', basketthresholded)
-        # #cv2.imshow('floor', floorthresholded)
-
-        # keypoints = self.detector.detect(thresholded)
-        # keypoints = sorted(keypoints, key=lambda kp:kp.size, reverse=True)
-        # if len(keypoints) >= 1:
-        #     x = keypoints[0].pt[0]
-        #     y = keypoints[0].pt[1]
-        # #cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-        # keypointcount = len(keypoints
         
         processed = self.processor.process_frame(aligned_depth=align_frame)
         ball_array = processed.balls
@@ -135,6 +59,8 @@ class ProcessFrames():
 
 
         floorarea = np.count_nonzero(processed.fragmented == int(Color.Color.ORANGE))
+        #out_of_field = color_sampler.test(processed.fragmented,3, (int(Color.Color.ORANGE),int(Color.Color.BLACK), int(Color.Color.WHITE), int(Color.Color.ORANGE)))
+        
         if floorarea is None:
             floorarea = 0
 
@@ -143,62 +69,3 @@ class ProcessFrames():
             y = ball_array[0].y
 
         return len(ball_array), y, x, basket_x_center, basket_y_center, basket_distance, floorarea
-        
-        
-    def Threshold(self, pipeline):
-        frames = pipeline.wait_for_frames()
-        aligned_frames = rs.align(rs.stream.color).process(frames)
-        color_frame = aligned_frames.get_color_frame()
-        frame = np.asanyarray(color_frame.get_data())
-        depth_frame = aligned_frames.get_depth_frame()
-
-        #Ball threshold
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lowerLimits = np.array([self.lHue1, self.lSaturation1, self.lValue1])
-        upperLimits = np.array([self.hHue1, self.hSaturation1, self.hValue1])
-
-        thresholded = cv2.inRange(hsv, lowerLimits, upperLimits)
-        thresholded = cv2.bitwise_not(thresholded)
-        #thresholded = cv2.erode(thresholded,self.kernel, iterations=1)
-        #thresholded = cv2.bitwise_not(thresholded)
-        outimage = cv2.bitwise_and(frame, frame, mask=thresholded)
-        keypoints = self.detector.detect(thresholded)
-
-        if len(keypoints) >= 1:
-            for kp in keypoints:
-                x = int(kp.pt[0])
-                y = int(kp.pt[1])
-                #print(kp.size)
-                cv2.putText(outimage, str(x) + "," + str(y), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-        # contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        
-        # if len(contours) > 0:
-        #     contour = max(contours, key= cv2.contourArea)
-        #     if cv2.contourArea(contour) > 500:
-
-        #         cv2.drawContours(frame, contour, -1, 255, -1)
-        #         print(cv2.contourArea(contour))
-        #     if cv2.contourArea(contour) < 1500 or contour is None:
-        #         print("go back going over playfield!")
-        #         #x1, y1, w, h = cv2.boundingRect(contour)
-        #         #cv2.rectangle(frame,(x1,y1),(x1+w,y1+h),(0,255,0),3)
-
-        
-        contours, hierarchy = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        
-        if len(contours) > 0:
-            contour = max(contours, key= cv2.contourArea)
-            if cv2.contourArea(contour) > 200:
-
-                cv2.drawContours(frame, contour, -1, 255, -1)
-                x1, y1, w, h = cv2.boundingRect(contour)
-                cv2.rectangle(frame,(x1,y1),(x1+w,y1+h),(0,255,0),3)
-                basket_x_center = int(x1+(w/2))
-                basket_y_center = int(y1+(h/2))
-                basket_distance = depth_frame.get_distance(basket_x_center, basket_y_center)
-                print(basket_distance*100)
-        
-        outimage = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-        cv2.imshow('Thresholded', thresholded)
-        cv2.imshow('Keypoints', outimage)

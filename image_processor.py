@@ -4,7 +4,7 @@ import _pickle as pickle
 import numpy as np
 import cv2
 import Color as c
-
+import color_sampler
 
 class Object():
     def __init__(self, x = -1, y = -1, size = -1, distance = -1, exists = False):
@@ -40,6 +40,7 @@ class ProcessedResults():
         self.color_frame = color_frame
         self.depth_frame = depth_frame
         self.fragmented = fragmented
+        self.out_of_field = False
 
         # can be used to illustrate things in a separate frame buffer
         self.debug_frame = debug_frame
@@ -85,7 +86,7 @@ class ImageProcessor():
 
             size = cv2.contourArea(contour)
 
-            if size < 15:
+            if size < 15 or self.out_of_field:
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
@@ -149,6 +150,7 @@ class ImageProcessor():
         color_frame, depth_frame = self.get_frame_data(aligned_depth = aligned_depth)
 
         segment.segment(color_frame, self.fragmented, self.t_balls, self.t_basket_m, self.t_basket_b)
+        self.out_of_field = color_sampler.OrderCheck(self.fragmented, 3, (int(c.Color.ORANGE),int(c.Color.BLACK), int(c.Color.WHITE), int(c.Color.ORANGE)))
 
         if self.debug:
             self.debug_frame = np.copy(color_frame)

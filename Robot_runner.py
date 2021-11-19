@@ -55,14 +55,14 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     speed = normalizedDelta * maxDeltaSpeed
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
-def HandleManual(yspd, xspd, rotspd, throw):
-    if throw == 1:
-        drive.Move2(yspd,xspd,rotspd, 1000)
+def HandleManual(state_data, gamepad):
+    if gamepad.throw == 1:
+        drive.Move2(gamepad.yspd,gamepad.xspd,gamepad.rotspd, 1000)
     else:
-        drive.Move2(yspd,xspd,rotspd, 0)
+        drive.Move2(gamepad.yspd,gamepad.xspd,gamepad.rotspd, 0)
         
 
-def HandleDrive(state_data):
+def HandleDrive(state_data, gamepad):
 
     if state_data.floor_area is None or state_data.floor_area < 20000:
         
@@ -91,7 +91,7 @@ def HandleDrive(state_data):
     
     state_data.state = State.DRIVE
 
-def HandleFind(state_data):
+def HandleFind(state_data, gamepad):
     drive.Move2(0, 0, 10, 0)
     if state_data.keypoint_count >= 1:
         HandleDrive(state_data)
@@ -103,7 +103,7 @@ def HandleStopped(state_data):
     drive.Stop()
     state_data.state = State.STOPPED
 
-def HandleAim(state_data):
+def HandleAim(state_data, gamepad):
     
     if state_data.floor_area is None or state_data.floor_area < 15000:
         floorarea = 0
@@ -133,7 +133,7 @@ def HandleAim(state_data):
         return
     state_data.state = State.AIM
 
-def HandleThrowing(state_data):
+def HandleThrowing(state_data, gamepad):
     
     minSpeed = 15
     maxSpeed = 30
@@ -228,19 +228,21 @@ def Logic(switcher):
             state_data.floor_area = floorarea
             state_data.basket_distance = basket_distance
 
-            print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
-            switcher.get(state_data.state)(state_data)
+            controller = joy.read()
+            #print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
+            switcher.get(state_data.state)(state_data, controller)
             #left x left y right x
-            lx,ly,rx,abtn,ybtn,start,stop = joy.read()
-            if ybtn == 1:
+
+            #lx,ly,rx,abtn,ybtn,start,stop = joy.read()
+            if controller.ybtn == 1:
                 state_data.state = State.MANUAL
-                switcher.get(state_data.state)(lx,ly,rx,abtn)
-            elif start == 1:
+                switcher.get(state_data.state)(state_data, controller)
+            elif controller.start == 1:
                 state_data.state = State.FIND
-                switcher.get(state_data.state)(state_data)
-            elif stop == 1:
+                switcher.get(state_data.state)(state_data, controller)
+            elif controller.stop == 1:
                 state_data.state = State.STOPPED
-                switcher.get(state_data.state)(state_data)
+                switcher.get(state_data.state)(state_data, controller)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

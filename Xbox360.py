@@ -1,6 +1,18 @@
+from typing import ValuesView
 from inputs import get_gamepad
 import math
 import threading
+
+
+class Values():
+    def __init__(self, x,y,a,ybtn,rx,start,stop) -> None:
+        self.x = self.LeftJoystickX
+        self.y = self.LeftJoystickY
+        self.a = self.A
+        self.ybtn = self.Y
+        self.rx = self.RightJoystickX
+        self.start = self.Back
+        self.stop = self.Start    
 
 class XboxController(object):
     MAX_TRIG_VAL = math.pow(2, 8)
@@ -39,12 +51,11 @@ class XboxController(object):
         y = self.LeftJoystickY
         a = self.A
         ybtn = self.Y
-        rb = self.RightBumper
         rx = self.RightJoystickX
-        ry = self.RightJoystickY
         start = self.Back
-        stop = self.Start #ironic these are inverted
-        return x,y,rx,a,ybtn,start,stop
+        stop = self.Start
+        return Values(x,y,a,ybtn,rx,start,stop) #ironic these are inverted
+        #return x,y,a,ybtn,rx,start,stop
 
 
     def _monitor_controller(self):
