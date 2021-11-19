@@ -135,6 +135,8 @@ class ProcessFrames():
 
 
         floorarea = np.count_nonzero(processed.fragmented == int(Color.Color.ORANGE))
+        if floorarea is None:
+            floorarea = 0
 
         if len(ball_array) > 0:
             x = ball_array[0].x

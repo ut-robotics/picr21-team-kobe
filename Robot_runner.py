@@ -10,6 +10,7 @@ from enum import Enum
 import Thrower
 import Referee_server as Server
 import time
+import Xbox360
 
 class RobotStateData():
     def __init__(self) -> None:
@@ -31,12 +32,14 @@ srv.start()
 Camera = CameraConfig.Config()
 
 #States for logic
+
 class State(Enum):
     FIND = 0
     DRIVE = 1
     AIM = 2
     THROWING = 3
     STOPPED = 4
+    MANUAL = 5
 
 #set target value with referee commands True = Blue, !True = Magenta
 target = True
@@ -52,38 +55,40 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     speed = normalizedDelta * maxDeltaSpeed
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
-
+def HandleManual(yspd, xspd, rotspd, throw):
+    if throw == 1:
+        drive.Move2(yspd,xspd,rotspd, 1000)
+    else:
+        drive.Move2(yspd,xspd,rotspd, 0)
+        
 
 def HandleDrive(state_data):
-    floorarea = state_data.floor_area
-    count = state_data.keypoint_count
-    x = state_data.ball_x
-    y = state_data.ball_y
-    if floorarea is None or floorarea < 20000:
-        floorarea = 0
+
+    if state_data.floor_area is None or state_data.floor_area < 20000:
+        
         drive.Move2(0, -10,20,0)
         time.sleep(0.3)
         return State.FIND
-    if count > 0 and floorarea > 20000:
+    
+    if state_data.keypoint_count > 0 and state_data.floor_area > 20000:
         #print(floorarea)
-        delta_x = x - Camera.camera_x/2
-        delta_y = 390-y
+        delta_x = state_data.ball_x - Camera.camera_x/2
+        delta_y = 390-state_data.ball_y
         minSpeed = 2
         maxSpeed = 50
         minDelta = 5
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 350, 40)#3 + (480-y)/ 540.0 * 30
-        #print(front_speed, delta_y, Camera.camera_y)
-        #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, maxSpeed)#(x - data["basket_x"])/480.0 * 15 
-        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, 20)#int((x - 480)/480.0 * 25)
-        #print(y,x)
+        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 350, 40)
+        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, 20)
         drive.Move2(-0, front_speed, -rotSpd, 0)
-        #print(count)
-        if 500 > y > 315 : # How close ball y should be to switch to next state
+        
+        if 500 > state_data.ball_y > 315 : # How close ball y should be to switch to next state
             state_data.state = State.AIM
             return
-    if count <= 0 or None:
+        
+    if state_data.keypoint_count <= 0 or None:
         state_data.state = State.FIND
         return
+    
     state_data.state = State.DRIVE
 
 def HandleFind(state_data):
@@ -99,24 +104,27 @@ def HandleStopped(state_data):
     state_data.state = State.STOPPED
 
 def HandleAim(state_data):
+    
     if state_data.floor_area is None or state_data.floor_area < 15000:
         floorarea = 0
         state_data.state = State.FIND
         return
+    
     basketInFrame = state_data.basket_x is not None
     if state_data.ball_x is None :
         state_data.state = State.FIND
         return
+    
     if not basketInFrame:
         delta_x = Camera.camera_x
     else:
         delta_x = state_data.ball_x - state_data.basket_x
+    
     rot_delta_x = state_data.ball_x - Camera.camera_x/2
     delta_y = 450 - state_data.ball_y
     front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 150, 30)
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 100, 20)
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 150, 20)
     rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 150, 30)
-    #print("y", y, "x", x, "center", center_x, "side", side_speed, "front", front_speed,"rot", rotSpd)   
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     
     if basketInFrame and 320 <= state_data.basket_x <= 335 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
@@ -127,6 +135,10 @@ def HandleAim(state_data):
 
 def HandleThrowing(state_data):
     
+    minSpeed = 15
+    maxSpeed = 30
+    minDelta = 6
+    
     if state_data.has_thrown:
         state_data.after_throw_counter += 1
 
@@ -135,8 +147,9 @@ def HandleThrowing(state_data):
         state_data.state = State.FIND
         state_data.has_thrown = False
         return
+    
     if state_data.keypoint_count >= 1:
-
+    
         basketInFrame = state_data.basket_x is not None
 
         if not basketInFrame:
@@ -145,18 +158,26 @@ def HandleThrowing(state_data):
             delta_x = state_data.ball_x - state_data.basket_x
         rot_delta_x = state_data.ball_x - Camera.camera_x/2 #if no ball and throw true basket_x - camera_x
         delta_y = 500 - state_data.ball_y
-        
-        minSpeed = 15
-        maxSpeed = 30
-        minDelta = 6
         thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
-        side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, maxSpeed)
+        #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, maxSpeed)
         rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, 100, maxSpeed)
         drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
         state_data.has_thrown = True
         state_data.state = State.THROWING
         return
+    
+    elif state_data.keypoint_count == 0 and state_data.has_thrown: 
+        delta_x = state_data.ball_x - state_data.basket_x
+        delta_y = 500 - state_data.ball_y
+        rot_delta_x = state_data.basket_x - Camera.camera_x
+        thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
+        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
+        rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 3, 100, maxSpeed)
+        drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
+        state_data.state = State.THROWING
+        return
+    
     elif state_data.keypoint_count == 0 and not state_data.has_thrown:    
         state_data.state = State.FIND
     #state_data.has_thrown = False
@@ -184,18 +205,21 @@ switcher = {
     State.DRIVE: HandleDrive,
     State.AIM: HandleAim,
     State.THROWING: HandleThrowing,
-    State.STOPPED: HandleStopped
+    State.STOPPED: HandleStopped,
+    State.MANUAL: HandleManual
 }
 
 def Logic(switcher):
     start_time = time.time()
     counter = 0
+    joy = Xbox360.XboxController()
+
     state_data = RobotStateData()
     try:
         while True:
             # Main code
             ListenForRefereeCommands(state_data, Processor)
-             
+            #Align depth frame if we are in throw state
             count, y, x, center_x, center_y, basket_distance, floorarea = Processor.ProcessFrame(align_frame = state_data.state == State.THROWING)
             state_data.ball_x = x 
             state_data.ball_y = y
@@ -204,11 +228,22 @@ def Logic(switcher):
             state_data.floor_area = floorarea
             state_data.basket_distance = basket_distance
 
-            #print(state_data.state)
+            print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
             switcher.get(state_data.state)(state_data)
+            #left x left y right x
+            lx,ly,rx,abtn,ybtn,start,stop = joy.read()
+            if ybtn == 1:
+                state_data.state = State.MANUAL
+                switcher.get(state_data.state)(lx,ly,rx,abtn)
+            elif start == 1:
+                state_data.state = State.FIND
+                switcher.get(state_data.state)(state_data)
+            elif stop == 1:
+                state_data.state = State.STOPPED
+                switcher.get(state_data.state)(state_data)
+            
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            
             
             # FPS stuff
             counter += 1
@@ -216,7 +251,6 @@ def Logic(switcher):
                 print("FPS -->", counter / (time.time() - start_time))
                 counter = 0
                 start_time = time.time()
-                
                 
         cv2.destroyAllWindows()
     except KeyboardInterrupt:        
