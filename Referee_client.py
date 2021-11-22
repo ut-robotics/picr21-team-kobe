@@ -9,7 +9,7 @@ parser = ConfigParser()
 parser.read('config.ini')
 
 
-class Client:
+class Server:
 
     def __init__(self):
         self.host = literal_eval(parser.get('websocket', 'host'))
@@ -69,5 +69,5 @@ class Client:
         loop.run_forever()
 
 
-cl = Client()
-cl.start()
+srv = Server()
+srv.start()

@@ -10,7 +10,7 @@ parser = ConfigParser()
 parser.read('config.ini')
 
 
-class Server:
+class Client:
 
     def __init__(self):
         self.run = False

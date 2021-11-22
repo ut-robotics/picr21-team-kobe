@@ -8,7 +8,7 @@ import CameraConfig
 import math
 from enum import Enum
 import Thrower
-import Referee_server as Server
+import Referee_client as Client
 import time
 import Xbox360
 
@@ -26,8 +26,8 @@ class RobotStateData():
         self.basket_distance = None
 
 
-srv = Server.Server()
-srv.start()
+cl = Client.Client()
+cl.start()
 
 Camera = CameraConfig.Config()
 
@@ -195,7 +195,7 @@ data = None
 
 def ListenForRefereeCommands(state_data, Processor):
     try:
-        run, target = srv.get_current_referee_command()
+        run, target = cl.get_current_referee_command()
         #print("Target:  " + str(target))
         #print("Run: " + str(run))
         
