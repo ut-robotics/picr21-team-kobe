@@ -64,6 +64,7 @@ class ImageProcessor():
 
         self.debug = debug
         self.debug_frame = np.zeros((self.camera.rgb_height, self.camera.rgb_width), dtype=np.uint8)
+        self.line_sequence = np.array([int(c.Color.ORANGE), int(c.Color.BLACK), int(c.Color.WHITE)], dtype=np.uint8)
 
     def set_segmentation_table(self, table):
         segment.set_table(table)
@@ -85,6 +86,7 @@ class ImageProcessor():
             # the bottom center of the fram to the ball
 
             size = cv2.contourArea(contour)
+            
 
             if size < 15: #or self.out_of_field:
                 continue
@@ -94,15 +96,13 @@ class ImageProcessor():
             ys	= np.repeat(np.arange(y + h, self.camera.rgb_height), 5)
             xs	= np.repeat(np.linspace(x + w/2, self.camera.rgb_width / 2, num=len(ys)/5), 5).astype('uint16')
 
-            colors = list(self.fragmented[ys,xs])
-            self.out_of_field = color_sampler.OrderCheck(colors, 0, (int(c.Color.ORANGE), int(c.Color.BLACK), int(c.Color.WHITE)))
-            print(self.out_of_field)
-            #colors = self.fragmented[(ys,xs)]
-            # line_array = np.array(self.fragmented[ys:xs])
-            #print(list(colors[300:500]))
-
-            #colors = line_array[0:-1,0]
+            colors = self.fragmented[ys,xs]
             #print(colors)
+            out_of_field = color_sampler.TestReal(colors, 10, self.line_sequence)
+
+            if out_of_field:
+                continue
+
             obj_x = int(x + (w/2))
             obj_y = int(y + (h/2))
             obj_dst = obj_y
