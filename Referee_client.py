@@ -26,16 +26,27 @@ class Client:
             while True:
                 msg = await ws.recv()
                 cmd = json.loads(msg)
-                print("Received message from client: " + str(cmd))
-                self.process_command(cmd)
+                print("Received message from server: " + str(cmd))
+                try:
+                    self.process_command(cmd)
+                    await ws.send("Command was processed.")
+                except ValueError:
+                    continue
 
     def process_command(self, cmd):
+        parser.read('config.ini')
+        self.robot = literal_eval(parser.get('robot', 'robot_id'))
         if self.robot in cmd["targets"]:
             if cmd["signal"] == "changeID" and self.robot != cmd["robot"]:
-                self.robot = cmd["robot"]
-                parser.set('robot', 'robot_id', repr(self.robot))
-                with open('config.ini', "w") as f:
-                    parser.write(f)
+                new_robot_id = cmd["robot"]
+                try:
+                    parser.set('robot', 'robot_id', repr(new_robot_id))
+                    with open('config.ini', "w") as f:
+                        parser.write(f)
+                    print(new_robot_id)
+                    self.robot = new_robot_id
+                except ValueError:
+                    print("Invalid robot id.")
             elif cmd["signal"] == "stop":
                 self.run = False
             elif cmd["signal"] == "start":
