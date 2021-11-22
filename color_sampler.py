@@ -27,9 +27,9 @@ def Test1(arr, order):
 def TestReal(arr, noise, order):
     sequence_arr = Test(arr,noise)
     order_exists = Test1(sequence_arr,order)
-    print(arr)
-    print(sequence_arr)
-    print(order_exists)
+    #print(arr)
+    #print(sequence_arr)
+    #print(order_exists)
     return len(order_exists) > 0
 
 
@@ -38,6 +38,7 @@ def Test(data, noise_level):
     data = np.split(data, np.where(np.diff(data[:]))[0]+1)
     new_list = []
     element_counter = 0
+    previous_appended = -1
     for i in data:
         if i[0] == 0:
             element_counter += i.size            
@@ -45,6 +46,9 @@ def Test(data, noise_level):
         if i.size + element_counter < noise_level:
             element_counter += i.size
             continue
+        if previous_appended == i[0]:
+            continue
+        previous_appended = i[0]
         new_list.append(i[0])
         element_counter = 0  
 

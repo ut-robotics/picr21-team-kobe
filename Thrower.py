@@ -1,9 +1,9 @@
 from scipy.interpolate import interp1d
 
 #Distance from basket in cm
-X = [0,122,163,198, 233, 328, 450, 600] #[208, 270, 308]
+X = [0,122,163,198,215, 233, 274, 328, 380, 450, 600] #[208, 270, 308]
 #Used thrower speed
-Y = [700,700,800,900, 1000, 1200, 1600, 2400] #[975, 1100, 1175]
+Y = [700,700,800,925,1050, 1050, 1111, 1225, 1635, 1625, 2400] #[975, 1100, 1175]
 #Function that estimates the speed to use from robot's current distance from the basket
 def ThrowerSpeed(distance):
     try:
@@ -18,4 +18,4 @@ def ThrowerSpeed(distance):
         if distance > 600:
             return 2400
         else:
-            return 700
+            return 675

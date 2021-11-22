@@ -13,8 +13,8 @@ parser.read('config.ini')
 class Client:
 
     def __init__(self):
-        self.run = False
-        self.blueIsTarget = True
+        self.run = True
+        self.blueIsTarget = False
         self.robot = literal_eval(parser.get('robot', 'robot_id'))
         self.host = literal_eval(parser.get('websocket', 'host'))
         self.port = literal_eval(parser.get('websocket', 'port'))

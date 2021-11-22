@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from os import stat
+
+from numba.core.types.containers import StarArgTuple
 import cv2
 import Movement as drive
 import Image_processing as ip
@@ -18,12 +20,13 @@ class RobotStateData():
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.STOPPED
+        self.state = State.FIND
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
         self.floor_area = None
         self.basket_distance = None
+        self.debug = True
 
 
 cl = Client.Client()
@@ -95,9 +98,9 @@ def HandleDrive(state_data, gamepad):
     state_data.state = State.DRIVE
 
 def HandleFind(state_data, gamepad):
-    drive.Move2(0, 0, 30, 0)
+    drive.Move2(0, 0, 10, 0)
     if state_data.keypoint_count >= 1:
-        HandleDrive(state_data)
+        HandleDrive(state_data, gamepad)
         state_data.state = State.DRIVE
         return
     state_data.state = State.FIND
@@ -126,7 +129,7 @@ def HandleAim(state_data, gamepad):
     rot_delta_x = state_data.ball_x - Camera.camera_x/2
     delta_y = 450 - state_data.ball_y
     front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 500, 30)
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 3, 200, 40)
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 6, 200, 40)
     rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 200, 40)
     drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     
@@ -151,7 +154,7 @@ def HandleThrowing(state_data, gamepad):
         state_data.has_thrown = False
         return
     
-    if state_data.keypoint_count >= 1:
+    if state_data.keypoint_count >= 1 and not state_data.has_thrown:
     
         basketInFrame = state_data.basket_x is not None
 
@@ -170,24 +173,27 @@ def HandleThrowing(state_data, gamepad):
         state_data.state = State.THROWING
         return
     
-    # elif state_data.keypoint_count == 0 and state_data.has_thrown: 
-    #     basketInFrame = state_data.basket_x is not None
+    elif state_data.has_thrown: 
+        basketInFrame = state_data.basket_x is not None
+        delta_x = 0
 
-    #     if not basketInFrame:
-    #         delta_x = Camera.camera_x
-    #     else:
-    #         rot_delta_x = state_data.basket_x - Camera.camera_x
-    #     #rot_delta_x = state_data.basket_x - Camera.camera_x
+        if basketInFrame:
+            delta_x = state_data.basket_x - Camera.camera_x/2
     
-    #         #delta_x = state_data.ball_x - state_data.basket_x
-    #     delta_y = 0#500 - Camera.camera_y
-    #     thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
-    #     front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
-    #     rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
-    #     drive.Move2(-0, 15, -rotSpd, thrower_speed)
-    #     state_data.state = State.THROWING
-    #     return
+            #delta_x = state_data.ball_x - state_data.basket_x
+        delta_y = 0#500 - Camera.camera_y
+        thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
+        #front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 0, 100, 8)
+        rotSpd = CalcSpeed(delta_x, Camera.camera_x, 0, 0, 50, 20)
+        drive.Move2(-0, 8, rotSpd, thrower_speed)
+        state_data.state = State.THROWING
+        if state_data.debug and state_data.after_throw_counter > 58:
+            state_data.state = State.STOPPED
+
+        return
     
+
+
     elif state_data.keypoint_count == 0 and not state_data.has_thrown:    
         state_data.state = State.FIND
     #state_data.has_thrown = False
@@ -203,7 +209,7 @@ def ListenForRefereeCommands(state_data, Processor):
         if not run:
             state_data.state = State.STOPPED
             return
-        if run and state_data.state == State.STOPPED:
+        if run and state_data.state == State.STOPPED and not state_data.debug:
             print(state_data.state)
             state_data.state = State.FIND
             return
@@ -211,6 +217,7 @@ def ListenForRefereeCommands(state_data, Processor):
         print("Server client communication failed.")
 
 switcher = {
+    State.FIND: HandleFind,
     State.DRIVE: HandleDrive,
     State.AIM: HandleAim,
     State.THROWING: HandleThrowing,
@@ -222,7 +229,7 @@ def Logic(switcher):
     start_time = time.time()
     counter = 0
     joy = Xbox360.XboxController()
-
+    debug = False
     state_data = RobotStateData()
     try:
         while True:
@@ -234,6 +241,7 @@ def Logic(switcher):
             state_data.ball_y = y
             state_data.keypoint_count = count
             state_data.basket_x = center_x
+            state_data.debug = debug
 
             state_data.floor_area = floorarea
             state_data.basket_distance = basket_distance
@@ -242,6 +250,7 @@ def Logic(switcher):
             controller = joy.read()
             #print(controller.stop)
             #print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
+            print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
             #left x left y right x
 
