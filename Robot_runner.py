@@ -237,10 +237,10 @@ def Logic(switcher):
 
             state_data.floor_area = floorarea
             state_data.basket_distance = basket_distance
-            print(state_data.state)
+            #print(state_data.state)
             
             controller = joy.read()
-            print(controller.stop)
+            #print(controller.stop)
             #print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
             switcher.get(state_data.state)(state_data, controller)
             #left x left y right x
@@ -262,7 +262,7 @@ def Logic(switcher):
             # FPS stuff
             counter += 1
             if(time.time() - start_time) > 1: # Frame rate per 1 second
-                #print("FPS -->", counter / (time.time() - start_time))
+                print("FPS -->", counter / (time.time() - start_time))
                 counter = 0
                 start_time = time.time()
                 

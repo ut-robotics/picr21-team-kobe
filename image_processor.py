@@ -94,10 +94,12 @@ class ImageProcessor():
             ys	= np.repeat(np.arange(y + h, self.camera.rgb_height), 5)
             xs	= np.repeat(np.linspace(x + w/2, self.camera.rgb_width / 2, num=len(ys)/5), 5).astype('uint16')
 
-            print(self.fragmented[ys:xs])
-            colors = self.fragmented[(ys,xs)]
+            colors = list(self.fragmented[ys,xs])
+            self.out_of_field = color_sampler.OrderCheck(colors, 0, (int(c.Color.ORANGE), int(c.Color.BLACK), int(c.Color.WHITE)))
+            print(self.out_of_field)
+            #colors = self.fragmented[(ys,xs)]
             # line_array = np.array(self.fragmented[ys:xs])
-            # print(line_array)
+            #print(list(colors[300:500]))
 
             #colors = line_array[0:-1,0]
             #print(colors)
@@ -157,8 +159,6 @@ class ImageProcessor():
         color_frame, depth_frame = self.get_frame_data(aligned_depth = aligned_depth)
 
         segment.segment(color_frame, self.fragmented, self.t_balls, self.t_basket_m, self.t_basket_b)
-        #self.out_of_field = color_sampler.OrderCheck(self.fragmented, 3, (int(c.Color.ORANGE),int(c.Color.BLACK), int(c.Color.WHITE), int(c.Color.ORANGE)))
-        #print(self.out_of_field)
         if self.debug:
             self.debug_frame = np.copy(color_frame)
 
