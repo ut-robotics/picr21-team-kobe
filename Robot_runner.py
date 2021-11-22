@@ -56,10 +56,10 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
 def HandleManual(state_data, gamepad):
-    if gamepad.throw == 1:
-        drive.Move2(gamepad.yspd,gamepad.xspd,gamepad.rotspd, 1000)
+    if gamepad.ybtn == 1:
+        drive.Move2(gamepad.x,gamepad.y,gamepad.rx, 1000)
     else:
-        drive.Move2(gamepad.yspd,gamepad.xspd,gamepad.rotspd, 0)
+        drive.Move2(gamepad.x,gamepad.y,gamepad.rx, 0)
         
 
 def HandleDrive(state_data, gamepad):
@@ -92,14 +92,14 @@ def HandleDrive(state_data, gamepad):
     state_data.state = State.DRIVE
 
 def HandleFind(state_data, gamepad):
-    drive.Move2(0, 0, 10, 0)
+    drive.Move2(0, 0, 30, 0)
     if state_data.keypoint_count >= 1:
         HandleDrive(state_data)
         state_data.state = State.DRIVE
         return
     state_data.state = State.FIND
 
-def HandleStopped(state_data):
+def HandleStopped(state_data,gamepad):
     drive.Stop()
     state_data.state = State.STOPPED
 
