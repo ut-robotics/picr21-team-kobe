@@ -8,7 +8,7 @@ import CameraConfig
 import math
 from enum import Enum
 import Thrower
-import Referee_client as Client
+import Referee_server as Client
 import time
 import Xbox360
 
