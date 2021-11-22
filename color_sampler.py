@@ -12,11 +12,11 @@ data = np.array(
 def OrderCheck(data, noise_level, order):
     #create list in a list everytime element value changes
     grouped = ([list(g) for k, g in groupby(data)])
-    grouped = [x.clear() if len(x) < noise_level for x in grouped]
-    #for i in grouped:
-    #    if len(i) < noise_level:
-    #        i.clear()
-    #        # remove empty lists in list
+    #grouped = [x.clear() if len(x) < noise_level for x in grouped]
+    for i in grouped:
+       if len(i) < noise_level:
+           i.clear()
+           # remove empty lists in list
     filtered = [x for x in grouped if x != []]
     #undo what grouped did
     flat_list = [item for sublist in filtered for item in sublist]

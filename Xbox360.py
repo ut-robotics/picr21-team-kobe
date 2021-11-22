@@ -6,13 +6,13 @@ import threading
 
 class Values():
     def __init__(self, x,y,a,ybtn,rx,start,stop) -> None:
-        self.x = self.LeftJoystickX
-        self.y = self.LeftJoystickY
-        self.a = self.A
-        self.ybtn = self.Y
-        self.rx = self.RightJoystickX
-        self.start = self.Back
-        self.stop = self.Start    
+        self.x = x
+        self.y = y
+        self.a = a
+        self.ybtn = ybtn
+        self.rx = rx
+        self.start = stop
+        self.stop = start
 
 class XboxController(object):
     MAX_TRIG_VAL = math.pow(2, 8)
@@ -52,8 +52,8 @@ class XboxController(object):
         a = self.A
         ybtn = self.Y
         rx = self.RightJoystickX
-        start = self.Back
-        stop = self.Start
+        start = self.Start
+        stop = self.Back
         return Values(x,y,a,ybtn,rx,start,stop) #ironic these are inverted
         #return x,y,a,ybtn,rx,start,stop
 

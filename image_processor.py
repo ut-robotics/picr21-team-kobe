@@ -86,14 +86,21 @@ class ImageProcessor():
 
             size = cv2.contourArea(contour)
 
-            if size < 15 or self.out_of_field:
+            if size < 15: #or self.out_of_field:
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
 
             ys	= np.repeat(np.arange(y + h, self.camera.rgb_height), 5)
-            xs	= np.repeat(np.linspace(x + w/2, self.camera.rgb_width / 2, num=len(ys)/5), 5).astype('uint16')           
+            xs	= np.repeat(np.linspace(x + w/2, self.camera.rgb_width / 2, num=len(ys)/5), 5).astype('uint16')
 
+            print(self.fragmented[ys:xs])
+            colors = self.fragmented[(ys,xs)]
+            # line_array = np.array(self.fragmented[ys:xs])
+            # print(line_array)
+
+            #colors = line_array[0:-1,0]
+            #print(colors)
             obj_x = int(x + (w/2))
             obj_y = int(y + (h/2))
             obj_dst = obj_y
@@ -150,8 +157,8 @@ class ImageProcessor():
         color_frame, depth_frame = self.get_frame_data(aligned_depth = aligned_depth)
 
         segment.segment(color_frame, self.fragmented, self.t_balls, self.t_basket_m, self.t_basket_b)
-        self.out_of_field = color_sampler.OrderCheck(self.fragmented, 3, (int(c.Color.ORANGE),int(c.Color.BLACK), int(c.Color.WHITE), int(c.Color.ORANGE)))
-
+        #self.out_of_field = color_sampler.OrderCheck(self.fragmented, 3, (int(c.Color.ORANGE),int(c.Color.BLACK), int(c.Color.WHITE), int(c.Color.ORANGE)))
+        #print(self.out_of_field)
         if self.debug:
             self.debug_frame = np.copy(color_frame)
 

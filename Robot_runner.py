@@ -56,10 +56,13 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
 def HandleManual(state_data, gamepad):
+    if gamepad.start == 1:
+            state_data.state = State.FIND
+            return
     if gamepad.ybtn == 1:
-        drive.Move2(gamepad.x,gamepad.y,gamepad.rx, 1000)
+        drive.Move2(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 1000)
     else:
-        drive.Move2(gamepad.x,gamepad.y,gamepad.rx, 0)
+        drive.Move2(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 0)
         
 
 def HandleDrive(state_data, gamepad):
@@ -208,7 +211,6 @@ def ListenForRefereeCommands(state_data, Processor):
         print("Server client communication failed.")
 
 switcher = {
-    State.FIND: HandleFind,
     State.DRIVE: HandleDrive,
     State.AIM: HandleAim,
     State.THROWING: HandleThrowing,
@@ -232,10 +234,13 @@ def Logic(switcher):
             state_data.ball_y = y
             state_data.keypoint_count = count
             state_data.basket_x = center_x
+
             state_data.floor_area = floorarea
             state_data.basket_distance = basket_distance
-
+            print(state_data.state)
+            
             controller = joy.read()
+            print(controller.stop)
             #print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
             switcher.get(state_data.state)(state_data, controller)
             #left x left y right x
@@ -244,12 +249,12 @@ def Logic(switcher):
             if controller.ybtn == 1:
                 state_data.state = State.MANUAL
                 switcher.get(state_data.state)(state_data, controller)
-            elif controller.start == 1:
+            if controller.start == 1:
                 state_data.state = State.FIND
                 switcher.get(state_data.state)(state_data, controller)
-            elif controller.stop == 1:
-                state_data.state = State.STOPPED
-                switcher.get(state_data.state)(state_data, controller)
+            # elif controller.stop == 1:
+            #     state_data.state = State.STOPPED
+            #     switcher.get(state_data.state)(state_data, controller)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -257,7 +262,7 @@ def Logic(switcher):
             # FPS stuff
             counter += 1
             if(time.time() - start_time) > 1: # Frame rate per 1 second
-                print("FPS -->", counter / (time.time() - start_time))
+                #print("FPS -->", counter / (time.time() - start_time))
                 counter = 0
                 start_time = time.time()
                 
