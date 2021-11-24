@@ -1,4 +1,3 @@
-import time
 import serial
 import struct
 import serial.tools.list_ports

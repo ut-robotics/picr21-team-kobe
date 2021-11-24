@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from os import stat
-
-from numba.core.types.containers import StarArgTuple
 import cv2
 import Movement as drive
 import Image_processing as ip
@@ -20,13 +17,14 @@ class RobotStateData():
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.FIND
+        self.state = State.STOPPED
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
         self.floor_area = None
         self.basket_distance = None
         self.debug = True
+        self.thrower_speed = 0
 
 
 cl = Client.Client()
@@ -35,7 +33,6 @@ cl.start()
 Camera = CameraConfig.Config()
 
 #States for logic
-
 class State(Enum):
     FIND = 0
     DRIVE = 1
@@ -43,6 +40,7 @@ class State(Enum):
     THROWING = 3
     STOPPED = 4
     MANUAL = 5
+    DEBUG = 6
 
 #set target value with referee commands True = Blue, !True = Magenta
 target = True
@@ -59,7 +57,7 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
 def HandleManual(state_data, gamepad):
-    if gamepad.start == 1:
+    if gamepad.a == 1:
             state_data.state = State.FIND
             return
     if gamepad.ybtn == 1:
@@ -131,9 +129,15 @@ def HandleAim(state_data, gamepad):
     front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 500, 30)
     side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 6, 200, 40)
     rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 200, 40)
-    drive.Move2(-side_speed, front_speed, -rotSpd, 0)
+    # Remove if-s if they dont work
+    if state_data.basket_x < 320:
+        drive.Move2(-side_speed, front_speed, -rotSpd, 0)
+    if state_data.basket_x > 320:
+        drive.Move2(side_speed, front_speed, rotSpd, 0)
     
-    if basketInFrame and 320 <= state_data.basket_x <= 335 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
+
+    
+    if basketInFrame and 315 <= state_data.basket_x <= 325 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
         drive.Stop()                             #prev center 315 to 325
         state_data.state = State.THROWING
         return
@@ -185,18 +189,29 @@ def HandleThrowing(state_data, gamepad):
         thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
         #front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 0, 100, 8)
         rotSpd = CalcSpeed(delta_x, Camera.camera_x, 0, 0, 50, 20)
-        drive.Move2(-0, 8, rotSpd, thrower_speed)
+        
+        if state_data.debug:
+            print("using speed: ", state_data.thrower_speed, "at", state_data.basket_distance)
+            drive.Move2(-0, 8, rotSpd, state_data.thrower_speed)
+        else:
+            drive.Move2(-0, 8, rotSpd, thrower_speed)
+
         state_data.state = State.THROWING
         if state_data.debug and state_data.after_throw_counter > 58:
-            state_data.state = State.STOPPED
-
+            state_data.state = State.DEBUG
         return
-    
-
 
     elif state_data.keypoint_count == 0 and not state_data.has_thrown:    
         state_data.state = State.FIND
     #state_data.has_thrown = False
+    
+def HandleDebug(state_data, gamepad):
+    drive.Stop()
+    print("distance from basket: ", state_data.basket_distance)
+    state_data.thrower_speed = int(input("Enter thrower speed to use:"))
+    state_data.state = State.FIND
+    
+    
 data = None
 
 def ListenForRefereeCommands(state_data, Processor):
@@ -222,7 +237,8 @@ switcher = {
     State.AIM: HandleAim,
     State.THROWING: HandleThrowing,
     State.STOPPED: HandleStopped,
-    State.MANUAL: HandleManual
+    State.MANUAL: HandleManual,
+    State.DEBUG: HandleDebug
 }
 
 def Logic(switcher):
@@ -242,30 +258,22 @@ def Logic(switcher):
             state_data.keypoint_count = count
             state_data.basket_x = center_x
             state_data.debug = debug
-
             state_data.floor_area = floorarea
-            state_data.basket_distance = basket_distance
-            #print(state_data.state)
-            
+            state_data.basket_distance = basket_distance            
             controller = joy.read()
-            #print(controller.stop)
-            #print("ball x: ", x, "basket x: ", center_x, "ball y: ", y)
-            print(state_data.state)
-            switcher.get(state_data.state)(state_data, controller)
-            #left x left y right x
 
-            #lx,ly,rx,abtn,ybtn,start,stop = joy.read()
             if controller.ybtn == 1:
                 state_data.state = State.MANUAL
-                switcher.get(state_data.state)(state_data, controller)
+                #switcher.get(state_data.state)(state_data, controller)
             if controller.start == 1:
                 state_data.state = State.FIND
-                switcher.get(state_data.state)(state_data, controller)
-            # elif controller.stop == 1:
-            #     state_data.state = State.STOPPED
-            #     switcher.get(state_data.state)(state_data, controller)
+                
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('r'):
+                state_data.state = State.FIND
+            switcher.get(state_data.state)(state_data, controller)
             
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if key == ord('q'):
                 break
             
             # FPS stuff

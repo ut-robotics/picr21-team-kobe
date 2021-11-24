@@ -1,8 +1,6 @@
 import serialcomms
 import math
 import cv2
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
 import CameraConfig
 import Image_processing as ip
 

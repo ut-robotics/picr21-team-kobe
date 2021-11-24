@@ -97,8 +97,7 @@ class ImageProcessor():
             xs	= np.repeat(np.linspace(x + w/2, self.camera.rgb_width / 2, num=len(ys)/5), 5).astype('uint16')
 
             colors = self.fragmented[ys,xs]
-            #print(colors)
-            out_of_field = color_sampler.TestReal(colors, 10, self.line_sequence)
+            out_of_field = color_sampler.CheckSequence(colors, 8, self.line_sequence)
 
             if out_of_field:
                 continue
