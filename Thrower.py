@@ -1,15 +1,15 @@
 from scipy.interpolate import interp1d
 from numpy import interp
 #Distance from basket in cm
-X = [0,122,163,198,215, 233, 274, 328, 380, 450, 600] #[208, 270, 308]
+X = [0,122,163,198,215, 233, 274, 290, 328, 380, 450, 470, 500, 525] #[208, 270, 308]
 #Used thrower speed
-Y = [700,700,800,925,1050, 1050, 1111, 1225, 1635, 1625, 2047] #[975, 1100, 1175]
+Y = [675,700,800,900,1050, 1075, 1175, 1200, 1275, 1375, 1525, 1750, 1850, 2047] #[975, 1100, 1175]
 #Function that estimates the speed to use from robot's current distance from the basket
 def ThrowerSpeed(distance):
     try:
         predicted_function = interp1d(X,Y, kind="linear")
         if distance is None:
-            return 700
+            return 675
         else:
             # Map duty cycle to distance because duty cycle is approximately equal to linear speed
             # 525 is max playing area (cm)
@@ -24,4 +24,4 @@ def ThrowerSpeed(distance):
         if distance > 525:
             return 2047
         else:
-            return 700
+            return 675

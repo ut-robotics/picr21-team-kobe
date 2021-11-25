@@ -23,7 +23,7 @@ class RobotStateData():
         self.after_throw_counter = 0
         self.floor_area = None
         self.basket_distance = None
-        self.debug = True
+        self.debug = False
         self.thrower_speed = 0
 
 
@@ -57,9 +57,9 @@ def CalcSpeed(delta, maxDelta, minDelta, minSpeed, maxDeltaSpeed, maxSpeed):
     return int(int(speed) if abs(speed) >= minSpeed and abs(speed) <= maxSpeed else maxSpeed * sign if speed > maxSpeed else minSpeed * sign)
 
 def HandleManual(state_data, gamepad):
-    if gamepad.a == 1:
-            state_data.state = State.FIND
-            return
+    # if gamepad.a == 1:
+    #         state_data.state = State.FIND
+    #         return
     if gamepad.ybtn == 1:
         drive.Move2(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 1000)
     else:
@@ -81,8 +81,8 @@ def HandleDrive(state_data, gamepad):
         minSpeed = 2
         maxSpeed = 50
         minDelta = 5
-        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 500, 50)
-        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 300, 40)
+        front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 5, 500, 60)
+        rotSpd = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 300, 50)
         drive.Move2(-0, front_speed, -rotSpd, 0)
         
         if 500 > state_data.ball_y > 315 : # How close ball y should be to switch to next state
@@ -126,18 +126,14 @@ def HandleAim(state_data, gamepad):
     
     rot_delta_x = state_data.ball_x - Camera.camera_x/2
     delta_y = 450 - state_data.ball_y
-    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 500, 30)
-    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 6, 200, 40)
-    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 200, 40)
-    # Remove if-s if they dont work
-    if state_data.basket_x < 320:
-        drive.Move2(-side_speed, front_speed, -rotSpd, 0)
-    if state_data.basket_x > 320:
-        drive.Move2(side_speed, front_speed, rotSpd, 0)
+    front_speed = CalcSpeed(delta_y, Camera.camera_y, 7, 3, 500, 40)
+    side_speed = CalcSpeed(delta_x, Camera.camera_x, 7, 6, 200, 30)
+    rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, 7, 3, 200, 50)
+    drive.Move2(-side_speed, front_speed, -rotSpd, 0)
     
 
     
-    if basketInFrame and 315 <= state_data.basket_x <= 325 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
+    if basketInFrame and 320 <= state_data.basket_x <= 330 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
         drive.Stop()                             #prev center 315 to 325
         state_data.state = State.THROWING
         return
@@ -170,9 +166,9 @@ def HandleThrowing(state_data, gamepad):
         delta_y = 500 - state_data.ball_y
         thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
         front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
-        #side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, maxSpeed)
+        side_speed = CalcSpeed(delta_x, Camera.camera_x, minDelta, 2, 150, maxSpeed)
         rotSpd = CalcSpeed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
-        drive.Move2(-0, front_speed, -rotSpd, thrower_speed)
+        drive.Move2(-side_speed, front_speed, -rotSpd, thrower_speed)
         state_data.has_thrown = True
         state_data.state = State.THROWING
         return
@@ -188,16 +184,16 @@ def HandleThrowing(state_data, gamepad):
         delta_y = 0#500 - Camera.camera_y
         thrower_speed = Thrower.ThrowerSpeed(state_data.basket_distance)
         #front_speed = CalcSpeed(delta_y, Camera.camera_y, minDelta, 0, 100, 8)
+        side_speed = CalcSpeed(delta_x, Camera.camera_x, 0, 0, 75, 20)
+
         rotSpd = CalcSpeed(delta_x, Camera.camera_x, 0, 0, 50, 20)
         
-        if state_data.debug:
-            print("using speed: ", state_data.thrower_speed, "at", state_data.basket_distance)
-            drive.Move2(-0, 8, rotSpd, state_data.thrower_speed)
-        else:
-            drive.Move2(-0, 8, rotSpd, thrower_speed)
+        print("using speed: ", thrower_speed, "at", state_data.basket_distance)
+        #drive.Move2(-0, 8, rotSpd, state_data.thrower_speed)
+        drive.Move2(-side_speed, 8, rotSpd, thrower_speed)
 
         state_data.state = State.THROWING
-        if state_data.debug and state_data.after_throw_counter > 58:
+        if state_data.debug and state_data.after_throw_counter > 59:
             state_data.state = State.DEBUG
         return
 
@@ -250,7 +246,7 @@ def Logic(switcher):
     try:
         while True:
             # Main code
-            ListenForRefereeCommands(state_data, Processor)
+            #ListenForRefereeCommands(state_data, Processor)
             #Align depth frame if we are in throw state
             count, y, x, center_x, center_y, basket_distance, floorarea = Processor.ProcessFrame(align_frame = state_data.state == State.THROWING)
             state_data.ball_x = x 
@@ -271,6 +267,7 @@ def Logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
+            print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
             
             if key == ord('q'):
