@@ -4,7 +4,7 @@ import threading
 
 
 class Values():
-    def __init__(self, x,y,a,ybtn,rx,start,stop) -> None:
+    def __init__(self, x,y,a,ybtn,rx,start,stop, right_trigger) -> None:
         self.x = x
         self.y = y
         self.a = a
@@ -12,6 +12,7 @@ class Values():
         self.rx = rx
         self.start = stop
         self.stop = start
+        self.right_trigger = right_trigger
 
 class XboxController(object):
     MAX_TRIG_VAL = math.pow(2, 8)
@@ -53,7 +54,8 @@ class XboxController(object):
         rx = self.RightJoystickX
         start = self.Start
         stop = self.Back
-        return Values(x,y,a,ybtn,rx,start,stop)
+        right_trigger = self.RightTrigger
+        return Values(x,y,a,ybtn,rx,start,stop, right_trigger)
 
     def _monitor_controller(self):
         while True:
@@ -77,6 +79,8 @@ class XboxController(object):
                     self.Back = event.state
                 elif event.code == 'BTN_START':
                     self.Start = event.state
+                elif event.code == 'ABS_RZ':
+                    self.RightTrigger = event.state / XboxController.MAX_TRIG_VAL # normalize between 0 and 1
 
 if __name__ == '__main__':
     joy = XboxController()

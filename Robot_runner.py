@@ -60,8 +60,8 @@ def HandleManual(state_data, gamepad):
     # if gamepad.a == 1:
     #         state_data.state = State.FIND
     #         return
-    if gamepad.ybtn == 1:
-        drive.Move2(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 1000)
+    if gamepad.right_trigger > 0:
+        drive.Move2(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), int(abs(gamepad.right_trigger*2000)))
     else:
         drive.Move2(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 0)
         
@@ -264,6 +264,9 @@ def Logic(switcher):
             if controller.start == 1:
                 state_data.state = State.FIND
                 
+            if controller.stop == 1:
+                state_data.state = State.STOPPED
+
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
