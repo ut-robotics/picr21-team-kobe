@@ -6,15 +6,15 @@ import image_processor
 import Color
 
 class ProcessFrames():
-    def __init__(self, target, camera):
+    def __init__(self, camera, target=Color.Color.BLUE):
         
         self.processor = image_processor.ImageProcessor(camera.cam, debug=True)
         self.target = target
 
-    def SetTarget(self, target):
+    def set_target(self, target):
         self.target = target
 
-    def ProcessFrame(self, align_frame = False):
+    def process_frame(self, align_frame = False):
         
         processed = self.processor.process_frame(aligned_depth=align_frame)
         ball_array = processed.balls

@@ -1,5 +1,4 @@
 import camera
-import time
 
 class Config():
     def __init__(self):
@@ -12,7 +11,6 @@ class Config():
                                             depth_height=self.camera_y,
                                             depth_width=self.camera_x)
         self.cam.open()
-        #return self.pipeline, self.camera_x, self.camera_y
-
-    def StopStreams(self):
+        
+    def stop_streams(self):
         self.cam.close()

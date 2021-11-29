@@ -29,7 +29,6 @@ class Client:
                 print("Received message from server: " + str(cmd))
                 try:
                     self.process_command(cmd)
-                    await ws.send("Command was processed.")
                 except ValueError:
                     continue
 

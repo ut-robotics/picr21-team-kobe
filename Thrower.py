@@ -5,7 +5,7 @@ X = [0,122,163,198,215, 233, 274, 290, 328, 380, 450, 470, 500, 525] #[208, 270,
 #Used thrower speed
 Y = [675,700,800,900,1050, 1075, 1175, 1200, 1275, 1375, 1525, 1750, 1850, 2047] #[975, 1100, 1175]
 #Function that estimates the speed to use from robot's current distance from the basket
-def ThrowerSpeed(distance):
+def thrower_speed(distance):
     try:
         predicted_function = interp1d(X,Y, kind="linear")
         if distance is None:

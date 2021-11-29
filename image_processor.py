@@ -133,7 +133,10 @@ class ImageProcessor():
 
             obj_x = int(x + (w/2))
             obj_y = int(y + (h/2))
-            obj_dst = depth_frame.get_distance(obj_x, obj_y)
+            area_w = 10
+            area_h = 20
+            depth_image = np.asanyarray(depth_frame.get_data())
+            obj_dst = np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale#depth_frame.get_distance(obj_x, obj_y)
 
 
             baskets.append(Object(x = obj_x, y = obj_y, size = size, distance = obj_dst, exists = True))

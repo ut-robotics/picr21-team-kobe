@@ -49,7 +49,7 @@ class RealsenseCamera(ICamera):
             
         self.align = rs.align(rs.stream.color)
         self.depth_scale = -1
-
+        
     def open(self):
         profile = self.pipeline.start(self.config)
         color_sensor = profile.get_device().query_sensors()[1]

@@ -37,13 +37,13 @@ def calc_wheel_speed(moving_speed, direction, wheel_angle):
     wheel_speed = moving_speed * math.cos(math.radians(direction - wheel_angle))
     return wheel_speed
 
-def spinRight(speed):
+def spin_right(speed):
     send_speeds([-30, -30, -30, 0])
 
-def spinLeft(speed):
+def spin_left(speed):
     send_speeds([15, 15, 15, 0])
 
-def keyBoardControl():
+def keyboard_control():
     cv2.namedWindow("Controller")
     #print("distance", basket_distance*100)
     movingSpeed = 15
@@ -68,10 +68,10 @@ def keyBoardControl():
             move(movingSpeed, 0, 60)
         if key == ord("e"):
             print("Spinning right.")
-            spinRight(movingSpeed)
+            spin_right(movingSpeed)
         if key == ord("q"):
             print("Spinning left.")
-            spinLeft(movingSpeed)
+            spin_left(movingSpeed)
         if key == ord("t"):
             print("Throwing.")
             move(0, throwingSpeed, 0)
@@ -83,6 +83,6 @@ def keyBoardControl():
             stop()
             break
 
-keyBoardControl()
+keyboard_control()
 
 cv2.destroyAllWindows()

@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit
 
-def OrderExists(arr, order):
+def order_exists(arr, order):
     arr_size = arr.size
     order_size = order.size
     order_range = np.arange(order_size)
@@ -14,13 +14,13 @@ def OrderExists(arr, order):
 
 
 def CheckSequence(arr, noise, order):
-    sequence_arr = FilterArray(arr, noise)
-    order_exists = OrderExists(sequence_arr, order)
-    return len(order_exists) > 0
+    sequence_arr = filter_array(arr, noise)
+    order_exist = order_exists(sequence_arr, order)
+    return len(order_exist) > 0
 
 
-@jit(nopython = True, cache = True)   
-def FilterArray(data, noise_level):
+@jit(nopython = True, cache = True, fastmath = True)   
+def filter_array(data, noise_level):
     data = np.split(data, np.where(np.diff(data[:]))[0]+1)
     new_list = []
     element_counter = 0
