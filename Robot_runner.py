@@ -30,7 +30,7 @@ class RobotStateData():
         self.prev_yspeed = 0
         self.prev_rotspeed = 0
         self.out_of_field = False
-        self.has_rotated = False
+        self.has_rotated = True
         self.after_rotation_counter = 0
 
 
@@ -124,17 +124,26 @@ def handle_drive(state_data, gamepad):
     state_data.state = State.DRIVE
 
 def handle_find(state_data, gamepad):
-
+    state_data.has_rotated = True
+    print(state_data.has_rotated)
+    print(state_data.after_rotation_counter)
     if state_data.has_rotated:
         state_data.after_rotation_counter += 1
 
-    if state_data.after_rotation_counter > 120:
+    if state_data.after_rotation_counter > 130:
         state_data.after_rotation_counter = 0
         state_data.has_rotated = False
+        front_speed = calc_speed(Camera.camera_y, Camera.camera_y, 10, 5, 500, 40)
+        rot_spd = calc_speed(Camera.camera_x, Camera.camera_x, 10, 5, 150, 30)
+        drive.move_omni(0,front_speed, -0, 0)
+        time.sleep(0.5)
+        drive.move_omni(0,front_speed, -0, 0)
+        time.sleep(0.5)
+
         return
+        
 
     drive.move_omni(0, 0, 10, 0)
-    state_data.has_rotated = True
     if state_data.keypoint_count >= 1:
         handle_drive(state_data, gamepad)
         state_data.state = State.DRIVE
