@@ -18,7 +18,7 @@ class RobotStateData():
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.STOPPED
+        self.state = State.DRIVE
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
@@ -26,6 +26,12 @@ class RobotStateData():
         self.basket_distance = None
         self.debug = False
         self.thrower_speed = 0
+        self.prev_xspeed = 0
+        self.prev_yspeed = 0
+        self.prev_rotspeed = 0
+        self.out_of_field = False
+        self.has_rotated = False
+        self.after_rotation_counter = 0
 
 
 cl = Client.Client()
@@ -69,6 +75,14 @@ def handle_manual(state_data, gamepad):
 
 def handle_drive(state_data, gamepad):
 
+    max_acceleration = 4
+    if state_data.out_of_field:
+        drive.move_omni(0,0, 20,0)
+        time.sleep(0.3)
+        state_data.out_of_field = False
+        state_data.state = State.FIND
+        return
+
     if not state_data.floor_area or state_data.floor_area < 20000:
         
         drive.move_omni(0, -10,20,0)
@@ -84,8 +98,20 @@ def handle_drive(state_data, gamepad):
         maxSpeed = 50
         minDelta = 5
         front_speed = calc_speed(delta_y, Camera.camera_y, minDelta, 5, 500, 60)
-        rotSpd = calc_speed(delta_x, Camera.camera_x, minDelta, minSpeed, 300, 50)
-        drive.move_omni(-0, front_speed, -rotSpd, 0)
+        rot_spd = calc_speed(delta_x, Camera.camera_x, minDelta, minSpeed, 150, 40)
+
+        front_delta = front_speed - state_data.prev_yspeed
+        if abs(front_delta) > max_acceleration and front_delta > 0:
+            
+            sign = math.copysign(1, front_delta)
+            front_speed = int(state_data.prev_yspeed + max_acceleration * sign)
+
+
+        state_data.prev_xspeed = 0
+        state_data.prev_yspeed = front_speed
+        state_data.prev_rotspeed = -rot_spd
+
+        drive.move_omni(-0, front_speed, -rot_spd, 0)
         
         if Camera.camera_y + 20 > state_data.ball_y > Camera.camera_y - 160 : # How close ball y should be to switch to next state
             state_data.state = State.AIM
@@ -98,11 +124,22 @@ def handle_drive(state_data, gamepad):
     state_data.state = State.DRIVE
 
 def handle_find(state_data, gamepad):
+
+    if state_data.has_rotated:
+        state_data.after_rotation_counter += 1
+
+    if state_data.after_rotation_counter > 120:
+        state_data.after_rotation_counter = 0
+        state_data.has_rotated = False
+        return
+
     drive.move_omni(0, 0, 10, 0)
+    state_data.has_rotated = True
     if state_data.keypoint_count >= 1:
         handle_drive(state_data, gamepad)
         state_data.state = State.DRIVE
         return
+        
     state_data.state = State.FIND
 
 def handle_stopped(state_data,gamepad):
@@ -129,12 +166,16 @@ def handle_aim(state_data, gamepad):
     delta_y = (Camera.camera_y - 30) - state_data.ball_y
     front_speed = calc_speed(delta_y, Camera.camera_y, 7, 3, 500, 40)
     side_speed = calc_speed(delta_x, Camera.camera_x, 7, 6, 200, 30)
-    rotSpd = calc_speed(rot_delta_x, Camera.camera_x, 7, 3, 200, 50)
-    drive.move_omni(-side_speed, front_speed, -rotSpd, 0)
+    rot_spd = calc_speed(rot_delta_x, Camera.camera_x, 7, 3, 200, 50)
+    state_data.prev_yspeed = front_speed
+    state_data.prev_rotspeed = rot_spd
+    state_data.prev_xspeed = side_speed
+
+    drive.move_omni(-side_speed, front_speed, -rot_spd, 0)
     
 
     
-    if basketInFrame and Camera.camera_x/2 <= state_data.basket_x <= (Camera.camera_x/2) + 10 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
+    if basketInFrame and (Camera.camera_x/2)- 10 <= state_data.basket_x <= (Camera.camera_x/2) + 10 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
         drive.stop()                             #prev center 315 to 325
         state_data.state = State.THROWING
         return
@@ -168,8 +209,11 @@ def handle_throwing(state_data, gamepad):
         thrower_speed = Thrower.thrower_speed(state_data.basket_distance)
         front_speed = calc_speed(delta_y, Camera.camera_y, minDelta, minSpeed, 200, maxSpeed)
         side_speed = calc_speed(delta_x, Camera.camera_x, minDelta, 2, 150, maxSpeed)
-        rotSpd = calc_speed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
-        drive.move_omni(-side_speed, front_speed, -rotSpd, thrower_speed)
+        rot_spd = calc_speed(rot_delta_x, Camera.camera_x, minDelta, 2, 100, maxSpeed)
+        state_data.prev_yspeed = front_speed
+        state_data.prev_rotspeed = rot_spd
+        state_data.prev_xspeed = side_speed
+        drive.move_omni(-side_speed, front_speed, -rot_spd, thrower_speed)
         state_data.has_thrown = True
         state_data.state = State.THROWING
         return
@@ -187,11 +231,16 @@ def handle_throwing(state_data, gamepad):
         #front_speed = calc_speed(delta_y, Camera.camera_y, minDelta, 0, 100, 8)
         side_speed = calc_speed(delta_x, Camera.camera_x, 0, 0, 75, 20)
 
-        rotSpd = calc_speed(delta_x, Camera.camera_x, 0, 0, 50, 20)
+        rot_spd = calc_speed(delta_x, Camera.camera_x, 0, 0, 50, 20)
+
+
+        state_data.prev_yspeed = 0
+        state_data.prev_rotspeed = rot_spd
+        state_data.prev_xspeed = side_speed
         
         print("using speed: ", thrower_speed, "at", state_data.basket_distance)
         #drive.move_omni(-0, 8, rotSpd, state_data.thrower_speed)
-        drive.move_omni(-side_speed, 8, rotSpd, thrower_speed)
+        drive.move_omni(-side_speed, 8, rot_spd, thrower_speed)
 
         state_data.state = State.THROWING
         if state_data.debug and state_data.after_throw_counter > 59:
@@ -245,21 +294,22 @@ def logic(switcher):
     start_time = time.time()
     counter = 0
     joy = Xbox360.XboxController()
-    debug = False
+    debug = True
     state_data = RobotStateData()
     try:
         while True:
             # Main code
-            listen_for_referee_commands(state_data, Processor)
+            #listen_for_referee_commands(state_data, Processor)
             #Align depth frame if we are in throw state
-            count, y, x, center_x, center_y, basket_distance, floorarea = Processor.ProcessFrame(align_frame = state_data.state == State.THROWING)
+            count, y, x, center_x, center_y, basket_distance, floorarea, out_of_field = Processor.process_frame(True)#align_frame = state_data.state == State.THROWING)
             state_data.ball_x = x 
             state_data.ball_y = y
             state_data.keypoint_count = count
             state_data.basket_x = center_x
             state_data.debug = debug
             state_data.floor_area = floorarea
-            state_data.basket_distance = basket_distance            
+            state_data.basket_distance = basket_distance
+            state_data.out_of_field = out_of_field            
             controller = joy.read()
 
             if controller.ybtn == 1:
@@ -274,7 +324,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            print(state_data.state)
+            #print(state_data.basket_distance)
             switcher.get(state_data.state)(state_data, controller)
             
             if key == ord('q'):
@@ -283,7 +333,7 @@ def logic(switcher):
             # FPS stuff
             counter += 1
             if(time.time() - start_time) > 1: # Frame rate per 1 second
-                print("FPS -->", counter / (time.time() - start_time))
+                #print("FPS -->", counter / (time.time() - start_time))
                 counter = 0
                 start_time = time.time()
                 

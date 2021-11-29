@@ -31,7 +31,8 @@ class ProcessedResults():
                 color_frame = [],
                 depth_frame = [],
                 fragmented = [],
-                debug_frame = []) -> None:
+                debug_frame = [],
+                out_of_field = False):
 
 
         self.balls = balls
@@ -40,7 +41,7 @@ class ProcessedResults():
         self.color_frame = color_frame
         self.depth_frame = depth_frame
         self.fragmented = fragmented
-        self.out_of_field = False
+        self.out_of_field = out_of_field
 
         # can be used to illustrate things in a separate frame buffer
         self.debug_frame = debug_frame
@@ -65,6 +66,7 @@ class ImageProcessor():
         self.debug = debug
         self.debug_frame = np.zeros((self.camera.rgb_height, self.camera.rgb_width), dtype=np.uint8)
         self.line_sequence = np.array([int(c.Color.ORANGE), int(c.Color.BLACK), int(c.Color.WHITE)], dtype=np.uint8)
+        self.out_of_field = False
 
     def set_segmentation_table(self, table):
         segment.set_table(table)
@@ -100,7 +102,9 @@ class ImageProcessor():
             out_of_field = color_sampler.CheckSequence(colors, 8, self.line_sequence)
 
             if out_of_field:
-                continue
+                self.out_of_field = out_of_field
+            else:
+                self.out_of_field = False
 
             obj_x = int(x + (w/2))
             obj_y = int(y + (h/2))
@@ -136,7 +140,9 @@ class ImageProcessor():
             area_w = 10
             area_h = 20
             depth_image = np.asanyarray(depth_frame.get_data())
-            obj_dst = np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale#depth_frame.get_distance(obj_x, obj_y)
+            obj_dst = depth_frame.get_distance(obj_x, obj_y)
+
+            #np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
 
 
             baskets.append(Object(x = obj_x, y = obj_y, size = size, distance = obj_dst, exists = True))
@@ -174,4 +180,5 @@ class ImageProcessor():
                                 color_frame=color_frame, 
                                 depth_frame=depth_frame, 
                                 fragmented=self.fragmented, 
-                                debug_frame=self.debug_frame)
+                                debug_frame=self.debug_frame,
+                                out_of_field = self.out_of_field)

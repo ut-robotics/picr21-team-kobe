@@ -24,6 +24,9 @@ class ProcessFrames():
         basket_x_center = None
         basket_y_center = None
         basket_distance = None
+        out_of_field = False
+
+        out_of_field = processed.out_of_field
 
         if self.target:
             basket = processed.basket_b
@@ -47,4 +50,4 @@ class ProcessFrames():
 
         cv2.imshow("Debug", processed.debug_frame)
 
-        return len(ball_array), y, x, basket_x_center, basket_y_center, basket_distance, floorarea
+        return len(ball_array), y, x, basket_x_center, basket_y_center, basket_distance, floorarea, out_of_field
