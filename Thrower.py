@@ -34,4 +34,12 @@ def thrower_speed(distance):
 
 
 
+#speed
+#[680,730, 800, 870, 960, 1070]
+
+#dist
+#[95,121, 156,190, 220, 250]
+
+
+
 # Experimental

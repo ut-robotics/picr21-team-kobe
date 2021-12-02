@@ -4,7 +4,7 @@ import threading
 
 
 class Values():
-    def __init__(self, x,y,a,ybtn,rx,start,stop, right_trigger) -> None:
+    def __init__(self, x,y,a,ybtn,rx,start,stop, right_trigger, b) -> None:
         self.x = x
         self.y = y
         self.a = a
@@ -13,6 +13,7 @@ class Values():
         self.start = stop
         self.stop = start
         self.right_trigger = right_trigger
+        self.b = b
 
 class XboxController(object):
     MAX_TRIG_VAL = math.pow(2, 8)
@@ -55,7 +56,8 @@ class XboxController(object):
         start = self.Start
         stop = self.Back
         right_trigger = self.RightTrigger
-        return Values(x,y,a,ybtn,rx,start,stop, right_trigger)
+        b = self.B
+        return Values(x,y,a,ybtn,rx,start,stop, right_trigger, b)
 
     def _monitor_controller(self):
         while True:

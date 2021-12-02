@@ -65,7 +65,7 @@ class Server:
                 continue
 
             await ws.send(json.dumps(msg))
-            await ws.recv()
+            #await ws.recv()
 
     def start(self):
         loop = asyncio.new_event_loop()
