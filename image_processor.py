@@ -90,7 +90,7 @@ class ImageProcessor():
             size = cv2.contourArea(contour)
             
 
-            if size < 15: #or self.out_of_field:
+            if size < 10: #or self.out_of_field:
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
@@ -140,9 +140,10 @@ class ImageProcessor():
             area_w = 5
             area_h = 5
             depth_image = np.asanyarray(depth_frame.get_data())
-            obj_dst = np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
+            obj_dst = depth_frame.get_distance(obj_x, obj_y)
 
-            #depth_frame.get_distance(obj_x, obj_y)
+            #np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
+
 
 
             baskets.append(Object(x = obj_x, y = obj_y, size = size, distance = obj_dst, exists = True))

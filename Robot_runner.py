@@ -18,20 +18,21 @@ class RobotStateData():
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.DRIVE
+        self.state = State.FIND
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
         self.floor_area = None
         self.basket_distance = None
         self.debug = False
-        self.thrower_speed = 650
+        self.thrower_speed = 0
         self.prev_xspeed = 0
         self.prev_yspeed = 0
         self.prev_rotspeed = 0
         self.out_of_field = False
         #self.has_rotated = True
         self.after_rotation_counter = 0
+        self.basket_size = 0
 
 
 cl = Client.Client()
@@ -67,31 +68,32 @@ def handle_manual(state_data, gamepad):
     # if gamepad.a == 1:
     #         state_data.state = State.FIND
     #         return
-    print("speed: ", state_data.thrower_speed, "dist: ", state_data.basket_distance)
+    #print("speed: ", state_data.thrower_speed, "dist: ", state_data.basket_distance)
     if gamepad.a > 0:
         state_data.thrower_speed += 10
     if gamepad.b > 0:
         state_data.thrower_speed -= 10
-    drive.move_omni(0,0,0, state_data.thrower_speed)
+    #drive.move_omni(0,0,0, state_data.thrower_speed)
     #drive.move_omni(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 0)
         
 
 def handle_drive(state_data, gamepad):
 
     max_acceleration = 4
+    print(state_data.basket_size)
+    if state_data.basket_size is not None:
+        if state_data.basket_size > 28000:
+            drive.move_omni(0, 0, 20, 0)
+            time.sleep(0.3)
+            state_data.state = State.FIND
+            return        
+
     if state_data.out_of_field:
         drive.move_omni(0, 0, 20, 0)
         time.sleep(0.3)
         state_data.out_of_field = False
         state_data.state = State.FIND
         return
-    # meters
-    if state_data.basket_distance is not None:
-        if state_data.basket_distance < 0.5:
-            drive.move_omni(0, 0, 20, 0)
-            time.sleep(0.3)
-            state_data.state = State.FIND
-            return
 
     if not state_data.floor_area or state_data.floor_area < 20000:
         
@@ -135,7 +137,7 @@ def handle_drive(state_data, gamepad):
 
 def handle_find(state_data, gamepad):
 
-    drive.move_omni(0, 0, 7, 0)
+    drive.move_omni(0, 0, 8, 0)
     if state_data.keypoint_count >= 1:
         handle_drive(state_data, gamepad)
         state_data.state = State.DRIVE
@@ -149,6 +151,14 @@ def handle_stopped(state_data,gamepad):
 
 def handle_aim(state_data, gamepad):
     
+    # # meters
+    # if state_data.basket_distance is not None:
+    #     if state_data.basket_distance < 0.3:
+    #         drive.move_omni(0, 0, 20, 0)
+    #         time.sleep(0.3)
+    #         state_data.state = State.FIND
+    #         return
+
     if state_data.floor_area is None or state_data.floor_area < 20000:
         state_data.state = State.FIND
         return
@@ -176,7 +186,7 @@ def handle_aim(state_data, gamepad):
     
 
     
-    if basketInFrame and (Camera.camera_x/2)- 5 <= state_data.basket_x <= (Camera.camera_x/2) + 5 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
+    if basketInFrame and (Camera.camera_x/2)- 15 <= state_data.basket_x <= (Camera.camera_x/2) + 15 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
         drive.stop()                             #prev center 315 to 325
         state_data.state = State.THROWING
         return
@@ -191,7 +201,7 @@ def handle_throwing(state_data, gamepad):
     if state_data.has_thrown:
         state_data.after_throw_counter += 1
 
-    if state_data.after_throw_counter > 60:
+    if state_data.after_throw_counter > 75:
         state_data.after_throw_counter = 0
         state_data.state = State.FIND
         state_data.has_thrown = False
@@ -238,9 +248,10 @@ def handle_throwing(state_data, gamepad):
         state_data.prev_rotspeed = rot_spd
         state_data.prev_xspeed = side_speed
         
-        #thrower_speed = Thrower.thrower_speed(state_data.basket_distance)
-        drive.move_omni(-side_speed, 8, rot_spd, state_data.thrower_speed)#thrower_speed)
-        print("throwing at ", state_data.thrower_speed, "from ", state_data.basket_distance, "away")
+        thrower_speed = Thrower.thrower_speed(state_data.basket_distance)
+
+        drive.move_omni(-side_speed, 8, rot_spd, thrower_speed)
+        #print("throwing at ", state_data.thrower_speed, "from ", state_data.basket_distance, "away")
 
         state_data.state = State.THROWING
         if state_data.debug and state_data.after_throw_counter > 59:
@@ -252,7 +263,7 @@ def handle_throwing(state_data, gamepad):
     
 def handle_debug(state_data, gamepad):
     drive.stop()
-    print("distance from basket: ", state_data.basket_distance)
+    #print("distance from basket: ", state_data.basket_distance)
     state_data.thrower_speed = int(input("Enter thrower speed to use:"))
     state_data.state = State.FIND
     
@@ -293,14 +304,14 @@ def logic(switcher):
     start_time = time.time()
     counter = 0
     joy = Xbox360.XboxController()
-    debug = True
+    debug = False
     state_data = RobotStateData()
     try:
         while True:
             # Main code
             #listen_for_referee_commands(state_data, Processor)
             #Align depth frame if we are in throw state
-            count, y, x, center_x, center_y, basket_distance, floorarea, out_of_field = Processor.process_frame(align_frame = True)#state_data.state == State.THROWING)
+            count, y, x, center_x, center_y, basket_distance, floorarea, out_of_field, basket_size = Processor.process_frame(align_frame = state_data.state == State.THROWING)
             state_data.ball_x = x 
             state_data.ball_y = y
             state_data.keypoint_count = count
@@ -308,7 +319,8 @@ def logic(switcher):
             state_data.debug = debug
             state_data.floor_area = floorarea
             state_data.basket_distance = basket_distance
-            state_data.out_of_field = out_of_field            
+            state_data.out_of_field = out_of_field      
+            state_data.basket_size = basket_size
             controller = joy.read()
 
             if controller.ybtn == 1:
@@ -323,7 +335,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            #print(state_data.basket_distance)
+            #print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
             
             if key == ord('q'):

@@ -48,6 +48,8 @@ class ProcessFrames():
             x = ball_array[0].x
             y = ball_array[0].y
 
+        basket_size = basket.size
+
         cv2.imshow("Debug", processed.debug_frame)
 
-        return len(ball_array), y, x, basket_x_center, basket_y_center, basket_distance, floorarea, out_of_field
+        return len(ball_array), y, x, basket_x_center, basket_y_center, basket_distance, floorarea, out_of_field, basket_size
