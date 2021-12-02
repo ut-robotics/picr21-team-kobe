@@ -77,9 +77,15 @@ def handle_drive(state_data, gamepad):
 
     max_acceleration = 4
     if state_data.out_of_field:
-        drive.move_omni(0,0, 20,0)
+        drive.move_omni(0, 0, 20, 0)
         time.sleep(0.3)
         state_data.out_of_field = False
+        state_data.state = State.FIND
+        return
+    # meters
+    if state_data.basket_distance < 0.5:
+        drive.move_omni(0, 0, 20, 0)
+        time.sleep(0.3)
         state_data.state = State.FIND
         return
 
@@ -218,7 +224,6 @@ def handle_throwing(state_data, gamepad):
     
             #delta_x = state_data.ball_x - state_data.basket_x
         delta_y = 0#500 - Camera.camera_y
-        thrower_speed = Thrower.thrower_speed(state_data.basket_distance)
         #front_speed = calc_speed(delta_y, Camera.camera_y, minDelta, 0, 100, 8)
         side_speed = calc_speed(delta_x, Camera.camera_x, 0, 0, 75, 20)
 
@@ -229,8 +234,7 @@ def handle_throwing(state_data, gamepad):
         state_data.prev_rotspeed = rot_spd
         state_data.prev_xspeed = side_speed
         
-        print("using speed: ", thrower_speed, "at", state_data.basket_distance)
-        #drive.move_omni(-0, 8, rotSpd, state_data.thrower_speed)
+        thrower_speed = Thrower.thrower_speed(state_data.basket_distance)
         drive.move_omni(-side_speed, 8, rot_spd, thrower_speed)
 
         state_data.state = State.THROWING
@@ -240,7 +244,6 @@ def handle_throwing(state_data, gamepad):
 
     elif state_data.keypoint_count == 0 and not state_data.has_thrown:    
         state_data.state = State.FIND
-    #state_data.has_thrown = False
     
 def handle_debug(state_data, gamepad):
     drive.stop()

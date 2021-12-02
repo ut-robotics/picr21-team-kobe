@@ -13,7 +13,8 @@ def order_exists(arr, order):
         return []   
 
 
-def CheckSequence(arr, noise, order):
+def check_sequence(arr, noise, order):
+    
     sequence_arr = filter_array(arr, noise)
     order_exist = order_exists(sequence_arr, order)
     return len(order_exist) > 0
