@@ -186,7 +186,7 @@ def handle_aim(state_data, gamepad):
     
 
     
-    if basketInFrame and (Camera.camera_x/2)- 15 <= state_data.basket_x <= (Camera.camera_x/2) + 15 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
+    if basketInFrame and (Camera.camera_x/2)- 10 <= state_data.basket_x <= (Camera.camera_x/2) + 10 and state_data.ball_y >= 410: # Start throwing if ball y is close to robot and basket is centered to camera x
         drive.stop()                             #prev center 315 to 325
         state_data.state = State.THROWING
         return
@@ -201,7 +201,7 @@ def handle_throwing(state_data, gamepad):
     if state_data.has_thrown:
         state_data.after_throw_counter += 1
 
-    if state_data.after_throw_counter > 75:
+    if state_data.after_throw_counter > 60:
         state_data.after_throw_counter = 0
         state_data.state = State.FIND
         state_data.has_thrown = False
@@ -273,8 +273,8 @@ data = None
 def listen_for_referee_commands(state_data, Processor):
     try:
         run, target = cl.get_current_referee_command()
-        #print("Target:  " + str(target))
-        #print("Run: " + str(run))
+        print("Target:  " + str(target))
+        print("Run: " + str(run))
         if target:
             target = True
         else:
@@ -309,7 +309,7 @@ def logic(switcher):
     try:
         while True:
             # Main code
-            #listen_for_referee_commands(state_data, Processor)
+            listen_for_referee_commands(state_data, Processor)
             #Align depth frame if we are in throw state
             count, y, x, center_x, center_y, basket_distance, floorarea, out_of_field, basket_size = Processor.process_frame(align_frame = state_data.state == State.THROWING)
             state_data.ball_x = x 
@@ -344,7 +344,7 @@ def logic(switcher):
             # FPS stuff
             counter += 1
             if(time.time() - start_time) > 1: # Frame rate per 1 second
-                #print("FPS -->", counter / (time.time() - start_time))
+                print("FPS -->", counter / (time.time() - start_time))
                 counter = 0
                 start_time = time.time()
                 
