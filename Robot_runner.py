@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import cv2
-import Movement as drive
+import movement as drive
 import image_processing as ip
 import camera_config
 import math
