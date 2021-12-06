@@ -1,7 +1,7 @@
 import serialcomms
 import math
 import cv2
-import CameraConfig
+import camera_config
 import Image_processing as ip
 
 wheelAngle1 = 240
@@ -10,7 +10,7 @@ wheelAngle3 = 0
 
 ser = serialcomms.Connection('/dev/ttyACM0')
 Processor = ip.ProcessFrames(False)
-Camera = CameraConfig.Config()
+Camera = camera_config.Config()
 
 
 def stop():

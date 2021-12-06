@@ -3,7 +3,7 @@
 import cv2
 import Movement as drive
 import Image_processing as ip
-import CameraConfig
+import camera_config
 import math
 from enum import Enum
 import Thrower
@@ -38,7 +38,7 @@ class RobotStateData():
 cl = Client.Client()
 cl.start()
 
-Camera = CameraConfig.Config()
+Camera = camera_config.Config()
 
 #States for logic
 class State(Enum):
