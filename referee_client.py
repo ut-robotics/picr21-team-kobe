@@ -14,7 +14,7 @@ class Client:
 
     def __init__(self):
         self.run = False
-        self.blueIsTarget = True
+        self.blue = True
         self.robot = literal_eval(parser.get('robot', 'robot_id'))
         self.host = literal_eval(parser.get('websocket', 'host'))
         self.port = literal_eval(parser.get('websocket', 'port'))
@@ -51,13 +51,13 @@ class Client:
             elif cmd["signal"] == "start":
                 color = cmd["baskets"][cmd["targets"].index(self.robot)]
                 if color == "blue":
-                    self.blueIsTarget = True
+                    self.blue = True
                 else:
-                    self.blueIsTarget = False
+                    self.blue = False
                 self.run = True
 
     def get_current_referee_command(self):
-        return self.run, self.blueIsTarget
+        return self.run, self.blue
 
     def start_loop(self):
         loop = asyncio.new_event_loop()
