@@ -3,7 +3,7 @@ import segment
 import _pickle as pickle
 import numpy as np
 import cv2
-import Color as c
+import color as c
 import color_sampler
 
 class Object():

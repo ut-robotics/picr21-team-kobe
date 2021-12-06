@@ -10,7 +10,7 @@ import Thrower
 import Referee_client as Client
 import time
 import Xbox360
-import Color
+import color
 
 class RobotStateData():
     def __init__(self) -> None:

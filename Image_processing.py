@@ -3,7 +3,7 @@
 import cv2
 import numpy as np
 import image_processor
-import Color
+import color
 
 class ProcessFrames():
     def __init__(self, camera, target=False):
@@ -39,7 +39,7 @@ class ProcessFrames():
             basket_distance = basket.distance
 
 
-        floorarea = np.count_nonzero(processed.fragmented == int(Color.Color.ORANGE))
+        floorarea = np.count_nonzero(processed.fragmented == int(color.Color.ORANGE))
         
         if floorarea is None:
             floorarea = 0
