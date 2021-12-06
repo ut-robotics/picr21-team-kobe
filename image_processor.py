@@ -122,7 +122,7 @@ class ImageProcessor:
         return balls
 
     def analyze_baskets(self, t_basket, depth_frame, debug_color = (0, 255, 255)) -> list:
-        t_basket = cv2.dilate(t_basket,(20,20),iterations = 1)
+        #t_basket = cv2.dilate(t_basket,(20,20),iterations = 1)
 
         contours, hierarchy = cv2.findContours(t_basket, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -146,6 +146,8 @@ class ImageProcessor:
             obj_dst = np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
 
             #depth_frame.get_distance(obj_x, obj_y)
+
+
 
 
 

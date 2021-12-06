@@ -3,11 +3,10 @@
 import cv2
 import numpy as np
 import image_processor
-import color
-
+from color import Color
 
 class ProcessFrames:
-    def __init__(self, camera, target=False):
+    def __init__(self, camera, target=Color.BLUE):
         self.processor = image_processor.ImageProcessor(camera.cam, debug=True)
         self.target = target
 
@@ -27,7 +26,7 @@ class ProcessFrames:
 
         out_of_field = processed.out_of_field
 
-        if self.target:
+        if self.target == Color.BLUE:
             basket = processed.basket_b
         else:
             basket = processed.basket_m
@@ -37,7 +36,7 @@ class ProcessFrames:
             basket_y_center = basket.y
             basket_distance = basket.distance
 
-        floor_area = np.count_nonzero(processed.fragmented == int(color.Color.ORANGE))
+        floor_area = np.count_nonzero(processed.fragmented == int(Color.ORANGE))
 
         if floor_area is None:
             floor_area = 0

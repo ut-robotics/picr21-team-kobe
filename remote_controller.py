@@ -9,7 +9,7 @@ wheel_angle_2 = 120
 wheel_angle_3 = 0
 
 ser = serialcomms.Connection('/dev/ttyACM0')
-processor = ip.ProcessFrames(False)
+#processor = ip.ProcessFrames(False)
 camera = camera_config.Config()
 
 
@@ -34,7 +34,7 @@ def get_speeds(moving_speed, thrower_speed, direction):
 def send_speeds(speeds):
     print("Sending: " + str(speeds))
     # order: motor1, motor2, motor3, thrower, failsafe
-    ser.WriteCommand(speeds[0], speeds[1], speeds[2], speeds[3], 0)
+    ser.write_command(speeds[0], speeds[1], speeds[2], speeds[3], 0)
 
 
 def calc_wheel_speed(moving_speed, direction, wheel_angle):
@@ -56,11 +56,11 @@ def keyboard_control():
     moving_speed = 15
     throwing_speed = 1400
     while True:
-        count, y, x, center_x, center_y, basket_distance, floor_area = processor.ProcessFrame(camera.pipeline,
-                                                                                              camera.camera_x,
-                                                                                              camera.camera_y)
-        print("distance", basket_distance * 100)
-        move(0, throwing_speed, 0)
+        #count, y, x, center_x, center_y, basket_distance, floor_area = processor.ProcessFrame(camera.pipeline,
+                                                                                              #camera.camera_x,
+                                                                                              #camera.camera_y)
+        #print("distance", basket_distance * 100)
+        #move(0, throwing_speed, 0)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("w"):
