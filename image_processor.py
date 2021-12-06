@@ -78,6 +78,8 @@ class ImageProcessor():
         self.camera.close()
 
     def analyze_balls(self, t_balls) -> list:
+        t_balls = cv2.dilate(t_balls,(20,20),iterations = 1)
+
         contours, hierarchy = cv2.findContours(t_balls, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         balls = []
@@ -90,7 +92,7 @@ class ImageProcessor():
             size = cv2.contourArea(contour)
             
 
-            if size < 10: #or self.out_of_field:
+            if size < 30: #or self.out_of_field:
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
@@ -121,6 +123,8 @@ class ImageProcessor():
         return balls
 
     def analyze_baskets(self, t_basket, depth_frame, debug_color = (0, 255, 255)) -> list:
+        t_basket = cv2.dilate(t_basket,(20,20),iterations = 1)
+
         contours, hierarchy = cv2.findContours(t_basket, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         baskets = []
@@ -137,12 +141,13 @@ class ImageProcessor():
 
             obj_x = int(x + (w/2))
             obj_y = int(y + (h/2))
-            area_w = 5
-            area_h = 5
+            area_w = 3
+            area_h = 3
             depth_image = np.asanyarray(depth_frame.get_data())
-            obj_dst = depth_frame.get_distance(obj_x, obj_y)
+            obj_dst = np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
 
-            #np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
+            #depth_frame.get_distance(obj_x, obj_y)
+
 
 
 

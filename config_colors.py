@@ -87,8 +87,9 @@ while True:
 
     for color in Color:
         frame[fragmented == int(color)] = color.color
-
+    dilation = cv2.dilate(frame,(20,20),iterations = 1)
     cv2.imshow('mask', frame)
+    cv2.imshow('dilated', dilation)
 
     k = cv2.waitKey(1) & 0xff
 
