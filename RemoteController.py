@@ -2,7 +2,7 @@ import serialcomms
 import math
 import cv2
 import camera_config
-import Image_processing as ip
+import image_processing as ip
 
 wheelAngle1 = 240
 wheelAngle2 = 120

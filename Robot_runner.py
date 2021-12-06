@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import cv2
 import Movement as drive
-import Image_processing as ip
+import image_processing as ip
 import camera_config
 import math
 from enum import Enum
