@@ -9,7 +9,7 @@ from enum import Enum
 import thrower
 import referee_client as client
 import time
-import Xbox360
+import xbox360
 import color
 
 
@@ -307,7 +307,7 @@ switcher = {
 def logic(switcher):
     start_time = time.time()
     counter = 0
-    joy = Xbox360.XboxController()
+    joy = xbox360.XboxController()
     debug = False
     state_data = RobotStateData()
     try:
