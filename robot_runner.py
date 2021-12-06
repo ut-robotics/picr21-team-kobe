@@ -6,7 +6,7 @@ import image_processing as ip
 import camera_config
 import math
 from enum import Enum
-import Thrower
+import thrower
 import referee_client as client
 import time
 import Xbox360
@@ -218,7 +218,7 @@ def handle_throwing(state_data, gamepad):
             delta_x = state_data.ball_x - state_data.basket_x
         rot_delta_x = state_data.ball_x - camera.camera_x / 2  # if no ball and throw true basket_x - camera_x
         delta_y = camera.camera_y + 20 - state_data.ball_y
-        thrower_speed = Thrower.thrower_speed(state_data.basket_distance)
+        thrower_speed = thrower.thrower_speed(state_data.basket_distance)
         front_speed = calc_speed(delta_y, camera.camera_y, min_delta, min_speed, 200, max_speed)
         side_speed = calc_speed(delta_x, camera.camera_x, min_delta, 2, 150, max_speed)
         rot_speed = calc_speed(rot_delta_x, camera.camera_x, min_delta, 2, 100, max_speed)
@@ -248,7 +248,7 @@ def handle_throwing(state_data, gamepad):
         state_data.prev_rot_speed = rot_speed
         state_data.prev_x_speed = side_speed
 
-        thrower_speed = Thrower.thrower_speed(state_data.basket_distance)
+        thrower_speed = thrower.thrower_speed(state_data.basket_distance)
 
         drive.move_omni(-side_speed, 8, rot_speed, thrower_speed)
         # print("throwing at ", state_data.thrower_speed, "from ", state_data.basket_distance, "away")
