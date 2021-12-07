@@ -173,7 +173,7 @@ def handle_stopped(state_data, gamepad):
 
 def handle_aim(state_data, gamepad):
 
-    if not state_data.floor_area or state_data.floor_area < 20000:
+    if state_data.floor_area is not None or state_data.floor_area < 20000:
         state_data.state = State.FIND
         return
 
