@@ -58,7 +58,7 @@ class State(Enum):
     DEBUG = 6
 
 #set target value with referee commands True = Blue, !True = Magenta
-target = Color.MAGENTA
+target = Color.BLUE
 #Create image processing object
 processor = ip.ProcessFrames(camera, target)
 
@@ -173,7 +173,7 @@ def handle_stopped(state_data, gamepad):
 
 def handle_aim(state_data, gamepad):
 
-    if state_data.floor_area is not None or state_data.floor_area < 20000:
+    if state_data.floor_area is None or state_data.floor_area < 20000:
         state_data.state = State.FIND
         return
 
@@ -188,7 +188,7 @@ def handle_aim(state_data, gamepad):
         delta_x = state_data.ball_x - state_data.basket_x
     rot_delta_x = state_data.ball_x - camera.camera_x/2
 
-    delta_y = (camera.camera_y * 0.708) - state_data.ball_y
+    delta_y = (camera.camera_y * 0.758) - state_data.ball_y
     front_speed = calc_speed(delta_y, camera.camera_y, 5, 3, 500, 50)
     side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 200, 40)
     rot_spd = calc_speed(rot_delta_x, camera.camera_x, 5, 3, 200, 70)
@@ -249,8 +249,8 @@ def handle_throwing(state_data, gamepad):
         delta_y = camera.camera_y - state_data.ball_y
         thrower_speed = thrower.thrower_speed(state_data.basket_distance)
         front_speed = calc_speed(delta_y, camera.camera_y, 5, min_speed, 200, max_speed)
-        side_speed = calc_speed(delta_x, camera.camera_x, 5, 3, 150, max_speed)
-        rot_spd = calc_speed(rot_delta_x, camera.camera_x, 5, 3, 100, max_speed)
+        side_speed = calc_speed(delta_x, camera.camera_x, 0, 2, 150, max_speed)
+        rot_spd = calc_speed(rot_delta_x, camera.camera_x, 0, 2, 100, max_speed)
         state_data.prev_yspeed = front_speed
         state_data.prev_rotspeed = rot_spd
         state_data.prev_xspeed = side_speed
@@ -279,14 +279,14 @@ def handle_throwing(state_data, gamepad):
         # front_speed = calc_speed(delta_y, camera.camera_y, min_delta, 0, 100, 8)
         side_speed = calc_speed(delta_x, camera.camera_x, 0, 0, 75, 20)
 
-        rot_speed = calc_speed(rot_delta_x, camera.camera_x/2, 0, 0, 200, 30)
+        rot_speed = calc_speed(rot_delta_x, camera.camera_x/2, 0, 0, 200, 20)
 
         state_data.prev_y_speed = 0
         state_data.prev_rot_speed = rot_speed
         state_data.prev_x_speed = side_speed
 
-        thrower_speed = thrower.thrower_speed(state_data.basket_distance)
-
+        #thrower_speed = thrower.thrower_speed(state_data.basket_distance)
+        thrower_speed = state_data.thrower_speed
         drive.move_omni(-side_speed, 12, -rot_speed, thrower_speed)
         #print("throwing at ", state_data.thrower_speed, "from ", state_data.basket_distance, "away")
 
@@ -344,7 +344,7 @@ def logic(switcher):
     start_time = time.time()
     counter = 0
     joy = xbox360.XboxController()
-    debug = False
+    debug = True
     state_data = RobotStateData()
     try:
         while True:
@@ -376,7 +376,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            # print(state_data.state)
+            print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
 
             if key == ord('q'):
