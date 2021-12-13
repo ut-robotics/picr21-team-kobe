@@ -285,8 +285,8 @@ def handle_throwing(state_data, gamepad):
         state_data.prev_rot_speed = rot_speed
         state_data.prev_x_speed = side_speed
 
-        #thrower_speed = thrower.thrower_speed(state_data.basket_distance)
-        thrower_speed = state_data.thrower_speed
+        thrower_speed = thrower.thrower_speed(state_data.basket_distance)
+        #thrower_speed = state_data.thrower_speed
         drive.move_omni(-side_speed, 12, -rot_speed, thrower_speed)
         #print("throwing at ", state_data.thrower_speed, "from ", state_data.basket_distance, "away")
 
@@ -344,7 +344,7 @@ def logic(switcher):
     start_time = time.time()
     counter = 0
     joy = xbox360.XboxController()
-    debug = True
+    debug = False
     state_data = RobotStateData()
     try:
         while True:
@@ -376,7 +376,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            print(state_data.state)
+            # print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
 
             if key == ord('q'):
