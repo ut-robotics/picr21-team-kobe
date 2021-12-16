@@ -102,7 +102,7 @@ class ImageProcessor:
             colors = self.fragmented[ys, xs]
             out_of_field = color_sampler.check_sequence(colors, 8, self.line_sequence)
             #out_of_field = False
-            print(out_of_field)
+            #print(out_of_field)
 
             if out_of_field:
                 self.out_of_field = out_of_field

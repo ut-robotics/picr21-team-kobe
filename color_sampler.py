@@ -16,7 +16,7 @@ def order_exists(arr, order):
 
 def check_sequence(arr, noise, order):
     sequence_arr = filter_array(arr, noise)
-    print(sequence_arr)
+    #print(sequence_arr)
     order_exist = order_exists(sequence_arr, order)
     return len(order_exist) > 0
 

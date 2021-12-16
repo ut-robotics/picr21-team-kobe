@@ -176,18 +176,19 @@ def handle_stopped(state_data, gamepad):
 
 def handle_aim(state_data, gamepad):
 
-    if state_data.last_attacking_basket_x < camera.camera_x/2:
+    if state_data.last_attacking_basket_x is not None and state_data.last_attacking_basket_x < camera.camera_x/2:
         #turn left
         turn_direction = 1
     else:
         #turn right
         turn_direction = -1
         
-    if state_data.opponent_x > camera.camera_x/2:
+    if state_data.opponent_basket_x is not None and state_data.opponent_basket_x > camera.camera_x/2:
         # reverse direction
         turn_direction *= -1
         
-        
+    print("attacking basket {} opponent_basket {} turn direction {}".format(state_data.last_attacking_basket_x, state_data.opponent_basket_x, turn_direction))
+
     print(turn_direction)
 
     if state_data.floor_area is None or state_data.floor_area < 20000:
@@ -381,9 +382,9 @@ def logic(switcher):
             state_data.basket_size = basket_size
             
             
-            if state_data.opponent_basket_x is not None:
+            if opponent_basket_x is not None:
                 state_data.opponent_basket_x = opponent_basket_x
-            if state_data.last_attacking_basket_x is not None:
+            if center_x is not None:
                 state_data.last_attacking_basket_x = center_x
             
 
