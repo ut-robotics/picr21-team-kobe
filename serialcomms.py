@@ -7,7 +7,7 @@ data_size = struct.calcsize('<hhhH')
 ports = serial.tools.list_ports.comports()
 
 
-# print([port.name for port in ports])
+print([port.name for port in ports])
 
 class Connection:
 
@@ -22,8 +22,8 @@ class Connection:
             self.ser.write(data)
 
             received_data = self.ser.read(data_size)
-            data = struct.unpack('<hhhH', received_data)
-            # print(data)
+            #data = struct.unpack('<hhhH', received_data)
+            #print(data)
         except Exception as e:
             print(e)
             raise
