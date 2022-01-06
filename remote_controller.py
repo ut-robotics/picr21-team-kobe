@@ -1,7 +1,7 @@
 import math
 import cv2
 import camera_config
-import image_processing as ip
+import image_processor as ip
 import movement
 
 #processor = ip.ProcessFrames(False)
