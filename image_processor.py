@@ -147,9 +147,11 @@ class ImageProcessor:
             area_w = 3
             area_h = 3
             depth_image = np.asanyarray(depth_frame.get_data())
-            obj_dst = np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
 
-            #depth_frame.get_distance(obj_x, obj_y)
+            try:
+                obj_dst = np.average(depth_image[obj_y:obj_y + area_w, obj_x:obj_x + area_h]) * self.camera.depth_scale
+            except IndexError:
+                obj_dst = depth_frame.get_distance(obj_x, obj_y)
 
 
 
