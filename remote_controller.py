@@ -10,7 +10,6 @@ camera = camera_config.Config()
 
 def keyboard_control():
     cv2.namedWindow("Controller")
-    # print("distance", basket_distance*100)
     moving_speed = 15
     throwing_speed = 1400
     while True:
