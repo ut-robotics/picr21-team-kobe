@@ -1,7 +1,7 @@
 import math
 import cv2
 import camera_config
-import image_processing as ip
+import image_processor as ip
 import movement
 
 #processor = ip.ProcessFrames(False)
@@ -10,7 +10,6 @@ camera = camera_config.Config()
 
 def keyboard_control():
     cv2.namedWindow("Controller")
-    # print("distance", basket_distance*100)
     moving_speed = 15
     throwing_speed = 1100
     while True:

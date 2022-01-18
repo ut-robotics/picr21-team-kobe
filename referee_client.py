@@ -11,7 +11,6 @@ parser.read('config.ini')
 
 
 class Client:
-
     def __init__(self):
         self.run = False
         self.blue = True

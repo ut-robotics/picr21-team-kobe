@@ -9,7 +9,6 @@ parser = ConfigParser()
 
 
 class Server:
-
     def __init__(self):
         parser.read('config.ini')
         self.host = literal_eval(parser.get('websocket', 'host'))
@@ -65,7 +64,7 @@ class Server:
                 continue
 
             await ws.send(json.dumps(msg))
-            #await ws.recv()
+            # await ws.recv()
 
     def start(self):
         loop = asyncio.new_event_loop()
