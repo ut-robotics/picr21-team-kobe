@@ -42,4 +42,11 @@ def thrower_speed(distance):
         else:
             return 675
 
-# Experimental
+# New thrower calibratrion
+
+#distance
+# X = [70, 100,149]
+
+
+#speed
+# Y = [730, 750,800]

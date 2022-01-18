@@ -312,8 +312,9 @@ def handle_throwing(state_data, gamepad):
         print("throwing at ", state_data.thrower_speed, "from ", state_data.basket_distance, "away")
 
         state_data.state = State.THROWING
-        if state_data.debug and state_data.after_throw_counter > 50:
+        if state_data.debug and state_data.after_throw_counter > 40:
             state_data.state = State.DEBUG
+            state_data.after_throw_counter = 0
         return
 
     elif state_data.keypoint_count == 0 and not state_data.has_thrown:

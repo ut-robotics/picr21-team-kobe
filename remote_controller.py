@@ -12,7 +12,7 @@ def keyboard_control():
     cv2.namedWindow("Controller")
     # print("distance", basket_distance*100)
     moving_speed = 15
-    throwing_speed = 1400
+    throwing_speed = 1100
     while True:
         #count, y, x, center_x, center_y, basket_distance, floor_area = processor.ProcessFrame(camera.pipeline,
                                                                                               #camera.camera_x,
