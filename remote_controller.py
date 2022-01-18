@@ -22,25 +22,25 @@ def keyboard_control():
         key = cv2.waitKey(1) & 0xFF
         if key == ord("w"):
             print("Moving forward.")
-            movement.move_omni(0, moving_speed, 0,0)
+            movement.move_omni(0, moving_speed, 0,1800)
         if key == ord("d"):
             print("Moving right.")
-            movement.move_omni(moving_speed, 0, 0,0)
+            movement.move_omni(-moving_speed, 0, 0,1800)
         if key == ord("s"):
             print("Moving backwards.")
-            movement.move_omni(0, -moving_speed, 0,0)
+            movement.move_omni(0, -moving_speed, 0,1800)
         if key == ord("a"):
             print("Moving left.")
-            movement.move_omni(-moving_speed, 0, 0,0)
+            movement.move_omni(moving_speed, 0, 0,1800)
         if key == ord("e"):
             print("Spinning right.")
-            movement.move_omni(0, 0, moving_speed,0)
+            movement.move_omni(0, 0, moving_speed,1800)
         if key == ord("q"):
             print("Spinning left.")
-            movement.move_omni(0, 0, -moving_speed,0)
+            movement.move_omni(0, 0, -moving_speed,1800)
         if key == ord("t"):
             print("Throwing.")
-            movement.move_omni(0, 0, 0,throwing_speed)
+            movement.move_omni(3, 3, 3,2600)
         if key == ord("c"):
             print("Stopping.")
             movement.stop()

@@ -31,22 +31,22 @@ def thrower_speed(distance):
             # likely should use a map of [122,525] where min distance is where you can still score a basket and a motor map of [700, 2047]
             # where min speed is the minimum amount needed to score from min distance
             # duty_cycle = int(interp(distance*100, [0, 525], [48, 2047]))
-            thrower_speed = int(predicted_function(distance * 100))
+            thrower_speed = int(predicted_function(distance * 100)) + 2012
             print(thrower_speed)
             # print("Duty cycle --> ", duty_cycle)
             print("using speed", thrower_speed, "at", distance * 100, "cm")
         return thrower_speed
     except Exception as e:
         if distance > 450:
-            return 2047
+            return 2047+2000
         else:
-            return 675
+            return 675+2000
 
 # New thrower calibratrion
 
 #distance
-# X = [70, 100,149]
+# X = [70, 100,149, 213]
 
 
 #speed
-# Y = [730, 750,800]
+# Y = [730, 750,800, 900]

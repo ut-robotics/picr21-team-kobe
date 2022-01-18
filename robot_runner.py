@@ -17,7 +17,7 @@ cl = client.Client()
 cl.start()
 camera = camera_config.Config()
 # set target value with referee commands True = Blue, !True = Magenta
-target = Color.BLUE
+target = Color.MAGENTA
 # Create image processing object
 processor = ip.ProcessFrames(camera, target)
 
@@ -28,14 +28,14 @@ class RobotStateData:
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.AIM
+        self.state = State.DRIVE
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
         self.floor_area = None
         self.basket_distance = None
         self.debug = False
-        self.thrower_speed = 0
+        self.thrower_speed = 2600
         self.prev_x_speed = 0
         self.prev_y_speed = 0
         self.prev_rot_speed = 0
@@ -88,7 +88,7 @@ def handle_drive(state_data, gamepad):
     max_acceleration = 4
     if state_data.basket_size is not None:
         if state_data.basket_size > 28000:
-            drive.move_omni(0, 0, 20, 0)
+            drive.move_omni(0, 0, 20, 1800)
             time.sleep(0.3)
             state_data.state = State.FIND
             return
@@ -101,7 +101,7 @@ def handle_drive(state_data, gamepad):
         return
 
     if state_data.floor_area is None or state_data.floor_area < 20000:
-        drive.move_omni(0, 0, 20, 0)
+        drive.move_omni(0, 0, 20, 1800)
         time.sleep(0.3)
         state_data.state = State.FIND
         return
@@ -123,7 +123,7 @@ def handle_drive(state_data, gamepad):
         state_data.prev_y_speed = front_speed
         state_data.prev_rot_speed = -rot_spd
 
-        drive.move_omni(-0, front_speed, -rot_spd, 0)
+        drive.move_omni(-0, front_speed, -rot_spd, 1800)
 
         if camera.camera_y > state_data.ball_y > camera.camera_y * 0.66:  # How close ball y should be to switch to next state
             state_data.state = State.AIM
@@ -150,7 +150,7 @@ def handle_find(state_data, gamepad):
         rot_speed = 20
     state_data.after_rotation_counter += 1
 
-    drive.move_omni(0, 0, rot_speed, 0)
+    drive.move_omni(0, 0, rot_speed, 1800)
     if state_data.keypoint_count >= 1:
         handle_drive(state_data, gamepad)
         state_data.state = State.DRIVE
@@ -202,7 +202,7 @@ def handle_aim(state_data, gamepad):
     state_data.prev_yspeed = front_speed
     state_data.prev_rotspeed = rot_spd
     state_data.prev_xspeed = side_speed
-    drive.move_omni(side_speed, front_speed, -rot_spd, 0)
+    drive.move_omni(-side_speed, front_speed, -rot_spd, 1800)
 
     print("side speed", side_speed)
         
@@ -229,7 +229,7 @@ def handle_aim(state_data, gamepad):
     state_data.state = State.AIM
 
 
-def handle_throwing(state_data):
+def handle_throwing(state_data, controller):
     min_speed = 15
     max_speed = 30
     # min_delta = 5
@@ -259,7 +259,9 @@ def handle_throwing(state_data):
         state_data.prev_yspeed = front_speed
         state_data.prev_rotspeed = rot_spd
         state_data.prev_xspeed = side_speed
-        drive.move_omni(side_speed, front_speed, -rot_spd, thrower_speed)
+        drive.move_omni(-side_speed, front_speed, -rot_spd, thrower_speed)
+        #drive.move_omni(-0, 0, -0, 2600)
+
         state_data.has_thrown = True
         state_data.state = State.THROWING
         return
@@ -289,9 +291,13 @@ def handle_throwing(state_data):
         state_data.prev_rot_speed = rot_speed
         state_data.prev_x_speed = side_speed
 
-        thrower_speed = state_data.thrower_speed
-        drive.move_omni(side_speed, 12, -rot_speed, thrower_speed)
-        print("throwing at ", state_data.thrower_speed, "from ", state_data.basket_distance, "away")
+        #thrower_speed = state_data.thrower_speed
+        thrower_speed = thrower.thrower_speed(state_data.basket_distance)
+
+        drive.move_omni(-side_speed, 12, -rot_speed, thrower_speed)
+        #drive.move_omni(-0, 0, -0, thrower_speed)
+
+        print("throwing at ", thrower_speed, "from ", state_data.basket_distance, "away")
 
         state_data.state = State.THROWING
         if state_data.debug and state_data.after_throw_counter > 40:
@@ -345,7 +351,7 @@ def logic(switcher):
     start_time = time.time()
     counter = 0
     joy = xbox360.XboxController()
-    debug = True
+    debug = False
     state_data = RobotStateData()
     try:
         while True:
