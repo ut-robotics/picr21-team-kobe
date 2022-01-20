@@ -24,6 +24,8 @@ class Client:
         async with websockets.connect(uri) as ws:
             while True:
                 msg = await ws.recv()
+                parser.read('config.ini')
+                self.robot = literal_eval(parser.get('robot', 'robot_id'))
                 cmd = json.loads(msg)
                 print("Received message from server: " + str(cmd))
                 try:
@@ -35,16 +37,15 @@ class Client:
         parser.read('config.ini')
         self.robot = literal_eval(parser.get('robot', 'robot_id'))
         if self.robot in cmd["targets"]:
-            if cmd["signal"] == "changeID" and self.robot != cmd["robot"]:
-                new_robot_id = cmd["robot"]
+            if cmd["signal"] == "changeID" and self.robot != cmd["new_robot_id"]:
+                new_robot_id = cmd["new_robot_id"]
                 try:
                     parser.set('robot', 'robot_id', repr(new_robot_id))
                     with open('config.ini', "w") as f:
                         parser.write(f)
-                    print(new_robot_id)
                     self.robot = new_robot_id
                 except ValueError:
-                    print("Invalid robot id.")
+                    print("Invalid robot id")
             elif cmd["signal"] == "stop":
                 self.run = False
             elif cmd["signal"] == "start":

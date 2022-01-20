@@ -17,8 +17,6 @@ class Server:
 
     async def send(self, ws, path):
         while True:
-            parser.read('config.ini')
-            self.robot = literal_eval(parser.get('robot', 'robot_id'))
             instructions = "Enter a command: 1, 2, 3 or 4 \n 1 - signal: start, targets: ['Io', " + self.robot + \
                            "], baskets: ['magenta', 'blue']\n 2 - signal: start, targets: ['Io', " + self.robot + \
                            "'], baskets: ['blue', 'magenta'] \n 3 - signal: stop, targets: ['Io', " + self.robot + \
@@ -27,6 +25,7 @@ class Server:
             try:
                 cmd = int(await asyncio.get_event_loop().run_in_executor(None, input, instructions))
             except ValueError:
+                print("Invalid command")
                 continue
 
             if cmd == 1:
@@ -52,19 +51,27 @@ class Server:
                 while self.robot == "":
                     try:
                         self.robot = str(await asyncio.get_event_loop().run_in_executor(None, input, "Enter an ID..."))
-                    except ValueError:
-                        print("Invalid robot id.")
-                        continue
+                        parser.set('robot', 'robot_id', repr(self.robot))
+                        with open('config.ini', "w") as f:
+                            parser.write(f)
+                    except (ValueError, UnicodeError):
+                        self.robot = robot_old
+                        parser.set('robot', 'robot_id', repr(self.robot))
+                        with open('config.ini', "w") as f:
+                            parser.write(f)
+                        print("Invalid robot id")
+                if self.robot == robot_old:
+                    continue
                 msg = {
                     "signal": "changeID",
-                    "targets": robot_old,
-                    "robot": self.robot
+                    "targets": [robot_old],
+                    "new_robot_id": self.robot
                 }
             else:
+                print("Invalid command")
                 continue
 
             await ws.send(json.dumps(msg))
-            # await ws.recv()
 
     def start(self):
         loop = asyncio.new_event_loop()
@@ -73,5 +80,4 @@ class Server:
         loop.run_forever()
 
 
-srv = Server()
-srv.start()
+Server().start()
