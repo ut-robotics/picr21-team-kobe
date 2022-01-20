@@ -16,7 +16,7 @@ data = None
 cl = client.Client()
 cl.start()
 camera = camera_config.Config()
-# set target value with referee commands True = Blue, !True = Magenta
+# set target color with referee commands 
 target = Color.MAGENTA
 # Create image processing object
 processor = ip.ProcessFrames(camera, target)
@@ -47,6 +47,10 @@ class RobotStateData:
         self.valid_aim_frames = 0
         self.last_attacking_basket_x = None
         self.opponent_basket_x = None
+        self.patrol_counter = 0
+        self.opponent_basket_bottom_y = None
+        self.basket_bottom_y = None
+        self.own_basket = True
 
 
 # States for logic
@@ -58,6 +62,7 @@ class State(Enum):
     STOPPED = 4
     MANUAL = 5
     DEBUG = 6
+    PATROL = 7
 
 
 def calc_speed(delta, max_delta, min_delta, min_speed, max_delta_speed, max_speed):
@@ -82,6 +87,68 @@ def handle_manual(state_data, gamepad):
         state_data.thrower_speed -= 10
     # drive.move_omni(0,0,0, state_data.thrower_speed)
     # drive.move_omni(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 0)
+
+def handle_patrol(state_data, gamepad):
+    if state_data.keypoint_count > 0:
+        state_data.state = State.DRIVE
+        return
+    
+    if state_data.own_basket:
+    
+        delta_y = (camera.camera_y * 0.758) - state_data.basket_bottom_y
+        if delta_y > 0:
+            
+            # First Drive to own basket to see if there are any balls
+            if state_data.floor_area is None or state_data.floor_area < 20000:
+                state_data.state = State.FIND
+                return
+
+            basket_in_frame = state_data.basket_x is not None
+
+            if not basket_in_frame:
+                delta_x = camera.camera_x
+                
+            else:
+                delta_x = state_data.basket_x
+            rot_delta_x = camera.camera_x/2
+
+            front_speed = calc_speed(delta_y, camera.camera_y, 5, 3, 500, 50)
+            side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
+            rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 30)  #* turn_direction
+            state_data.prev_yspeed = front_speed
+            state_data.prev_rotspeed = rot_spd
+            state_data.prev_xspeed = side_speed
+            drive.move_omni(-side_speed, front_speed, -rot_spd, 1800)
+        else:
+            state_data.own_basket = not state_data.own_basket
+    # We are now at own basket so drive to opponent basket to see if there are any balls
+    else:
+        delta_y = (camera.camera_y * 0.758) - state_data.opponent_basket_bottom_y
+        if delta_y > 0:
+            
+            if state_data.floor_area is None or state_data.floor_area < 20000:
+                state_data.state = State.FIND
+                return
+
+            basket_in_frame = state_data.opponent_basket_x is not None
+
+            if not basket_in_frame:
+                delta_x = camera.camera_x
+                
+            else:
+                delta_x = state_data.opponent_basket_x
+            rot_delta_x = camera.camera_x/2
+
+            front_speed = calc_speed(delta_y, camera.camera_y, 5, 3, 500, 50)
+            side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
+            rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 30)  #* turn_direction
+            state_data.prev_yspeed = front_speed
+            state_data.prev_rotspeed = rot_spd
+            state_data.prev_xspeed = side_speed
+            drive.move_omni(-side_speed, front_speed, -rot_spd, 1800)
+        else:
+            state_data.own_basket = not state_data.own_basket
+    state_data.State = State.PATROL
 
 
 def handle_drive(state_data, gamepad):
@@ -138,7 +205,12 @@ def handle_drive(state_data, gamepad):
 
 def handle_find(state_data, gamepad):
     rot_speed = 5
-
+    
+    if state_data.patrol_counter > 300 and state_data.keypoint_count == 0:
+        state_data.patrol_counter = 0
+        state_data.state = State.PATROL
+        return
+    
     if state_data.after_rotation_counter > 20 and state_data.has_rotated:
         state_data.after_rotation_counter = 0
         state_data.has_rotated = not state_data.has_rotated
@@ -149,6 +221,7 @@ def handle_find(state_data, gamepad):
     if state_data.has_rotated:
         rot_speed = 20
     state_data.after_rotation_counter += 1
+    state_data.patrol_counter += 1
 
     drive.move_omni(0, 0, rot_speed, 1800)
     if state_data.keypoint_count >= 1:
@@ -313,6 +386,7 @@ def handle_debug(state_data):
     drive.stop()
     state_data.thrower_speed = int(input("Enter thrower speed to use:"))
     state_data.state = State.FIND
+    
 
 
 def listen_for_referee_commands(state_data, processor):
@@ -343,7 +417,8 @@ switcher = {
     State.THROWING: handle_throwing,
     State.STOPPED: handle_stopped,
     State.MANUAL: handle_manual,
-    State.DEBUG: handle_debug
+    State.DEBUG: handle_debug,
+    State.PATROL: handle_patrol
 }
 
 
@@ -359,7 +434,7 @@ def logic(switcher):
             # listen_for_referee_commands(state_data, processor)
             # state_data.state = State.THROWING
             # Align depth frame if we are in throw state
-            count, y, x, center_x, center_y, basket_distance, floor_area, out_of_field, basket_size, opponent_basket_x = processor.process_frame(
+            count, y, x, center_x, center_y, basket_distance, floor_area, out_of_field, basket_size, opponent_basket_x, opponent_basket_bottom_y, basket_bottom_y = processor.process_frame(
                 align_frame=state_data.state == State.THROWING)
             state_data.ball_x = x
             state_data.ball_y = y
@@ -370,9 +445,11 @@ def logic(switcher):
             state_data.basket_distance = basket_distance
             state_data.out_of_field = out_of_field
             state_data.basket_size = basket_size
+            state_data.basket_bottom_y = basket_bottom_y
 
             if opponent_basket_x is not None:
                 state_data.opponent_basket_x = opponent_basket_x
+                state_data.opponent_basket_bottom_y = opponent_basket_bottom_y
             if center_x is not None:
                 state_data.last_attacking_basket_x = center_x
 

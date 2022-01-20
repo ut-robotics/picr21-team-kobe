@@ -8,20 +8,21 @@ from color import Color
 
 
 class Object:
-    def __init__(self, x=-1, y=-1, size=-1, distance=-1, exists=False):
+    def __init__(self, x=-1, y=-1, size=-1, distance=-1, exists=False, bottom_y=-1):
         self.x = x
         self.y = y
         self.size = size
         self.distance = distance
         self.exists = exists
+        self.bottom_y = bottom_y
 
     def __str__(self) -> str:
-        return "[Object: x={}; y={}; size={}; distance={}; exists={}]".format(
-            self.x, self.y, self.size, self.distance, self.exists)
+        return "[Object: x={}; y={}; size={}; distance={}; exists={}; bottom_y={}]".format(
+            self.x, self.y, self.size, self.distance, self.exists, self.bottom_y)
 
     def __repr__(self) -> str:
-        return "[Object: x={}; y={}; size={}; distance={}; exists={}]".format(
-            self.x, self.y, self.size, self.distance, self.exists)
+        return "[Object: x={}; y={}; size={}; distance={}; exists={}; bottom_y{}]".format(
+            self.x, self.y, self.size, self.distance, self.exists, self.bottom_y)
 
 
 # results object of image processing. contains coordinates of objects and frame data used for these results
@@ -131,7 +132,8 @@ class ImageProcessor:
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
-
+            #bottommost = tuple(contour[contour[:,:,1].argmax()][0])
+            bottom = (np.argmax(contour[y+h-1, :]), y+h-1)
             obj_x = int(x + (w/2))
             obj_y = int(y + (h/2))
             area_w = 3
@@ -143,7 +145,7 @@ class ImageProcessor:
             except IndexError:
                 obj_dst = depth_frame.get_distance(obj_x, obj_y)
 
-            baskets.append(Object(x=obj_x, y=obj_y, size=size, distance=obj_dst, exists=True))
+            baskets.append(Object(x=obj_x, y=obj_y, size=size, distance=obj_dst, exists=True, bottom_y=bottom[1]))
 
         baskets.sort(key=lambda x: x.size)
 
@@ -151,7 +153,9 @@ class ImageProcessor:
 
         if self.debug:
             if basket.exists:
-                cv2.circle(self.debug_frame, (basket.x, basket.y), 20, debug_color, -1)
+                #cv2.circle(self.debug_frame, (basket.x, basket.y), 20, debug_color, -1)
+                cv2.rectangle(self.debug,(x,y),(x+w, y+h), debug_color, -1)
+                cv2.circle(self.debug, bottom, 5, (100,100,100), -1)
 
         return basket
 
@@ -214,9 +218,11 @@ class ProcessFrames:
             basket_x_center = basket.x
             basket_y_center = basket.y
             basket_distance = basket.distance
+            basket_bottom_y = basket.bottom_y
 
         if opponent_basket.exists:
             opponent_basket_x = opponent_basket.x
+            opponent_basket_bottom_y = opponent_basket.bottom_y
 
         floor_area = np.count_nonzero(processed.fragmented == int(Color.ORANGE))
 
@@ -240,4 +246,6 @@ class ProcessFrames:
                 floor_area,
                 out_of_field,
                 basket_size,
-                opponent_basket_x)
+                opponent_basket_x,
+                opponent_basket_bottom_y,
+                basket_bottom_y)
