@@ -87,8 +87,8 @@ class ImageProcessor:
             # ball filtering logic goes here. Example includes filtering by size and an example how to get pixels from
             # the bottom center of the frame to the ball
             size = cv2.contourArea(contour)
-
-            if size < 15: #or self.out_of_field:
+            print(size)
+            if size < 50: #or self.out_of_field: #15
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
@@ -111,8 +111,9 @@ class ImageProcessor:
 
             if self.debug:
                 self.debug_frame[ys, xs] = [0, 0, 0]
+                #self.debug_frame[150:300, 300:600] = [0,0,0]
                 cv2.circle(self.debug_frame, (obj_x, obj_y), 10, (0, 255, 0), 2)
-                cv2.rectangle(self.debug_frame, (self.debug_frame[150:300]), (self.debug_frame[300:600]),(0,255,0), 5)
+                #cv2.rectangle(self.debug_frame, (100,200), (100,200),(0,255,0), 5)
 
             balls.append(Object(x=obj_x, y=obj_y, size=size, distance=obj_dst, exists=True))
 
@@ -133,8 +134,8 @@ class ImageProcessor:
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
-            #bottommost = tuple(contour[contour[:,:,1].argmax()][0])
-            bottom = (np.argmax(contour[y+h-1, :]), y+h-1)
+            bottommost = tuple(contour[contour[:,:,1].argmax()][0])
+            #bottom = (np.argmax(contour[y+h-1, :]), y+h-1)
             obj_x = int(x + (w/2))
             obj_y = int(y + (h/2))
             area_w = 3
@@ -146,7 +147,7 @@ class ImageProcessor:
             except IndexError:
                 obj_dst = depth_frame.get_distance(obj_x, obj_y)
 
-            baskets.append(Object(x=obj_x, y=obj_y, size=size, distance=obj_dst, exists=True, bottom_y=bottom[1]))
+            baskets.append(Object(x=obj_x, y=obj_y, size=size, distance=obj_dst, exists=True, bottom_y=bottommost[1]))
 
         baskets.sort(key=lambda x: x.size)
 
@@ -154,9 +155,9 @@ class ImageProcessor:
 
         if self.debug:
             if basket.exists:
-                #cv2.circle(self.debug_frame, (basket.x, basket.y), 20, debug_color, -1)
-                cv2.rectangle(self.debug,(x,y),(x+w, y+h), debug_color, -1)
-                cv2.circle(self.debug, bottom, 5, (100,100,100), -1)
+                cv2.circle(self.debug_frame, (basket.x, basket.y), 20, debug_color, -1)
+                #cv2.rectangle(self.debug,(x,y),(x+w, y+h), debug_color, -1)
+                #cv2.circle(self.debug, bottommost, 5, (255,0,0), -1)
 
         return basket
 
@@ -204,7 +205,9 @@ class ProcessFrames:
         basket_x_center = None
         basket_y_center = None
         basket_distance = None
-        avoid_collision = False
+        #avoid_collision = False
+        opponent_basket_bottom_y = None
+        basket_bottom_y = None
 
         out_of_field = processed.out_of_field
         opponent_basket_x = None
@@ -227,18 +230,18 @@ class ProcessFrames:
             opponent_basket_bottom_y = opponent_basket.bottom_y
 
         floor_area = np.count_nonzero(processed.fragmented == int(Color.ORANGE))
-        obstacle_area = np.count_nonzero(processed.fragmented[150:300, 300:600] == int(Color.ORANGE))
-        print("obstacle orange area", obstacle_area)
+        #obstacle_area = np.count_nonzero(processed.fragmented[150:300, 300:600] == int(Color.ORANGE))
+        #print("obstacle orange area", obstacle_area)
         
 
         
-        if obstacle_area is None:
-            obstacle_area = 0
+        # if obstacle_area is None:
+        #     obstacle_area = 0
             
-        if obstacle_area < 1000:
-            avoid_collision = True
-        elif obstacle_area > 1000:
-            avoid_collision = False
+        # if obstacle_area < 1000:
+        #     avoid_collision = True
+        # elif obstacle_area > 1000:
+        #     avoid_collision = False
             
         if floor_area is None:
             floor_area = 0

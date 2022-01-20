@@ -17,7 +17,7 @@ cl = client.Client()
 cl.start()
 camera = camera_config.Config()
 # set target color with referee commands 
-target = Color.MAGENTA
+target = Color.BLUE
 # Create image processing object
 processor = ip.ProcessFrames(camera, target)
 
@@ -28,7 +28,7 @@ class RobotStateData:
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.DRIVE
+        self.state = State.STOPPED
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
@@ -90,64 +90,49 @@ def handle_manual(state_data, gamepad):
 
 def handle_patrol(state_data, gamepad):
     if state_data.keypoint_count > 0:
+
         state_data.state = State.DRIVE
         return
-    
     if state_data.own_basket:
-    
-        delta_y = (camera.camera_y * 0.758) - state_data.basket_bottom_y
-        if delta_y > 0:
-            
-            # First Drive to own basket to see if there are any balls
-            if state_data.floor_area is None or state_data.floor_area < 20000:
-                state_data.state = State.FIND
-                return
+        basket_in_frame = state_data.basket_x is not None
+        print(state_data.basket_bottom_y, state_data.own_basket)
+        if basket_in_frame and state_data.basket_bottom_y < camera.camera_y*0.3:
+            #rot_delta_x = camera.camera_x/2
+            delta_x = state_data.basket_x - camera.camera_x / 2
 
-            basket_in_frame = state_data.basket_x is not None
+            rot_spd = calc_speed(delta_x, camera.camera_x/2, 5, 3, 100, 30)  #* turn_direction
 
-            if not basket_in_frame:
-                delta_x = camera.camera_x
-                
-            else:
-                delta_x = state_data.basket_x
-            rot_delta_x = camera.camera_x/2
+            drive.move_omni(0,20,-rot_spd,1800)
+        elif not basket_in_frame:
+            drive.move_omni(0,0,10,1800)
+        elif state_data.basket_bottom_y <= camera.camera_y * 0.4:
+            state_data.own_basket = False
 
-            front_speed = calc_speed(delta_y, camera.camera_y, 5, 3, 500, 50)
-            side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
-            rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 30)  #* turn_direction
-            state_data.prev_yspeed = front_speed
-            state_data.prev_rotspeed = rot_spd
-            state_data.prev_xspeed = side_speed
-            drive.move_omni(-side_speed, front_speed, -rot_spd, 1800)
-        else:
-            state_data.own_basket = not state_data.own_basket
-    # We are now at own basket so drive to opponent basket to see if there are any balls
-    else:
-        delta_y = (camera.camera_y * 0.758) - state_data.opponent_basket_bottom_y
-        if delta_y > 0:
-            
-            if state_data.floor_area is None or state_data.floor_area < 20000:
-                state_data.state = State.FIND
-                return
+    if not state_data.own_basket:
+        basket_in_frame = state_data.opponent_basket_x is not None
+        print(state_data.opponent_basket_bottom_y, state_data.own_basket)
+        if basket_in_frame and state_data.opponent_basket_bottom_y < camera.camera_y*0.3:
+            #rot_delta_x = camera.camera_x/2
+            delta_x = state_data.opponent_basket_x - camera.camera_x / 2
 
-            basket_in_frame = state_data.opponent_basket_x is not None
+            rot_spd = calc_speed(delta_x, camera.camera_x/2, 5, 3, 100, 20)  #* turn_direction
 
-            if not basket_in_frame:
-                delta_x = camera.camera_x
-                
-            else:
-                delta_x = state_data.opponent_basket_x
-            rot_delta_x = camera.camera_x/2
-
-            front_speed = calc_speed(delta_y, camera.camera_y, 5, 3, 500, 50)
-            side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
-            rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 30)  #* turn_direction
-            state_data.prev_yspeed = front_speed
-            state_data.prev_rotspeed = rot_spd
-            state_data.prev_xspeed = side_speed
-            drive.move_omni(-side_speed, front_speed, -rot_spd, 1800)
-        else:
-            state_data.own_basket = not state_data.own_basket
+            drive.move_omni(0,20,-rot_spd,1800)
+        elif not basket_in_frame:
+            drive.move_omni(0,0,10,1800)
+        elif state_data.opponent_basket_bottom_y <= camera.camera_y * 0.4:
+            state_data.own_basket = True
+        
+    # if not basket_in_frame:
+    #     basket_in_frame = state_data.opponent_basket_x is not None
+    #     if basket_in_frame and state_data.opponent_basket_bottom_y < camera.camera_y * 0.3:
+    #         delta_x = state_data.opponent_basket_x - camera.camera_x / 2
+    #         rot_spd = calc_speed(delta_x, camera.camera_x/2, 5, 3, 100, 30)  #* turn_direction
+    #         drive.move_omni(0,10,-rot_spd,1800)
+    #         if state_data.opponent_basket_bottom_y < camera.camera_y * 0.25:
+    #             state_data.own_basket = not state_data.own_basket
+    #     else:
+    #         drive.move_omni(0,0,10,1800)
     state_data.State = State.PATROL
 
 
@@ -467,7 +452,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            print(state_data.basket_distance)
+            #print(state_data.keypoint_count)
             switcher.get(state_data.state)(state_data, controller)
 
             if key == ord('q'):
