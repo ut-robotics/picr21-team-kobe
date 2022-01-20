@@ -87,8 +87,8 @@ class ImageProcessor:
             # ball filtering logic goes here. Example includes filtering by size and an example how to get pixels from
             # the bottom center of the frame to the ball
             size = cv2.contourArea(contour)
-            print(size)
-            if size < 50: #or self.out_of_field: #15
+            #print(size)
+            if size < 15: #or self.out_of_field: #15
                 continue
 
             x, y, w, h = cv2.boundingRect(contour)
@@ -111,7 +111,7 @@ class ImageProcessor:
 
             if self.debug:
                 self.debug_frame[ys, xs] = [0, 0, 0]
-                self.debug_frame[100:300, 200:600] = [0,0,0]
+                #self.debug_frame[100:300, 200:600] = [0,0,0]
                 cv2.circle(self.debug_frame, (obj_x, obj_y), 10, (0, 255, 0), 2)
                 #cv2.rectangle(self.debug_frame, (100,200), (100,200),(0,255,0), 5)
 
@@ -230,20 +230,20 @@ class ProcessFrames:
             opponent_basket_bottom_y = opponent_basket.bottom_y
 
         floor_area = np.count_nonzero(processed.fragmented == int(Color.ORANGE))
-        obstacle_area = np.count_nonzero(processed.fragmented[150:300, 300:600] == int(Color.ORANGE))
+        # obstacle_area = np.count_nonzero(processed.fragmented[150:300, 300:600] == int(Color.ORANGE))
         
 
         
-        if obstacle_area is None:
-            obstacle_area = 0
+        # if obstacle_area is None:
+        #     obstacle_area = 0
             
-        if obstacle_area < 40000:
-            avoid_collision = True
-        if obstacle_area > 40000:
-            avoid_collision = False
+        # if obstacle_area < 40000:
+        #     avoid_collision = True
+        # if obstacle_area > 40000:
+        #     avoid_collision = False
             
-        print("obstacle area", obstacle_area)
-        print("obstacle ahead", avoid_collision)
+        # print("obstacle area", obstacle_area)
+        # print("obstacle ahead", avoid_collision)
         if floor_area is None:
             floor_area = 0
 
