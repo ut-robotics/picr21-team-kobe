@@ -28,7 +28,7 @@ class RobotStateData:
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.STOPPED
+        self.state = State.FIND
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
@@ -51,6 +51,7 @@ class RobotStateData:
         self.opponent_basket_bottom_y = None
         self.basket_bottom_y = None
         self.own_basket = True
+        self.avoid_collision = False
 
 
 # States for logic
@@ -138,8 +139,8 @@ def handle_patrol(state_data, gamepad):
 
 def handle_drive(state_data, gamepad):
     max_acceleration = 4
-    if state_data.basket_size is not None:
-        if state_data.basket_size > 28000:
+    if state_data.basket_bottom_y is not None:
+        if state_data.basket_bottom_y > camera.camera_y * 0.3:
             drive.move_omni(0, 0, 20, 1800)
             time.sleep(0.3)
             state_data.state = State.FIND
@@ -158,12 +159,12 @@ def handle_drive(state_data, gamepad):
         state_data.state = State.FIND
         return
 
-    if state_data.keypoint_count > 0 and state_data.floor_area > 20000:
+    if state_data.keypoint_count > 0 and state_data.floor_area > 20000 and state_data.avoid_collision is False:
         delta_x = state_data.ball_x - camera.camera_x / 2
         delta_y = (camera.camera_y * 0.77) - state_data.ball_y
         min_speed = 2
         min_delta = 5
-        front_speed = calc_speed(delta_y, camera.camera_y, min_delta, 5, 400, 60)
+        front_speed = calc_speed(delta_y, camera.camera_y, min_delta, 5, 400, 30)
         rot_spd = calc_speed(delta_x, camera.camera_x, min_delta, min_speed, 150, 30)
 
         front_delta = front_speed - state_data.prev_y_speed
@@ -177,9 +178,17 @@ def handle_drive(state_data, gamepad):
 
         drive.move_omni(-0, front_speed, -rot_spd, 1800)
 
+
         if camera.camera_y > state_data.ball_y > camera.camera_y * 0.66:  # How close ball y should be to switch to next state
             state_data.state = State.AIM
             return
+
+    if state_data.avoid_collision is True and state_data.keypoint_count > 0:
+        delta_x = state_data.ball_x - camera.camera_x
+
+        side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
+
+        drive.move_omni(side_speed,0,0,1800)
 
     if state_data.keypoint_count <= 0 or None:
         state_data.state = State.FIND
@@ -419,7 +428,7 @@ def logic(switcher):
             # listen_for_referee_commands(state_data, processor)
             # state_data.state = State.THROWING
             # Align depth frame if we are in throw state
-            count, y, x, center_x, center_y, basket_distance, floor_area, out_of_field, basket_size, opponent_basket_x, opponent_basket_bottom_y, basket_bottom_y = processor.process_frame(
+            count, y, x, center_x, center_y, basket_distance, floor_area, out_of_field, basket_size, opponent_basket_x, opponent_basket_bottom_y, basket_bottom_y, avoid_collision = processor.process_frame(
                 align_frame=state_data.state == State.THROWING)
             state_data.ball_x = x
             state_data.ball_y = y
@@ -431,6 +440,7 @@ def logic(switcher):
             state_data.out_of_field = out_of_field
             state_data.basket_size = basket_size
             state_data.basket_bottom_y = basket_bottom_y
+            state_data.avoid_collision = avoid_collision
 
             if opponent_basket_x is not None:
                 state_data.opponent_basket_x = opponent_basket_x

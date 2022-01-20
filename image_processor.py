@@ -111,7 +111,7 @@ class ImageProcessor:
 
             if self.debug:
                 self.debug_frame[ys, xs] = [0, 0, 0]
-                #self.debug_frame[150:300, 300:600] = [0,0,0]
+                self.debug_frame[100:300, 200:600] = [0,0,0]
                 cv2.circle(self.debug_frame, (obj_x, obj_y), 10, (0, 255, 0), 2)
                 #cv2.rectangle(self.debug_frame, (100,200), (100,200),(0,255,0), 5)
 
@@ -205,7 +205,7 @@ class ProcessFrames:
         basket_x_center = None
         basket_y_center = None
         basket_distance = None
-        #avoid_collision = False
+        avoid_collision = True
         opponent_basket_bottom_y = None
         basket_bottom_y = None
 
@@ -230,19 +230,20 @@ class ProcessFrames:
             opponent_basket_bottom_y = opponent_basket.bottom_y
 
         floor_area = np.count_nonzero(processed.fragmented == int(Color.ORANGE))
-        #obstacle_area = np.count_nonzero(processed.fragmented[150:300, 300:600] == int(Color.ORANGE))
-        #print("obstacle orange area", obstacle_area)
+        obstacle_area = np.count_nonzero(processed.fragmented[150:300, 300:600] == int(Color.ORANGE))
         
 
         
-        # if obstacle_area is None:
-        #     obstacle_area = 0
+        if obstacle_area is None:
+            obstacle_area = 0
             
-        # if obstacle_area < 1000:
-        #     avoid_collision = True
-        # elif obstacle_area > 1000:
-        #     avoid_collision = False
+        if obstacle_area < 40000:
+            avoid_collision = True
+        if obstacle_area > 40000:
+            avoid_collision = False
             
+        print("obstacle area", obstacle_area)
+        print("obstacle ahead", avoid_collision)
         if floor_area is None:
             floor_area = 0
 
@@ -265,4 +266,5 @@ class ProcessFrames:
                 basket_size,
                 opponent_basket_x,
                 opponent_basket_bottom_y,
-                basket_bottom_y)
+                basket_bottom_y,
+                avoid_collision)
