@@ -96,8 +96,44 @@ class ImageProcessor:
             ys = np.arange(y + h, self.camera.rgb_height)
             xs = np.linspace(x + w / 2, self.camera.rgb_width / 2, num=len(ys), dtype=np.uint16)
 
-            center_line = np.arange(424, 524)[:, np.newaxis]
-            print(center_line)
+            # obstacle avoidance
+
+            center_x = 424
+            center_y = np.arange(180,300)
+
+            left_column_x = 364
+            left_column_y = np.arange(180,300)
+
+            left_column_x1 = 304
+            left_column_y1 = np.arange(180,300)
+
+            left_column_x2 = 244
+            left_column_y2 = np.arange(180,300)
+
+            right_column_x = 484
+            right_column_y = np.arange(180,300)
+
+            right_column_x1 = 544
+            right_column_y1 = np.arange(180,300)
+
+            right_column_x2 = 604
+            right_column_y2 = np.arange(180,300)
+
+
+            orange_color_sum = self.fragmented[center_y,center_x]
+            orange_color_sum1 = self.fragmented[left_column_y,left_column_x]
+            orange_color_sum2 = self.fragmented[left_column_y1,left_column_x1]
+            orange_color_sum3 = self.fragmented[left_column_y2,left_column_x2]
+            orange_color_sum4 = self.fragmented[right_column_y,right_column_x]
+            orange_color_sum5 = self.fragmented[right_column_y1,right_column_x1]
+            orange_color_sum6 = self.fragmented[right_column_y,right_column_x2]
+
+            orange_color_area = np.count_nonzero(self.fragmented[center_y,center_x] == int(Color.ORANGE))
+
+
+
+            print(orange_color_area)
+            print(orange_color_sum)
 
             colors = self.fragmented[ys, xs]
             out_of_field = color_sampler.check_sequence(colors, 8, self.line_sequence)
@@ -113,8 +149,16 @@ class ImageProcessor:
             obj_dst = obj_y
 
             if self.debug:
-                self.debug_frame[ys, xs] = [0, 0, 0]
-                self.debug_frame[]
+                #self.debug_frame[ys, xs] = [0, 0, 0]
+                #self.debug_frame[200:300, 424] = [0,0,0]
+                self.debug_frame[center_y, center_x] = [0,0,0]
+                self.debug_frame[left_column_y, left_column_x] = [0,0,0]
+                self.debug_frame[left_column_y1, left_column_x1] = [0,0,0]
+                self.debug_frame[left_column_y2, left_column_x2] = [0,0,0]
+                self.debug_frame[right_column_y, right_column_x] = [0,0,0]
+                self.debug_frame[right_column_y1, right_column_x1] = [0,0,0]
+                self.debug_frame[right_column_y2, right_column_x2] = [0,0,0]
+
                 #self.debug_frame[100:300, 200:600] = [0,0,0]
                 cv2.circle(self.debug_frame, (obj_x, obj_y), 10, (0, 255, 0), 2)
                 #cv2.rectangle(self.debug_frame, (100,200), (100,200),(0,255,0), 5)

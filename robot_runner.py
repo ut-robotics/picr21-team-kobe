@@ -28,7 +28,7 @@ class RobotStateData:
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.FIND
+        self.state = State.STOPPED
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
@@ -102,7 +102,7 @@ def handle_patrol(state_data, gamepad):
 
     if state_data.own_basket:
         basket_in_frame = state_data.basket_x is not None
-        print(state_data.basket_bottom_y, state_data.own_basket)
+        #print(state_data.basket_bottom_y, state_data.own_basket)
         if basket_in_frame and state_data.basket_bottom_y < camera.camera_y*0.3:
             #rot_delta_x = camera.camera_x/2
             delta_x = state_data.basket_x - camera.camera_x / 2
@@ -119,7 +119,7 @@ def handle_patrol(state_data, gamepad):
 
     if not state_data.own_basket:
         basket_in_frame = state_data.opponent_basket_x is not None
-        print(state_data.opponent_basket_bottom_y, state_data.own_basket)
+        #print(state_data.opponent_basket_bottom_y, state_data.own_basket)
         if basket_in_frame and state_data.opponent_basket_bottom_y < camera.camera_y*0.3:
             #rot_delta_x = camera.camera_x/2
             delta_x = state_data.opponent_basket_x - camera.camera_x / 2
@@ -249,7 +249,7 @@ def handle_find(state_data, gamepad):
 
 
 def handle_stopped(state_data, gamepad):
-    print(state_data.opponent_basket_bottom_y)
+    #print(state_data.opponent_basket_bottom_y)
     drive.stop()
     state_data.state = State.STOPPED
 
@@ -476,7 +476,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            print(state_data.state)
+            #print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
 
             if key == ord('q'):
