@@ -40,7 +40,7 @@ def keyboard_control():
             movement.move_omni(0, 0, -moving_speed,1800)
         if key == ord("t"):
             print("Throwing.")
-            movement.move_omni(0, 0, 0,4047)
+            movement.move_omni(0, 0, 0,1400)
         if key == ord("c"):
             print("Stopping.")
             movement.stop()

@@ -27,7 +27,7 @@ def spin_right(speed):
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
 
 def stop():
-    speed = [0, 0, 0, 1800]
+    speed = [0, 0, 0, 0]
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
 
 def test():

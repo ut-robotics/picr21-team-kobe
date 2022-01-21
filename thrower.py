@@ -20,7 +20,7 @@ Y = [700, 750, 800, 900, 1050, 1075, 1175, 1200, 1275, 1375, 1525, 1750, 1850, 2
 # #dist
 # X = [95,121, 156,190, 220, 250, 290, 320, 355, 390, 450]
 # Function that estimates the speed to use from robot's current distance from the basket
-last_distance = 2012
+last_distance = 0
 def thrower_speed(distance):
     global last_distance
     try:
@@ -32,18 +32,19 @@ def thrower_speed(distance):
         # duty_cycle = int(interp(distance*100, [0, 525], [48, 2047]))
         if distance*100 > 525:
             distance = 5.25
-        thrower_speed = int(predicted_function(distance * 100)) + 2012
+        thrower_speed = int(predicted_function(distance * 100))# + 2012
         #print(thrower_speed)
         # print("Duty cycle --> ", duty_cycle)
-        #print("using speed", thrower_speed, "at", distance * 100, "cm")
-        last_distance = distance
+        print("using speed", thrower_speed, "at", distance * 100, "cm")
+        #last_distance = distance
         return thrower_speed
     except Exception as e:
         if distance is None:
-            return int(predicted_function(last_distance * 100)) + 2012
+            return 2000
+            #return int(predicted_function(last_distance * 100))# + 2012
 
         elif distance > 450:
-            return 2047+2012
+            return 2000#+2012
 
 
 

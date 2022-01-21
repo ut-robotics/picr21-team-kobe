@@ -1,3 +1,4 @@
+from concurrent.futures import process
 import segment
 import _pickle as pickle
 import numpy as np
@@ -35,7 +36,9 @@ class ProcessedResults:
                  depth_frame=[],
                  fragmented=[],
                  debug_frame=[],
-                 out_of_field=False):
+                 out_of_field=False,
+                 turn_left=False,
+                 turn_right=False):
         self.balls = balls
         self.basket_b = basket_b
         self.basket_m = basket_m
@@ -43,6 +46,8 @@ class ProcessedResults:
         self.depth_frame = depth_frame
         self.fragmented = fragmented
         self.out_of_field = out_of_field
+        self.turn_left = turn_left
+        self.turn_right = turn_right
         # can be used to illustrate things in a separate frame buffer
         self.debug_frame = debug_frame
 
@@ -66,6 +71,8 @@ class ImageProcessor:
         self.debug_frame = np.zeros((self.camera.rgb_height, self.camera.rgb_width), dtype=np.uint8)
         self.line_sequence = np.array([int(c.Color.ORANGE), int(c.Color.BLACK), int(c.Color.WHITE)], dtype=np.uint8)
         self.out_of_field = False
+        self.turn_right = False
+        self.turn_left = False
 
     def set_segmentation_table(self, table):
         segment.set_table(table)
@@ -96,44 +103,55 @@ class ImageProcessor:
             ys = np.arange(y + h, self.camera.rgb_height)
             xs = np.linspace(x + w / 2, self.camera.rgb_width / 2, num=len(ys), dtype=np.uint16)
 
-            # obstacle avoidance
+            #obstacle avoidance
 
             center_x = 424
-            center_y = np.arange(180,300)
+            center_y = np.arange(150,330)
 
-            left_column_x = 364
-            left_column_y = np.arange(180,300)
+            left_column_x = 324
+            left_column_y = np.arange(150,330)
 
-            left_column_x1 = 304
-            left_column_y1 = np.arange(180,300)
+            left_column_x1 = 224
+            left_column_y1 = np.arange(150,330)
 
-            left_column_x2 = 244
-            left_column_y2 = np.arange(180,300)
+            left_column_x2 = 124
+            left_column_y2 = np.arange(150,330)
 
-            right_column_x = 484
-            right_column_y = np.arange(180,300)
+            right_column_x = 524
+            right_column_y = np.arange(150,330)
 
-            right_column_x1 = 544
-            right_column_y1 = np.arange(180,300)
+            right_column_x1 = 624
+            right_column_y1 = np.arange(150,330)
 
-            right_column_x2 = 604
-            right_column_y2 = np.arange(180,300)
-
-
-            orange_color_sum = self.fragmented[center_y,center_x]
-            orange_color_sum1 = self.fragmented[left_column_y,left_column_x]
-            orange_color_sum2 = self.fragmented[left_column_y1,left_column_x1]
-            orange_color_sum3 = self.fragmented[left_column_y2,left_column_x2]
-            orange_color_sum4 = self.fragmented[right_column_y,right_column_x]
-            orange_color_sum5 = self.fragmented[right_column_y1,right_column_x1]
-            orange_color_sum6 = self.fragmented[right_column_y,right_column_x2]
-
-            orange_color_area = np.count_nonzero(self.fragmented[center_y,center_x] == int(Color.ORANGE))
+            right_column_x2 = 724
+            right_column_y2 = np.arange(150,330)
 
 
+            #orange_color_sum = np.count_nonzero(self.fragmented[center_y,center_x] == int(Color.ORANGE))
+            orange_color_sum1 = np.count_nonzero(self.fragmented[left_column_y,left_column_x] == int(Color.ORANGE))
+            orange_color_sum2 = np.count_nonzero(self.fragmented[left_column_y1,left_column_x1] == int(Color.ORANGE))
+            orange_color_sum3 = np.count_nonzero(self.fragmented[left_column_y2,left_column_x2] == int(Color.ORANGE))
+            orange_color_sum4 = np.count_nonzero(self.fragmented[right_column_y,right_column_x] == int(Color.ORANGE))
+            orange_color_sum5 = np.count_nonzero(self.fragmented[right_column_y1,right_column_x1] == int(Color.ORANGE))
+            orange_color_sum6 = np.count_nonzero(self.fragmented[right_column_y2,right_column_x2] == int(Color.ORANGE))
 
-            print(orange_color_area)
-            print(orange_color_sum)
+            orange_color_area_left_side = orange_color_sum1 + orange_color_sum2 + orange_color_sum3
+            orange_color_area_right_side = orange_color_sum4 + orange_color_sum5 + orange_color_sum6
+
+            if orange_color_area_left_side < 240:
+                self.turn_right = True
+            if orange_color_area_left_side > 240:
+                self.turn_right = False
+            if orange_color_area_right_side < 240:
+                self.turn_left = True
+            if orange_color_area_right_side > 240:
+                self.turn_left = False
+
+
+
+            print(orange_color_area_left_side)
+            print(self.turn_right)
+            #print(orange_color_sum)
 
             colors = self.fragmented[ys, xs]
             out_of_field = color_sampler.check_sequence(colors, 8, self.line_sequence)
@@ -149,7 +167,7 @@ class ImageProcessor:
             obj_dst = obj_y
 
             if self.debug:
-                #self.debug_frame[ys, xs] = [0, 0, 0]
+                self.debug_frame[ys, xs] = [0, 0, 0]
                 #self.debug_frame[200:300, 424] = [0,0,0]
                 self.debug_frame[center_y, center_x] = [0,0,0]
                 self.debug_frame[left_column_y, left_column_x] = [0,0,0]
@@ -234,7 +252,9 @@ class ImageProcessor:
                                 depth_frame=depth_frame,
                                 fragmented=self.fragmented,
                                 debug_frame=self.debug_frame,
-                                out_of_field=self.out_of_field)
+                                out_of_field=self.out_of_field,
+                                turn_left=self.turn_left,
+                                turn_right=self.turn_right)
 
 
 class ProcessFrames:
@@ -258,6 +278,8 @@ class ProcessFrames:
         basket_bottom_y = None
 
         out_of_field = processed.out_of_field
+        turn_left = processed.turn_left
+        turn_right = processed.turn_right
         opponent_basket_x = None
 
         if self.target == Color.BLUE:
@@ -315,4 +337,6 @@ class ProcessFrames:
                 opponent_basket_x,
                 opponent_basket_bottom_y,
                 basket_bottom_y,
-                avoid_collision)
+                avoid_collision,
+                turn_left,
+                turn_right)
