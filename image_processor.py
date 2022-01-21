@@ -96,6 +96,9 @@ class ImageProcessor:
             ys = np.arange(y + h, self.camera.rgb_height)
             xs = np.linspace(x + w / 2, self.camera.rgb_width / 2, num=len(ys), dtype=np.uint16)
 
+            center_line = np.arange(424, 524)[:, np.newaxis]
+            print(center_line)
+
             colors = self.fragmented[ys, xs]
             out_of_field = color_sampler.check_sequence(colors, 8, self.line_sequence)
 
@@ -111,6 +114,7 @@ class ImageProcessor:
 
             if self.debug:
                 self.debug_frame[ys, xs] = [0, 0, 0]
+                self.debug_frame[]
                 #self.debug_frame[100:300, 200:600] = [0,0,0]
                 cv2.circle(self.debug_frame, (obj_x, obj_y), 10, (0, 255, 0), 2)
                 #cv2.rectangle(self.debug_frame, (100,200), (100,200),(0,255,0), 5)
