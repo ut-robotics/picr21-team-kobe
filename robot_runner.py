@@ -35,7 +35,7 @@ class RobotStateData:
         self.floor_area = None
         self.basket_distance = None
         self.debug = False
-        self.thrower_speed = 2600
+        self.thrower_speed = 1000
         self.prev_x_speed = 0
         self.prev_y_speed = 0
         self.prev_rot_speed = 0
@@ -206,6 +206,8 @@ def handle_drive(state_data, gamepad):
             return
 
     if state_data.turn_left is True:
+        if state_data.ball_x is None:
+            state_data.ball_x = camera.camera_x
         delta_x = state_data.ball_x - camera.camera_x
 
         side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
@@ -213,6 +215,8 @@ def handle_drive(state_data, gamepad):
         drive.move_omni(-side_speed,0,0,0)
 
     if state_data.turn_right is True:
+        if state_data.ball_x is None:
+            state_data.ball_x = camera.camera_x
         delta_x = state_data.ball_x - camera.camera_x
 
         side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
@@ -343,6 +347,7 @@ def handle_throwing(state_data, controller):
         rot_delta_x = state_data.ball_x - camera.camera_x/2  # if no ball and throw true basket_x - camera_x
         delta_y = camera.camera_y - state_data.ball_y
         thrower_speed = thrower.thrower_speed(state_data.basket_distance)
+        #thrower_speed = state_data.thrower_speed
         front_speed = calc_speed(delta_y, camera.camera_y, 5, min_speed, 200, max_speed)
         side_speed = calc_speed(delta_x, camera.camera_x, 0, 2, 150, max_speed)
         rot_spd = calc_speed(rot_delta_x, camera.camera_x, 0, 2, 100, max_speed)
@@ -387,10 +392,10 @@ def handle_throwing(state_data, controller):
         drive.move_omni(-side_speed, 8, -rot_speed, thrower_speed)
         #drive.move_omni(-0, 0, -0, thrower_speed)
 
-        #print("throwing at ", thrower_speed, "from ", state_data.basket_distance, "away")
+        print("throwing at ", thrower_speed, "from ", state_data.basket_distance, "away")
 
         state_data.state = State.THROWING
-        if state_data.debug and state_data.after_throw_counter > 40:
+        if state_data.debug and state_data.after_throw_counter > 55:
             state_data.state = State.DEBUG
             state_data.after_throw_counter = 0
         return
@@ -399,7 +404,7 @@ def handle_throwing(state_data, controller):
         state_data.state = State.FIND
 
 
-def handle_debug(state_data):
+def handle_debug(state_data, gamepad):
     drive.stop()
     state_data.thrower_speed = int(input("Enter thrower speed to use:"))
     state_data.state = State.FIND

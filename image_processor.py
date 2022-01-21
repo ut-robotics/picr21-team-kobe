@@ -149,8 +149,8 @@ class ImageProcessor:
 
 
 
-            print(orange_color_area_left_side)
-            print(self.turn_right)
+            # print(orange_color_area_left_side)
+            # print(self.turn_right)
             #print(orange_color_sum)
 
             colors = self.fragmented[ys, xs]

@@ -2,10 +2,21 @@ from scipy.interpolate import interp1d
 from numpy import interp
 
 # # Distance from basket in cm
-X = [0, 122, 163, 198, 215, 233, 274, 290, 328, 380, 450, 470, 500, 525]  # [208, 270, 308]
-# Used thrower speed
-Y = [700, 750, 800, 900, 1050, 1075, 1175, 1200, 1275, 1375, 1525, 1750, 1850, 2047]  # [975, 1100, 1175]
+# X = [0, 122, 163, 198, 215, 233, 274, 290, 328, 380, 450, 470, 500, 525]  # [208, 270, 308]
+# # Used thrower speed
+# Y = [700, 750, 800, 900, 1050, 1075, 1175, 1200, 1275, 1375, 1525, 1750, 1850, 2047]  # [975, 1100, 1175]
 
+
+# New thrower calibratrion
+#close distance 0.6m-2.5m
+#distance
+X = [67, 93, 110, 143, 164, 182, 202, 225, 247, 272, 297, 323, 353, 370, 411, 500, 525]
+
+
+#speed
+Y = [750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1060,1125, 1150, 1200, 1300, 1850, 2047 ]
+
+# long distance 2.5m-5.25m
 
 # Experimental 1
 # #distance
@@ -32,6 +43,9 @@ def thrower_speed(distance):
         # duty_cycle = int(interp(distance*100, [0, 525], [48, 2047]))
         if distance*100 > 525:
             distance = 5.25
+        if distance*100 < 67:
+            distance = 0.67
+
         thrower_speed = int(predicted_function(distance * 100))# + 2012
         #print(thrower_speed)
         # print("Duty cycle --> ", duty_cycle)
@@ -47,12 +61,3 @@ def thrower_speed(distance):
             return 2000#+2012
 
 
-
-# New thrower calibratrion
-
-#distance
-# X = [70, 100,149, 213]
-
-
-#speed
-# Y = [730, 750,800, 900]
