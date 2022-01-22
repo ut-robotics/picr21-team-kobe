@@ -7,20 +7,12 @@ ser = serialcomms.Connection('/dev/ttyACM0')
 # Order: motor1, motor2, motor3, thrower, failsafe
 def move_omni(x_speed, y_speed, rot_speed, thrower):
     speed = [0, 0, 0, 0]
-
     move_speed = math.sqrt(x_speed ** 2 + y_speed ** 2)
-    # print("move_speed", move_speed)
     direction = math.atan2(x_speed, y_speed)
-
-    speed[0] = int(wheel_speed(move_speed, direction, 60)) + rot_speed
-    speed[1] = int(wheel_speed(move_speed, direction, 300)) + rot_speed
-    speed[2] = int(wheel_speed(move_speed, direction, 180)) + rot_speed
-
-
-
-
+    speed[0] = int(wheel_speed(move_speed, direction, 0)) + rot_speed#60
+    speed[1] = int(wheel_speed(move_speed, direction, 120)) + rot_speed#300
+    speed[2] = int(wheel_speed(move_speed, direction, 240)) + rot_speed#180
     speed[3] = int(thrower)
-
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
 
 
@@ -38,8 +30,12 @@ def spin_right(speed):
 
 
 def stop():
-    speed = [0, 0, 0, 0]
+    speed = [0, 0, 0, 1800]
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
 
 
+def test():
+    speed = [0, 0, 0, 0]
+    ser.write_command(0, 0, 5, 1800, 0)
 
+test()

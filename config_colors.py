@@ -6,10 +6,6 @@ import image_processor
 from color import *
 
 
-def nothing(x):
-    pass
-
-
 cv2.namedWindow('image')
 cv2.namedWindow('rgb')
 cv2.namedWindow('mask')
@@ -20,6 +16,11 @@ try:
         colors_lookup = pickle.load(fh)
 except:
     colors_lookup = np.zeros(0x1000000, dtype=np.uint8)
+
+
+def nothing(x):
+    pass
+
 
 cap = camera.RealsenseCamera()
 processor = image_processor.ImageProcessor(cap, debug=True)
