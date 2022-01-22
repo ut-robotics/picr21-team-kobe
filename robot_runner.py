@@ -195,13 +195,13 @@ def handle_drive(state_data, gamepad):
 
 
         if camera.camera_y > state_data.ball_y > camera.camera_y * 0.66:  # How close ball y should be to switch to next state
-            if state_data.last_attacking_basket_x is not None and state_data.last_attacking_basket_x < camera.camera_x/2:
-                state_data.turn_direction = 1
-            else:
-                state_data.turn_direction = -1
+            # if state_data.last_attacking_basket_x is not None and state_data.last_attacking_basket_x < camera.camera_x/2:
+            #     state_data.turn_direction = 1
+            # else:
+            #     state_data.turn_direction = -1
 
-            if state_data.opponent_basket_x is not None and state_data.opponent_basket_x > camera.camera_x/2:
-                state_data.turn_direction *= -1  # reverse direction
+            # if state_data.opponent_basket_x is not None and state_data.opponent_basket_x > camera.camera_x/2:
+            #     state_data.turn_direction *= -1  # reverse direction
             state_data.state = State.AIM
             return
 
@@ -395,7 +395,7 @@ def handle_throwing(state_data, controller):
         #print("throwing at ", thrower_speed, "from ", state_data.basket_distance, "away")
 
         state_data.state = State.THROWING
-        if state_data.debug and state_data.after_throw_counter > 55:
+        if state_data.debug and state_data.after_throw_counter > 50:
             state_data.state = State.DEBUG
             state_data.after_throw_counter = 0
         return
@@ -477,6 +477,16 @@ def logic(switcher):
                 state_data.opponent_basket_bottom_y = opponent_basket_bottom_y
             if center_x is not None:
                 state_data.last_attacking_basket_x = center_x
+
+            if state_data.state != State.AIM:
+                if state_data.last_attacking_basket_x is not None and state_data.last_attacking_basket_x < camera.camera_x/2:
+                    state_data.turn_direction = 1
+                else:
+                    state_data.turn_direction = -1
+
+                if state_data.opponent_basket_x is not None and state_data.opponent_basket_x > camera.camera_x/2:
+                    state_data.turn_direction *= -1  # reverse direction
+            
 
             controller = joy.read()
 
