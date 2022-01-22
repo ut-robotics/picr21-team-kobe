@@ -84,7 +84,9 @@ class ImageProcessor:
         self.camera.close()
 
     def analyze_balls(self, t_balls) -> list:
-        t_balls = cv2.dilate(t_balls,(20,20),iterations = 1)
+        t_balls = cv2.morphologyEx(t_balls, cv2.MORPH_CLOSE, (30,30), iterations = 1)
+
+        #t_balls = cv2.dilate(t_balls,(20,20),iterations = 1)
 
         contours, hierarchy = cv2.findContours(t_balls, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 

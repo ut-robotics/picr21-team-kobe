@@ -17,7 +17,7 @@ cl = client.Client()
 cl.start()
 camera = camera_config.Config()
 # set target color with referee commands
-target = Color.BLUE
+target = Color.MAGENTA
 # Create image processing object
 processor = ip.ProcessFrames(camera, target)
 
@@ -195,33 +195,33 @@ def handle_drive(state_data, gamepad):
 
 
         if camera.camera_y > state_data.ball_y > camera.camera_y * 0.66:  # How close ball y should be to switch to next state
-            # if state_data.last_attacking_basket_x is not None and state_data.last_attacking_basket_x < camera.camera_x/2:
-            #     state_data.turn_direction = 1
-            # else:
-            #     state_data.turn_direction = -1
+            if state_data.last_attacking_basket_x is not None and state_data.last_attacking_basket_x < camera.camera_x/2:
+                state_data.turn_direction = 1
+            else:
+                state_data.turn_direction = -1
 
-            # if state_data.opponent_basket_x is not None and state_data.opponent_basket_x > camera.camera_x/2:
-            #     state_data.turn_direction *= -1  # reverse direction
+            if state_data.opponent_basket_x is not None and state_data.opponent_basket_x > camera.camera_x/2:
+                state_data.turn_direction *= -1  # reverse direction
             state_data.state = State.AIM
             return
 
-    if state_data.turn_left is True:
-        if state_data.ball_x is None:
-            state_data.ball_x = camera.camera_x
-        delta_x = state_data.ball_x - camera.camera_x
+    # if state_data.turn_left is True:
+    #     if state_data.ball_x is None:
+    #         state_data.ball_x = camera.camera_x
+    #     delta_x = state_data.ball_x - camera.camera_x
 
-        side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
+    #     side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
 
-        drive.move_omni(-side_speed,0,0,0)
+    #     drive.move_omni(-side_speed,0,0,0)
 
-    if state_data.turn_right is True:
-        if state_data.ball_x is None:
-            state_data.ball_x = camera.camera_x
-        delta_x = state_data.ball_x - camera.camera_x
+    # if state_data.turn_right is True:
+    #     if state_data.ball_x is None:
+    #         state_data.ball_x = camera.camera_x
+    #     delta_x = state_data.ball_x - camera.camera_x
 
-        side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
+    #     side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
 
-        drive.move_omni(side_speed,0,0,0)
+    #     drive.move_omni(side_speed,0,0,0)
 
     if state_data.keypoint_count <= 0 or None:
         state_data.state = State.FIND
@@ -250,7 +250,7 @@ def handle_find(state_data, gamepad):
     state_data.after_rotation_counter += 1
     state_data.patrol_counter += 1
 
-    drive.move_omni(0, 0, 10, 0)
+    drive.move_omni(0, 0, rot_speed, 0)
     if state_data.keypoint_count >= 1:
         handle_drive(state_data, gamepad)
         state_data.state = State.DRIVE
@@ -269,9 +269,9 @@ def handle_stopped(state_data, gamepad):
 
 def handle_aim(state_data, gamepad):
 
-    #print("attacking basket {} opponent_basket {} turn direction {}".format(state_data.last_attacking_basket_x, state_data.opponent_basket_x, turn_direction))
+    print("attacking basket {} opponent_basket {} turn direction {}".format(state_data.last_attacking_basket_x, state_data.opponent_basket_x, state_data.turn_direction))
 
-    #print(turn_direction)
+    #print(state_data.turn_direction)
 
     if state_data.floor_area is None or state_data.floor_area < 20000:
         state_data.state = State.FIND
@@ -283,7 +283,7 @@ def handle_aim(state_data, gamepad):
         return
 
     if not basket_in_frame:
-        delta_x = camera.camera_x #* state_data.turn_direction
+        delta_x = camera.camera_x * state_data.turn_direction
 
     else:
         delta_x = state_data.ball_x - state_data.basket_x
@@ -291,8 +291,8 @@ def handle_aim(state_data, gamepad):
 
     delta_y = (camera.camera_y * 0.758) - state_data.ball_y
     front_speed = calc_speed(delta_y, camera.camera_y, 5, 3, 500, 50)
-    side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30)  #* turn_direction
-    rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 30)  #* turn_direction
+    side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30) # * state_data.turn_direction
+    rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 50) # * state_data.turn_direction
     state_data.prev_yspeed = front_speed
     state_data.prev_rotspeed = rot_spd
     state_data.prev_xspeed = side_speed
@@ -392,7 +392,7 @@ def handle_throwing(state_data, controller):
         drive.move_omni(-side_speed, 8, -rot_speed, thrower_speed)
         #drive.move_omni(-0, 0, -0, thrower_speed)
 
-        print("throwing at ", thrower_speed, "from ", state_data.basket_distance, "away")
+        #print("throwing at ", thrower_speed, "from ", state_data.basket_distance, "away")
 
         state_data.state = State.THROWING
         if state_data.debug and state_data.after_throw_counter > 55:
@@ -492,7 +492,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            #print(state_data.state)
+            print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
 
             if key == ord('q'):
