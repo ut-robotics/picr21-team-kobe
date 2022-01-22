@@ -28,7 +28,7 @@ class RobotStateData:
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.STOPPED
+        self.state = State.FIND
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
@@ -192,15 +192,15 @@ def handle_drive(state_data, gamepad):
         state_data.prev_rot_speed = -rot_spd
 
         print(state_data.right_metric)
-        if state_data.left_metric > 0.5 and state_data.right_metric > 0.5:
+        if state_data.left_metric > 0.6 and state_data.right_metric > 0.6:
             drive.move_omni(0,front_speed, -rot_spd, 0)
 
-        if state_data.left_metric < 0.5:
-            print('left')
-            drive.move_omni(state_data.left_metric * 160, front_speed, -rot_spd, 0)
-        if state_data.right_metric < 0.5:
-            print('right')
-            drive.move_omni(-state_data.left_metric * 160, front_speed, -rot_spd, 0)
+        if state_data.left_metric < 0.6:
+            #print('left')
+            drive.move_omni(-state_data.left_metric * 70, front_speed, -rot_spd, 0)
+        if state_data.right_metric < 0.6:
+            #print('right')
+            drive.move_omni(state_data.left_metric * 70, front_speed, -rot_spd, 0)
 
 
 
@@ -247,8 +247,8 @@ def handle_find(state_data, gamepad):
 
 
 def handle_stopped(state_data, gamepad):
-    print(state_data.left_metric, "left")
-    print(state_data.right_metric, "right")
+    # print(state_data.left_metric, "left")
+    # print(state_data.right_metric, "right")
     drive.stop()
     state_data.state = State.STOPPED
 
@@ -455,6 +455,8 @@ def logic(switcher):
             state_data.basket_size = basket_size
             state_data.basket_bottom_y = basket_bottom_y
             state_data.avoid_collision = avoid_collision
+            # print('left metric', left_metric)
+            # print('right metric', right_metric)
             state_data.left_metric = left_metric
             state_data.right_metric = right_metric
 

@@ -133,6 +133,7 @@ class ImageProcessor:
             orange_color_sum1 = np.count_nonzero(self.fragmented[left_column_y,left_column_x] == int(Color.ORANGE))
             orange_color_sum2 = np.count_nonzero(self.fragmented[left_column_y1,left_column_x1] == int(Color.ORANGE))
             orange_color_sum3 = np.count_nonzero(self.fragmented[left_column_y2,left_column_x2] == int(Color.ORANGE))
+
             orange_color_sum4 = np.count_nonzero(self.fragmented[right_column_y,right_column_x] == int(Color.ORANGE))
             orange_color_sum5 = np.count_nonzero(self.fragmented[right_column_y1,right_column_x1] == int(Color.ORANGE))
             orange_color_sum6 = np.count_nonzero(self.fragmented[right_column_y2,right_column_x2] == int(Color.ORANGE))
@@ -141,9 +142,11 @@ class ImageProcessor:
             orange_color_area_right_side = orange_color_sum4 + orange_color_sum5 + orange_color_sum6
 
             self.left_metric = orange_color_area_left_side / 720
-            self.right_metric = orange_color_area_right_side / 720
 
-            print("orange right side", self.right_metric)
+
+            self.right_metric = orange_color_area_right_side / 720
+            #print('orange sum', orange_color_area_right_side)
+            #print("orange right side", self.right_metric)
 
             # if orange_color_area_left_side < 240:
             #     self.turn_right = True
@@ -261,7 +264,7 @@ class ImageProcessor:
                                 debug_frame=self.debug_frame,
                                 out_of_field=self.out_of_field,
                                 left_metric=self.left_metric,
-                                right_metric=self.left_metric)
+                                right_metric=self.right_metric)
 
 
 class ProcessFrames:
