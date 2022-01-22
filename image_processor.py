@@ -108,25 +108,25 @@ class ImageProcessor:
             #obstacle avoidance
 
             center_x = 424
-            center_y = np.arange(150,330)
+            center_y = np.arange(120,360)
 
             left_column_x = 324
-            left_column_y = np.arange(150,330)
+            left_column_y = np.arange(120,360)
 
             left_column_x1 = 224
-            left_column_y1 = np.arange(150,330)
+            left_column_y1 = np.arange(120,360)
 
             left_column_x2 = 124
-            left_column_y2 = np.arange(150,330)
+            left_column_y2 = np.arange(120,360)
 
             right_column_x = 524
-            right_column_y = np.arange(150,330)
+            right_column_y = np.arange(120,360)
 
             right_column_x1 = 624
-            right_column_y1 = np.arange(150,330)
+            right_column_y1 = np.arange(120,360)
 
             right_column_x2 = 724
-            right_column_y2 = np.arange(150,330)
+            right_column_y2 = np.arange(120,360)
 
 
             #orange_color_sum = np.count_nonzero(self.fragmented[center_y,center_x] == int(Color.ORANGE))

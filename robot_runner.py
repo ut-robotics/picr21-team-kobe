@@ -28,7 +28,7 @@ class RobotStateData:
         self.ball_y = None
         self.basket_x = None
         self.image_processor = None
-        self.state = State.FIND
+        self.state = State.STOPPED
         self.keypoint_count = None
         self.has_thrown = False
         self.after_throw_counter = 0
@@ -233,10 +233,10 @@ def handle_drive(state_data, gamepad):
 def handle_find(state_data, gamepad):
     rot_speed = 5
 
-    # if state_data.patrol_counter > 300 and state_data.keypoint_count == 0:
-    #     state_data.patrol_counter = 0
-    #     state_data.state = State.PATROL
-    #     return
+    if state_data.patrol_counter > 300 and state_data.keypoint_count == 0:
+        state_data.patrol_counter = 0
+        state_data.state = State.PATROL
+        return
 
     if state_data.after_rotation_counter > 20 and state_data.has_rotated:
         state_data.after_rotation_counter = 0
