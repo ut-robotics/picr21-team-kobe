@@ -37,8 +37,8 @@ class ProcessedResults:
                  fragmented=[],
                  debug_frame=[],
                  out_of_field=False,
-                 turn_left=False,
-                 turn_right=False):
+                 left_metric=None,
+                 right_metric=None):
         self.balls = balls
         self.basket_b = basket_b
         self.basket_m = basket_m
@@ -46,8 +46,8 @@ class ProcessedResults:
         self.depth_frame = depth_frame
         self.fragmented = fragmented
         self.out_of_field = out_of_field
-        self.turn_left = turn_left
-        self.turn_right = turn_right
+        self.left_metric = left_metric
+        self.right_metric = right_metric
         # can be used to illustrate things in a separate frame buffer
         self.debug_frame = debug_frame
 
@@ -140,14 +140,19 @@ class ImageProcessor:
             orange_color_area_left_side = orange_color_sum1 + orange_color_sum2 + orange_color_sum3
             orange_color_area_right_side = orange_color_sum4 + orange_color_sum5 + orange_color_sum6
 
-            if orange_color_area_left_side < 240:
-                self.turn_right = True
-            if orange_color_area_left_side > 240:
-                self.turn_right = False
-            if orange_color_area_right_side < 240:
-                self.turn_left = True
-            if orange_color_area_right_side > 240:
-                self.turn_left = False
+            self.left_metric = orange_color_area_left_side / 720
+            self.right_metric = orange_color_area_right_side / 720
+
+            print("orange right side", self.right_metric)
+
+            # if orange_color_area_left_side < 240:
+            #     self.turn_right = True
+            # if orange_color_area_left_side > 240:
+            #     self.turn_right = False
+            # if orange_color_area_right_side < 240:
+            #     self.turn_left = True
+            # if orange_color_area_right_side > 240:
+            #     self.turn_left = False
 
 
 
@@ -255,8 +260,8 @@ class ImageProcessor:
                                 fragmented=self.fragmented,
                                 debug_frame=self.debug_frame,
                                 out_of_field=self.out_of_field,
-                                turn_left=self.turn_left,
-                                turn_right=self.turn_right)
+                                left_metric=self.left_metric,
+                                right_metric=self.left_metric)
 
 
 class ProcessFrames:
@@ -275,13 +280,13 @@ class ProcessFrames:
         basket_x_center = None
         basket_y_center = None
         basket_distance = None
-        avoid_collision = True
+        avoid_collision = False
         opponent_basket_bottom_y = None
         basket_bottom_y = None
 
         out_of_field = processed.out_of_field
-        turn_left = processed.turn_left
-        turn_right = processed.turn_right
+        left_metric = processed.left_metric
+        right_metric = processed.right_metric
         opponent_basket_x = None
 
         if self.target == Color.BLUE:
@@ -340,5 +345,5 @@ class ProcessFrames:
                 opponent_basket_bottom_y,
                 basket_bottom_y,
                 avoid_collision,
-                turn_left,
-                turn_right)
+                left_metric,
+                right_metric)
