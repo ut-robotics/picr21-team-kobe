@@ -1,0 +1,8 @@
+numpy==1.21.5
+inputs==0.5
+pyrealsense2==2.50.0.3812
+pyserial==3.5
+websockets==10.1
+numba==0.55.0
+scipy==1.7.3
+opencv-python==4.5.5.62
