@@ -70,9 +70,13 @@ class ImageProcessor:
         self.debug = debug
         self.debug_frame = np.zeros((self.camera.rgb_height, self.camera.rgb_width), dtype=np.uint8)
         self.line_sequence = np.array([int(c.Color.ORANGE), int(c.Color.BLACK), int(c.Color.WHITE)], dtype=np.uint8)
+
+
+
+
         self.out_of_field = False
-        self.turn_right = False
-        self.turn_left = False
+        self.left_metric = None
+        self.right_metric = None
 
     def set_segmentation_table(self, table):
         segment.set_table(table)
@@ -106,45 +110,6 @@ class ImageProcessor:
             xs = np.linspace(x + w / 2, self.camera.rgb_width / 2, num=len(ys), dtype=np.uint16)
 
             #obstacle avoidance
-
-            center_x = 424
-            center_y = np.arange(120,360)
-
-            left_column_x = 324
-            left_column_y = np.arange(120,360)
-
-            left_column_x1 = 224
-            left_column_y1 = np.arange(120,360)
-
-            left_column_x2 = 124
-            left_column_y2 = np.arange(120,360)
-
-            right_column_x = 524
-            right_column_y = np.arange(120,360)
-
-            right_column_x1 = 624
-            right_column_y1 = np.arange(120,360)
-
-            right_column_x2 = 724
-            right_column_y2 = np.arange(120,360)
-
-
-            #orange_color_sum = np.count_nonzero(self.fragmented[center_y,center_x] == int(Color.ORANGE))
-            orange_color_sum1 = np.count_nonzero(self.fragmented[left_column_y,left_column_x] == int(Color.ORANGE))
-            orange_color_sum2 = np.count_nonzero(self.fragmented[left_column_y1,left_column_x1] == int(Color.ORANGE))
-            orange_color_sum3 = np.count_nonzero(self.fragmented[left_column_y2,left_column_x2] == int(Color.ORANGE))
-
-            orange_color_sum4 = np.count_nonzero(self.fragmented[right_column_y,right_column_x] == int(Color.ORANGE))
-            orange_color_sum5 = np.count_nonzero(self.fragmented[right_column_y1,right_column_x1] == int(Color.ORANGE))
-            orange_color_sum6 = np.count_nonzero(self.fragmented[right_column_y2,right_column_x2] == int(Color.ORANGE))
-
-            orange_color_area_left_side = orange_color_sum1 + orange_color_sum2 + orange_color_sum3
-            orange_color_area_right_side = orange_color_sum4 + orange_color_sum5 + orange_color_sum6
-
-            self.left_metric = orange_color_area_left_side / 720
-
-
-            self.right_metric = orange_color_area_right_side / 720
             #print('orange sum', orange_color_area_right_side)
             #print("orange right side", self.right_metric)
 
@@ -178,14 +143,14 @@ class ImageProcessor:
 
             if self.debug:
                 self.debug_frame[ys, xs] = [0, 0, 0]
-                #self.debug_frame[200:300, 424] = [0,0,0]
-                self.debug_frame[center_y, center_x] = [0,0,0]
-                self.debug_frame[left_column_y, left_column_x] = [0,0,0]
-                self.debug_frame[left_column_y1, left_column_x1] = [0,0,0]
-                self.debug_frame[left_column_y2, left_column_x2] = [0,0,0]
-                self.debug_frame[right_column_y, right_column_x] = [0,0,0]
-                self.debug_frame[right_column_y1, right_column_x1] = [0,0,0]
-                self.debug_frame[right_column_y2, right_column_x2] = [0,0,0]
+                # #self.debug_frame[200:300, 424] = [0,0,0]
+                # self.debug_frame[center_y, center_x] = [0,0,0]
+                # self.debug_frame[left_column_y, left_column_x] = [0,0,0]
+                # self.debug_frame[left_column_y1, left_column_x1] = [0,0,0]
+                # self.debug_frame[left_column_y2, left_column_x2] = [0,0,0]
+                # self.debug_frame[right_column_y, right_column_x] = [0,0,0]
+                # self.debug_frame[right_column_y1, right_column_x1] = [0,0,0]
+                # self.debug_frame[right_column_y2, right_column_x2] = [0,0,0]
 
                 #self.debug_frame[100:300, 200:600] = [0,0,0]
                 cv2.circle(self.debug_frame, (obj_x, obj_y), 10, (0, 255, 0), 2)
@@ -253,6 +218,43 @@ class ImageProcessor:
 
         balls = self.analyze_balls(self.t_balls)
         basket_b = self.analyze_baskets(self.t_basket_b, depth_frame, debug_color=c.Color.BLUE.color.tolist())
+
+        center_x = 424
+        center_y = np.arange(120,360)
+
+        left_column_x = 324
+        left_column_y = np.arange(120,360)
+
+        left_column_x1 = 224
+        left_column_y1 = np.arange(120,360)
+
+        left_column_x2 = 124
+        left_column_y2 = np.arange(120,360)
+
+        right_column_x = 524
+        right_column_y = np.arange(120,360)
+
+        right_column_x1 = 624
+        right_column_y1 = np.arange(120,360)
+
+        right_column_x2 = 724
+        right_column_y2 = np.arange(120,360)
+
+
+        #orange_color_sum = np.count_nonzero(self.fragmented[center_y,center_x] == int(Color.ORANGE))
+        orange_color_sum1 = np.count_nonzero(self.fragmented[left_column_y,left_column_x] == int(Color.ORANGE))
+        orange_color_sum2 = np.count_nonzero(self.fragmented[left_column_y1,left_column_x1] == int(Color.ORANGE))
+        orange_color_sum3 = np.count_nonzero(self.fragmented[left_column_y2,left_column_x2] == int(Color.ORANGE))
+
+        orange_color_sum4 = np.count_nonzero(self.fragmented[right_column_y,right_column_x] == int(Color.ORANGE))
+        orange_color_sum5 = np.count_nonzero(self.fragmented[right_column_y1,right_column_x1] == int(Color.ORANGE))
+        orange_color_sum6 = np.count_nonzero(self.fragmented[right_column_y2,right_column_x2] == int(Color.ORANGE))
+
+        orange_color_area_left_side = orange_color_sum1 + orange_color_sum2 + orange_color_sum3
+        orange_color_area_right_side = orange_color_sum4 + orange_color_sum5 + orange_color_sum6
+
+        self.left_metric = orange_color_area_left_side / 720
+        self.right_metric = orange_color_area_right_side / 720
         basket_m = self.analyze_baskets(self.t_basket_m, depth_frame, debug_color=c.Color.MAGENTA.color.tolist())
 
         return ProcessedResults(balls=balls,

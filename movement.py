@@ -1,5 +1,6 @@
 import serialcomms
 import math
+import time
 
 ser = serialcomms.Connection('/dev/ttyACM0')
 
@@ -32,4 +33,6 @@ def stop():
 
 def test():
     speed = [0, 0, 0, 0]
-    ser.write_command(0, 0, 5, 1800, 0)
+    ser.write_command(0, 0, 40, 0, 0)
+    time.sleep(3)
+test()
