@@ -29,12 +29,12 @@ installing the requirements go to the directory `/segment_module` and run `pip i
 
 **Run:**</br>
 In order to use Remote desktop install xrdp on your linux machine `sudo apt install xrdp` xrdp service will automatically start after the installation(and on boot).
-Run the NUC and connect with remote desktop on your local machine to your NUC's ip, e.g `192.168.3.63` To configure referee server config edit host and port in `config.ini` to connect to a server. 
+Run the NUC and connect with remote desktop on your local machine to your NUC's ip, e.g `192.168.3.63` To configure referee server edit host and port in `config.ini` to connect to a server. 
 If you want to use a local server enter 'localhost' as host and an arbitrary available port and run `referee_server.py`. 
 Then run `robot_runner.py`. To threshold run `color_config.py`.
 
 **Gamepad:**</br>
-To use the gamepad comment out `listen_for_referee_commands(state_data, processor)` in the logic function.
+To use the xbox360 gamepad comment out `listen_for_referee_commands(state_data, processor)` in the logic function.
 Since the gamepad(wired) works over a virtual driver created by the remote desktop protocol you will also have to install the required software on your local and remote(NUC) computers. Wireless Xbox controllers were not tested and should not work with this solution. If you do not plan to use a gamepad there is also `remote_controller.py` to manually move the robot around.
 USB Network Gate free 14 day trial (Both linux and windows): https://www.usb-over-network.org/downloads/
 
