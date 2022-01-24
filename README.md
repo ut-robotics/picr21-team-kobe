@@ -35,7 +35,7 @@ Then run `robot_runner.py`. To threshold run `color_config.py`.
 
 **Gamepad:**</br>
 To use the xbox360 gamepad comment out `listen_for_referee_commands(state_data, processor)` in the logic function.
-Since the gamepad(wired) works over a virtual driver created by the remote desktop protocol you will also have to install the required software on your local and remote(NUC) computers. Wireless Xbox controllers were not tested and should not work with this solution. If you do not plan to use a gamepad there is also `remote_controller.py` to manually move the robot around.
+Since the gamepad(wired) works over a virtual driver created by the remote desktop protocol you will also have to install the required software on your local and remote(NUC) computers. Wireless Xbox controllers were not tested and should not work with this solution. If you do not plan to use a gamepad there is also `keyboard_controller.py` to manually move the robot around.
 USB Network Gate free 14 day trial (Both linux and windows): https://www.usb-over-network.org/downloads/
 
 To share your local USB device connect to your remote machine through the application (with the remote ip provided that both the local and remote computers are on the same network) and there will be a connect option for the ip. You will know if everything worked if the shared usb port(device) on your local machine in the application turns green.
