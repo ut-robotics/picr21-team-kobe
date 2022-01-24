@@ -32,3 +32,5 @@
 - DRVOFF pin to put the driver on standby
 
 ![alt text](https://github.com/ut-robotics/picr21-team-kobe/blob/main/Kobe_Elektronics/Mainboard_footprint_w_desc.png)
+
+![alt text](![alt text](https://github.com/ut-robotics/picr21-team-kobe/blob/main/Kobe_Elektronics/Driver_footprint_w_desc.png))
