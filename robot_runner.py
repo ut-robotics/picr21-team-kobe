@@ -102,10 +102,12 @@ def handle_patrol(state_data, gamepad):
         state_data.patrol_counter = 0
         state_data.state = State.FIND  
 
+    print(state_data.own_basket)
     if state_data.own_basket:
         basket_in_frame = state_data.basket_x is not None
-        if not basket_in_frame:
-            state_data.own_basket = False
+        print("here", basket_in_frame)
+        # if not basket_in_frame:
+        #     state_data.own_basket = False
         #print(state_data.basket_bottom_y, state_data.own_basket)
         if basket_in_frame and state_data.basket_bottom_y < camera.camera_y*0.3:
             #rot_delta_x = camera.camera_x/2
@@ -123,17 +125,26 @@ def handle_patrol(state_data, gamepad):
                 #print('right')
                 drive.move_omni(state_data.left_metric * 70, 40, -rot_spd, 0)
 
+
+        elif not basket_in_frame:
+            drive.move_omni(0,0,20,0)
+        elif state_data.basket_bottom_y <= camera.camera_y * 0.41:
+            state_data.own_basket = False
+            state_data.basket_bottom_y = None
+            state_data.state = State.FIND
+
     if not state_data.own_basket:
+        print('here2')
         basket_in_frame = state_data.opponent_basket_x is not None
-        if not basket_in_frame:
-            state_data.own_basket = True
-        #print(state_data.opponent_basket_bottom_y, state_data.own_basket)
+        # if not basket_in_frame:
+        #     state_data.own_basket = True
+        print(state_data.opponent_basket_bottom_y, state_data.own_basket)
         if basket_in_frame and state_data.opponent_basket_bottom_y < camera.camera_y*0.3:
             #rot_delta_x = camera.camera_x/2
             delta_x = state_data.opponent_basket_x - camera.camera_x / 2
 
             rot_spd = calc_speed(delta_x, camera.camera_x/2, 5, 3, 100, 20)  #* turn_direction
-
+            print(state_data.left_metric, state_data.right_metric)
 
             if state_data.left_metric > 0.6 and state_data.right_metric > 0.6:
                 drive.move_omni(0,40, -rot_spd, 0)
@@ -144,6 +155,14 @@ def handle_patrol(state_data, gamepad):
             if state_data.right_metric < 0.6:
                 #print('right')
                 drive.move_omni(state_data.left_metric * 70, 40, -rot_spd, 0)
+
+        elif not basket_in_frame:
+            drive.move_omni(0,0,20,0)
+        elif state_data.opponent_basket_bottom_y <= camera.camera_y * 0.4:
+            state_data.state = State.FIND
+            state_data.opponent_basket_bottom_y = None
+            state_data.own_basket = True
+            return
 
     if state_data.keypoint_count == 0:
         state_data.patrol_counter += 1
@@ -275,8 +294,8 @@ def handle_aim(state_data, gamepad):
 
     delta_y = (camera.camera_y * 0.758) - state_data.ball_y
     front_speed = calc_speed(delta_y, camera.camera_y, 5, 3, 500, 50)
-    side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 35) # * state_data.turn_direction
-    rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 50) # * state_data.turn_direction
+    side_speed = calc_speed(delta_x, camera.camera_x, 5, 4, 100, 30) # * state_data.turn_direction
+    rot_spd = calc_speed(rot_delta_x, camera.camera_x/2, 5, 3, 100, 40) # * state_data.turn_direction
     state_data.prev_yspeed = front_speed
     state_data.prev_rotspeed = rot_spd
     state_data.prev_xspeed = side_speed
@@ -437,7 +456,8 @@ def logic(switcher):
     try:
         while True:
             # Main code
-            listen_for_referee_commands(state_data, processor)
+            # Comment this line out if you are not using a referee server to send commands
+            #listen_for_referee_commands(state_data, processor)
             #state_data.state = State.AIM
             # Align depth frame if we are in throw state
             count, y, x, center_x, center_y, basket_distance, floor_area, out_of_field, basket_size, opponent_basket_x, opponent_basket_bottom_y, basket_bottom_y, avoid_collision, left_metric, right_metric = processor.process_frame(

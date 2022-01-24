@@ -30,9 +30,3 @@ def spin_right(speed):
 def stop():
     speed = [0, 0, 0, 0]
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
-
-def test():
-    speed = [0, 0, 0, 0]
-    ser.write_command(0, 0, 40, 0, 0)
-    time.sleep(3)
-test()
