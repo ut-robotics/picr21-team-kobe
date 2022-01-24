@@ -1,7 +1,7 @@
-#Kobe Electronics
+# Kobe Electronics
 
 
-##Mainboard functionality
+## Mainboard functionality
 
 - Consists of 2 separate isolated schematics: One with USB as power source, the other has battery
 
@@ -19,14 +19,14 @@
 
 - Three drivers for controlling motors, with FAULT LEDs
 
--Can be controlled through 2 PWM signals or one direction signal and one PWM signal, controlled by MODE pin signal. When GND, 1 PWM and direction
+- Can be controlled through 2 PWM signals or one direction signal and one PWM signal, controlled by MODE pin signal. When GND, 1 PWM and direction
 
--Needs 20us low pulse on nSLEEP to initialize, otherwise when high FAULT LEDs are glowing
+- Needs 20us low pulse on nSLEEP to initialize, otherwise when high FAULT LEDs are glowing
 
--Has SR pin for slew rate control
+- Has SR pin for slew rate control
 
--ITRIP pin for load current regulation
+- ITRIP pin for load current regulation
 
--DIAG pin connected to PGND
+- DIAG pin connected to PGND
 
--DRVOFF pin to put the driver on standby
+- DRVOFF pin to put the driver on standby
