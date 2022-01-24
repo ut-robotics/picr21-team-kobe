@@ -1,11 +1,15 @@
+from ctypes.wintypes import tagRECT
 import math
 import cv2
 import camera_config
 import image_processor as ip
 import movement
+from color import Color
 
 #processor = ip.ProcessFrames(False)
 camera = camera_config.Config()
+target = Color.MAGENTA
+processor = ip.ProcessFrames(camera, target)
 
 
 def keyboard_control():
@@ -13,10 +17,9 @@ def keyboard_control():
     moving_speed = 15
     throwing_speed = 1100
     while True:
-        #count, y, x, center_x, center_y, basket_distance, floor_area = processor.ProcessFrame(camera.pipeline,
-                                                                                              #camera.camera_x,
-                                                                                              #camera.camera_y)
-        #print("distance", basket_distance * 100)
+        count, y, x, center_x, center_y, basket_distance, floor_area, out_of_field, basket_size, opponent_basket_x, opponent_basket_bottom_y, basket_bottom_y, avoid_collision, turn_left, turn_right = processor.process_frame(
+                align_frame=True)
+        print("distance", basket_distance * 100)
         #move(0, throwing_speed, 0)
 
         key = cv2.waitKey(1) & 0xFF
@@ -40,7 +43,7 @@ def keyboard_control():
             movement.move_omni(0, 0, -moving_speed,1800)
         if key == ord("t"):
             print("Throwing.")
-            movement.move_omni(0, 0, 0,4047)
+            movement.move_omni(0, 0, 0,1200)
         if key == ord("c"):
             print("Stopping.")
             movement.stop()

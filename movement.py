@@ -1,5 +1,6 @@
 import serialcomms
 import math
+import time
 
 ser = serialcomms.Connection('/dev/ttyACM0')
 
@@ -15,11 +16,9 @@ def move_omni(x_speed, y_speed, rot_speed, thrower):
     speed[3] = int(thrower)
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
 
-
 def wheel_speed(speed, direction, angle):
     wheel_linear_velocity = speed * math.cos(direction - math.radians(angle + 30))
     return wheel_linear_velocity
-
 
 def spin_left(speed):
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
@@ -28,14 +27,12 @@ def spin_left(speed):
 def spin_right(speed):
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
 
-
 def stop():
-    speed = [0, 0, 0, 1800]
+    speed = [0, 0, 0, 0]
     ser.write_command(speed[0], speed[1], speed[2], speed[3], 0)
-
 
 def test():
     speed = [0, 0, 0, 0]
-    ser.write_command(0, 0, 5, 1800, 0)
-
+    ser.write_command(0, 0, 40, 0, 0)
+    time.sleep(3)
 test()
