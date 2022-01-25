@@ -8,6 +8,7 @@ installing the requirements go to the directory `/segment_module` and run `pip i
 
 **Used Libraries:**</br>
 `numpy`- for image processing</br>
+`segment_module` - for fast colour thresholding <br \>
 `opencv-python` - for image processing and GUI </br>
 `pyrealsense2` - for realsense camera configuration and usage </br>
 `pyserial` - for serialized communication with mainboard </br>
