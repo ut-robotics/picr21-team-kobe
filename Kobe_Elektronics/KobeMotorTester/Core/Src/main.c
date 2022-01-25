@@ -203,7 +203,7 @@ void Thrower_Send (uint16_t command){
 			pwmData[counter] = 798;
 		}
 		else{
-			pwmData[counter] = 399
+			pwmData[counter] = 399;
 		}
 		counter++;
 	}
