@@ -1,5 +1,5 @@
 Comment;Description;Designator;Quantity;Farnell;Mouser;TME;
-100nF;;C1, C2, C3, C4, C5, C10, C12, C13, C14, C15, C16, C18, C19, C20, C21;15;;;;
+100nF;;C1 C2 C3 C4 C5 C10 C12 C13 C14 C15 C16 C18 C19 C20 C21;15;;;;
 10uF;Capacitor 1206;C6, C7, C8, C17, C23, C25, C26, C27, C28;9;;;;
 1uF;;C9, C11, C22, C24;4;;;;
 CM1223;TVS diode, USB;D1;1;3607672;748-CM1223-02SO;;
