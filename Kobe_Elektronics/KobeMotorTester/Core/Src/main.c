@@ -136,7 +136,6 @@ volatile uint8_t isCommandReceived = 0; // (5)
 volatile uint8_t driverReset = 0;
 uint16_t timer = 0;
 uint16_t enable_pid = 0;
-int datasentflag = 0;
 Feedback feedback = { // (1)
 	      .speed1 = 0,
 	      .speed2 = 0,
@@ -157,16 +156,16 @@ int32_t clamp(int32_t value, int32_t minValue, int32_t maxValue) {
 
 
 void CDC_On_Receive(uint8_t* buffer, uint32_t* length) { // (6)
-  if (*length == sizeof(Command)) { // (7)
-    memcpy(&command, buffer, sizeof(Command)); // (8)
+	if (*length == sizeof(Command)) { // (7)
+		memcpy(&command, buffer, sizeof(Command)); // (8)
 
-    if (command.delimiter == 0xAAAA) { // (9)
-      isCommandReceived = 1;
-    }
-    if (command.delimiter == 0xBBBB) { // (9)
-          driverReset = 1;
-        }
-  }
+		if (command.delimiter == 0xAAAA) { // (9)
+			isCommandReceived = 1;
+		}
+		if (command.delimiter == 0xBBBB) { // (9)
+	  		driverReset = 1;
+		}
+	}
 }
 
 int32_t PIDcontrol(MotorControl* control, int16_t position){
@@ -292,13 +291,6 @@ int main(void)
   MX_USB_Device_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 1);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 0);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 1);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 0);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 1);
-
 
 
   HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
