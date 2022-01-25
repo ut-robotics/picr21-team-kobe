@@ -71,9 +71,6 @@ class ImageProcessor:
         self.debug_frame = np.zeros((self.camera.rgb_height, self.camera.rgb_width), dtype=np.uint8)
         self.line_sequence = np.array([int(c.Color.ORANGE), int(c.Color.BLACK), int(c.Color.WHITE)], dtype=np.uint8)
 
-
-
-
         self.out_of_field = False
         self.left_metric = None
         self.right_metric = None
@@ -88,19 +85,16 @@ class ImageProcessor:
         self.camera.close()
 
     def analyze_balls(self, t_balls) -> list:
-        t_balls = cv2.morphologyEx(t_balls, cv2.MORPH_CLOSE, (30,30), iterations = 1)
-
+        t_balls = cv2.morphologyEx(t_balls, cv2.MORPH_CLOSE, (30, 30), iterations=1)
         #t_balls = cv2.dilate(t_balls,(20,20),iterations = 1)
-
         contours, hierarchy = cv2.findContours(t_balls, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
         balls = []
 
         for contour in contours:
             # ball filtering logic goes here. Example includes filtering by size and an example how to get pixels from
             # the bottom center of the frame to the ball
             size = cv2.contourArea(contour)
-            #print(size)
+
             if size < 15: #or self.out_of_field: #15
                 continue
 
@@ -110,9 +104,6 @@ class ImageProcessor:
             xs = np.linspace(x + w / 2, self.camera.rgb_width / 2, num=len(ys), dtype=np.uint16)
 
             #obstacle avoidance
-            #print('orange sum', orange_color_area_right_side)
-            #print("orange right side", self.right_metric)
-
             # if orange_color_area_left_side < 240:
             #     self.turn_right = True
             # if orange_color_area_left_side > 240:
@@ -121,12 +112,6 @@ class ImageProcessor:
             #     self.turn_left = True
             # if orange_color_area_right_side > 240:
             #     self.turn_left = False
-
-
-
-            # print(orange_color_area_left_side)
-            # print(self.turn_right)
-            #print(orange_color_sum)
 
             colors = self.fragmented[ys, xs]
             out_of_field = color_sampler.check_sequence(colors, 8, self.line_sequence)
@@ -240,12 +225,10 @@ class ImageProcessor:
         right_column_x2 = 724
         right_column_y2 = np.arange(120,360)
 
-
         #orange_color_sum = np.count_nonzero(self.fragmented[center_y,center_x] == int(Color.ORANGE))
         orange_color_sum1 = np.count_nonzero(self.fragmented[left_column_y,left_column_x] == int(Color.ORANGE))
         orange_color_sum2 = np.count_nonzero(self.fragmented[left_column_y1,left_column_x1] == int(Color.ORANGE))
         orange_color_sum3 = np.count_nonzero(self.fragmented[left_column_y2,left_column_x2] == int(Color.ORANGE))
-
         orange_color_sum4 = np.count_nonzero(self.fragmented[right_column_y,right_column_x] == int(Color.ORANGE))
         orange_color_sum5 = np.count_nonzero(self.fragmented[right_column_y1,right_column_x1] == int(Color.ORANGE))
         orange_color_sum6 = np.count_nonzero(self.fragmented[right_column_y2,right_column_x2] == int(Color.ORANGE))
@@ -313,19 +296,15 @@ class ProcessFrames:
 
         floor_area = np.count_nonzero(processed.fragmented == int(Color.ORANGE))
         # obstacle_area = np.count_nonzero(processed.fragmented[150:300, 300:600] == int(Color.ORANGE))
-        
 
-        
         # if obstacle_area is None:
         #     obstacle_area = 0
-            
+
         # if obstacle_area < 40000:
         #     avoid_collision = True
         # if obstacle_area > 40000:
         #     avoid_collision = False
-            
-        # print("obstacle area", obstacle_area)
-        # print("obstacle ahead", avoid_collision)
+
         if floor_area is None:
             floor_area = 0
 
