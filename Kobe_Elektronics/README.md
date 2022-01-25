@@ -17,6 +17,8 @@
 
 - Has voltage regulators to turn 5V to 3.3V and 16V to 5V
 
+- One MicroMatch to send signal to thrower motor driver
+
 - Three drivers for controlling motors, with FAULT LEDs
 
 - Drivers can be controlled through 2 PWM signals or one direction signal and one PWM signal, controlled by MODE pin signal. When GND, 1 PWM and direction
