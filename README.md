@@ -43,8 +43,20 @@ To share your local USB device connect to your remote machine through the applic
 
 NB: This solution is kind of iffy because occasionally some of the inputs may become inversed, e.g right stick x-axis gets inverted, B button becomes A. This is likely because of the virtual rdp gamepad driver.
 
-**Referee commands:**</br>
+**Keyboard:**</br>
+In order to use the keyboard for manual robot control run `keyboard_controller.py` and use the following keys:  </br>
 
+w - forward  </br>
+a - left  </br>
+s - backwards  </br>
+d - right  </br>
+q - spin left  </br>
+e - spin right  </br>
+t - throw  </br>
+c - stop  </br>
+x - quit  manual control </br>
+
+**Referee commands:**</br>
 When using a local server you can control the robot by sending numerically encoded commands via the console of `referee_server.py`: </br>
 
 1 - Start with target color blue </br>
