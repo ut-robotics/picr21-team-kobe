@@ -13,7 +13,7 @@ Thrower,Thrower motor,J11,1,,,AMP-7-215079-4,
 3k3,,R2 R5 R6,3,,,,
 100k,,R9 R13 R17,3,,,,
 BUK6Y10-30P,Reverse voltage protection,T1,1,3438512,771-BUK6Y10-30PX,,
-DRV8243H-Q1,Motor driver,U1 U2 U3,3,,,,DRV8243-Q1
+DRV8243H-Q1,Motor driver,U1 U2 U3,3,,,,
 STM32G441,Microcontroller,U4,1,3132405,511-STM32G431KBT6,,
 MAX14930,4 channel isolator,U5 U8,2,3257451,700-MAX14930DASE+,,
 NCP164,TSOP-5 microcontroller voltage regulator,U6,1,3367831,863-NCP164CSN330T1G,,
