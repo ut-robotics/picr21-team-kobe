@@ -1,12 +1,10 @@
 from ctypes.wintypes import tagRECT
-import math
 import cv2
 import camera_config
 import image_processor as ip
 import movement
 from color import Color
 
-#processor = ip.ProcessFrames(False)
 camera = camera_config.Config()
 target = Color.MAGENTA
 processor = ip.ProcessFrames(camera, target)
@@ -37,13 +35,13 @@ def keyboard_control():
             movement.move_omni(moving_speed, 0, 0,0)
         if key == ord("e"):
             print("Spinning right.")
-            movement.move_omni(0, 0, moving_speed,1800)
+            movement.move_omni(0, 0, moving_speed, 1800)
         if key == ord("q"):
             print("Spinning left.")
-            movement.move_omni(0, 0, -moving_speed,1800)
+            movement.move_omni(0, 0, -moving_speed, 1800)
         if key == ord("t"):
             print("Throwing.")
-            movement.move_omni(0, 0, 0,1200)
+            movement.move_omni(0, 0, 0, 1200)
         if key == ord("c"):
             print("Stopping.")
             movement.stop()

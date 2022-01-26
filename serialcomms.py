@@ -13,13 +13,11 @@ class Connection:
         self.port = port
         init_data = struct.pack('<hhhHH', 0, 0, 0, 0, 0xBBBB)
         self.ser.write(init_data)
+
     def write_command(self, speed1, speed2, speed3, thrower_speed, disable_failsafe):
         try:
             data = struct.pack('<hhhHH', speed1, speed2, speed3, thrower_speed, 0xAAAA)
             self.ser.write(data)
-            # received_data = self.ser.read(data_size)
-            # data = struct.unpack('<hhhH', received_data)
-            # print(data)
         except Exception as e:
             print(e)
             self.ser.close()

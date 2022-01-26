@@ -92,9 +92,9 @@ def handle_manual(state_data, gamepad):
     # drive.move_omni(0,0,0, state_data.thrower_speed)
     # drive.move_omni(int(gamepad.x*30),-int(gamepad.y*30),int(gamepad.rx*20), 0)
 
+
 def handle_patrol(state_data, gamepad):
     if state_data.keypoint_count > 0:
-
         state_data.state = State.DRIVE
         return
 
@@ -108,7 +108,6 @@ def handle_patrol(state_data, gamepad):
         #print("here", basket_in_frame)
         # if not basket_in_frame:
         #     state_data.own_basket = False
-        #print(state_data.basket_bottom_y, state_data.own_basket)
         if basket_in_frame and state_data.basket_bottom_y < camera.camera_y*0.3:
             #rot_delta_x = camera.camera_x/2
             delta_x = state_data.basket_x - camera.camera_x / 2
@@ -117,14 +116,10 @@ def handle_patrol(state_data, gamepad):
 
             if state_data.left_metric > 0.6 and state_data.right_metric > 0.6:
                 drive.move_omni(0,40, -rot_spd, 0)
-
             if state_data.left_metric < 0.6:
-                #print('left')
                 drive.move_omni(-state_data.left_metric * 70, 40, -rot_spd, 0)
             if state_data.right_metric < 0.6:
-                #print('right')
                 drive.move_omni(state_data.left_metric * 70, 40, -rot_spd, 0)
-
 
         elif not basket_in_frame:
             drive.move_omni(0,0,20,0)
@@ -147,13 +142,10 @@ def handle_patrol(state_data, gamepad):
             #print(state_data.left_metric, state_data.right_metric)
 
             if state_data.left_metric > 0.6 and state_data.right_metric > 0.6:
-                drive.move_omni(0,40, -rot_spd, 0)
-
+                drive.move_omni(0, 40, -rot_spd, 0)
             if state_data.left_metric < 0.6:
-                #print('left')
                 drive.move_omni(-state_data.left_metric * 70, 40, -rot_spd, 0)
             if state_data.right_metric < 0.6:
-                #print('right')
                 drive.move_omni(state_data.left_metric * 70, 40, -rot_spd, 0)
 
         elif not basket_in_frame:
@@ -213,13 +205,9 @@ def handle_drive(state_data, gamepad):
             drive.move_omni(0,front_speed, -rot_spd, 0)
 
         if state_data.left_metric < 0.6:
-            #print('left')
             drive.move_omni(-state_data.left_metric * 70, front_speed, -rot_spd, 0)
         if state_data.right_metric < 0.6:
-            #print('right')
             drive.move_omni(state_data.left_metric * 70, front_speed, -rot_spd, 0)
-
-
 
         if camera.camera_y > state_data.ball_y > camera.camera_y * 0.66:  # How close ball y should be to switch to next state
             state_data.state = State.AIM
@@ -274,8 +262,6 @@ def handle_aim(state_data, gamepad):
 
     #print("attacking basket {} opponent_basket {} turn direction {}".format(state_data.last_attacking_basket_x, state_data.opponent_basket_x, state_data.turn_direction))
 
-    #print(state_data.turn_direction)
-
     if state_data.floor_area is None or state_data.floor_area < 20000:
         state_data.state = State.FIND
         return
@@ -300,8 +286,6 @@ def handle_aim(state_data, gamepad):
     state_data.prev_rotspeed = rot_spd
     state_data.prev_xspeed = side_speed
     drive.move_omni(-side_speed, front_speed, -rot_spd, 0)
-
-    #print("side speed", side_speed)
 
                                 #415                                                    433
     if basket_in_frame and camera.camera_x * 0.489 <= state_data.basket_x <= camera.camera_x * 0.51 and state_data.ball_y >= camera.camera_y * 0.655: # Start throwing if ball y is close to robot and basket is centered to camera x
@@ -359,7 +343,6 @@ def handle_throwing(state_data, controller):
         state_data.prev_xspeed = side_speed
         drive.move_omni(-side_speed, front_speed, -rot_spd, thrower_speed)
         #drive.move_omni(-0, 0, -0, 2600)
-
         state_data.has_thrown = True
         state_data.state = State.THROWING
         return
@@ -395,8 +378,6 @@ def handle_throwing(state_data, controller):
         drive.move_omni(-side_speed, 8, -rot_speed, thrower_speed)
         #drive.move_omni(-0, 0, -0, thrower_speed)
 
-        #print("throwing at ", thrower_speed, "from ", state_data.basket_distance, "away")
-
         state_data.state = State.THROWING
         if state_data.debug and state_data.after_throw_counter > 50:
             state_data.state = State.DEBUG
@@ -411,7 +392,6 @@ def handle_debug(state_data, gamepad):
     drive.stop()
     state_data.thrower_speed = int(input("Enter thrower speed to use:"))
     state_data.state = State.FIND
-
 
 
 def listen_for_referee_commands(state_data, processor):
@@ -473,8 +453,6 @@ def logic(switcher):
             state_data.basket_size = basket_size
             state_data.basket_bottom_y = basket_bottom_y
             state_data.avoid_collision = avoid_collision
-            # print('left metric', left_metric)
-            # print('right metric', right_metric)
             state_data.left_metric = left_metric
             state_data.right_metric = right_metric
 
@@ -492,7 +470,6 @@ def logic(switcher):
 
                 if state_data.opponent_basket_x is not None and state_data.opponent_basket_x > camera.camera_x/2:
                     state_data.turn_direction *= -1  # reverse direction
-            
 
             controller = joy.read()
 

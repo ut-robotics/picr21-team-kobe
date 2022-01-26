@@ -7,7 +7,6 @@ def order_exists(arr, order):
     order_size = order.size
     order_range = np.arange(order_size)
     m = (arr[np.arange(arr_size - order_size + 1)[:, None] + order_range] == order).all(1)
-
     if m.any() > 0:
         return np.where(np.convolve(m, np.ones(order_size, dtype=int)) > 0)[0]
     else:
@@ -16,7 +15,6 @@ def order_exists(arr, order):
 
 def check_sequence(arr, noise, order):
     sequence_arr = filter_array(arr, noise)
-    #print(sequence_arr)
     order_exist = order_exists(sequence_arr, order)
     return len(order_exist) > 0
 

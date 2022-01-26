@@ -90,15 +90,6 @@ typedef struct Feedback { // (3)
   uint16_t delimiter;
 } Feedback;
 
-typedef struct Encoder { // (3)
-  int16_t speed1;
-  int16_t speed2;
-  int16_t speed3;
-  uint16_t m1_pwm;
-  uint16_t m2_pwm;
-  uint16_t delimiter;
-} Encoder;
-
 typedef struct MotorControl {
 	int16_t speed;
 	int16_t position;
@@ -108,8 +99,6 @@ typedef struct MotorControl {
 	int32_t newspeed;
 	int16_t positionChange;
 } MotorControl;
-
-
 
 MotorControl motor1Control = {
 	  .speed = 0,
@@ -144,24 +133,15 @@ MotorControl motor3Control = {
 
 Command command = {.speed1 = 0, .speed2 = 0, .speed3 = 0, .throwerSpeed = 0, .delimiter = 0}; // (4)
 volatile uint8_t isCommandReceived = 0; // (5)
-volatile uint8_t sendData = 0;
+volatile uint8_t driverReset = 0;
 uint16_t timer = 0;
 uint16_t enable_pid = 0;
-int datasentflag = 0;
 Feedback feedback = { // (1)
 	      .speed1 = 0,
 	      .speed2 = 0,
 	      .speed3 = 0,
 	      .delimiter = 0xAAAA
 	  };;
-Encoder encoder = {
-		.speed1 = 0,
-		.speed2 = 0,
-		.speed3 = 0,
-		.delimiter = 0xAAAA
-
-};
-
 
 int32_t clamp(int32_t value, int32_t minValue, int32_t maxValue) {
 	if (value > maxValue) {
@@ -171,42 +151,22 @@ int32_t clamp(int32_t value, int32_t minValue, int32_t maxValue) {
 	if (value < minValue) {
 		return minValue;
 	}
-
 	return value;
 }
 
 
 void CDC_On_Receive(uint8_t* buffer, uint32_t* length) { // (6)
-  if (*length == sizeof(Command)) { // (7)
-    memcpy(&command, buffer, sizeof(Command)); // (8)
+	if (*length == sizeof(Command)) { // (7)
+		memcpy(&command, buffer, sizeof(Command)); // (8)
 
-    if (command.delimiter == 0xAAAA) { // (9)
-      isCommandReceived = 1;
-    }
-    if (command.delimiter == 0xBBBB) { // (9)
-          sendData = 1;
-        }
-  }
+		if (command.delimiter == 0xAAAA) { // (9)
+			isCommandReceived = 1;
+		}
+		if (command.delimiter == 0xBBBB) { // (9)
+	  		driverReset = 1;
+		}
+	}
 }
-
-/*uint16_t prepareDshotPacket(motorDmaOutput_t *const motor, const uint16_t value)
-{
-    uint16_t packet = (value << 1) | (motor->requestTelemetry ? 1 : 0);
-    motor->requestTelemetry = false;    // reset telemetry request to make sure it's triggered only once in a row
-
-    // compute checksum
-    int csum = 0;
-    int csum_data = packet;
-    for (int i = 0; i < 3; i++) {
-        csum ^=  csum_data;   // xor data by nibbles
-        csum_data >>= 4;
-    }
-    csum &= 0xf;
-    // append checksum
-    packet = (packet << 4) | csum;
-
-    return packet;
-}*/
 
 int32_t PIDcontrol(MotorControl* control, int16_t position){
 	control->positionChange = position - control->position; //Lahutab vana positsiooni, et saada kiiruse
@@ -217,12 +177,9 @@ int32_t PIDcontrol(MotorControl* control, int16_t position){
 	return control->p_gain * error + control->i_gain * control->integraal;
 }
 
-uint16_t ThrData[20];
 uint16_t pwmData[20];
 
-void Thrower_Send (uint16_t command)
-{
-
+void Thrower_Send (uint16_t command){
 	// compute checksum
 
 	uint16_t packet = (command << 1) | 0;
@@ -237,95 +194,50 @@ void Thrower_Send (uint16_t command)
 	csum &= 0xf;
 	// append checksum
 	packet = (packet << 4) | csum;
-
+	
+	
+	int counter = 0;
 	for (int i=15; i>=0; i--)
 	{
-		if (packet&(1<<i))
-		{
-			pwmData[i] = 798;
+		if (packet & (1<<i)){
+			pwmData[counter] = 798;
 		}
-		else pwmData[i] = 399;
-	}
-
-	//pwmData[11] = 399;
-
-	for (int i=19; i>=16; i--)
-	{
-		pwmData[i] = 0;
-	}
-	int counter = 0;
-	for (int i = 19; i >= 0; i--){
-		ThrData[counter] = pwmData[i];
+		else{
+			pwmData[counter] = 399;
+		}
 		counter++;
 	}
 
-	HAL_TIM_PWM_Start_DMA(&htim8, TIM_CHANNEL_1, (uint32_t *)ThrData, 20);
+	for (int i=19; i>=16; i--){
+		pwmData[i] = 0;
+	}
+	HAL_TIM_PWM_Start_DMA(&htim8, TIM_CHANNEL_1, (uint32_t *)pmwData, 20);
 }
 
 
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim6) {
-  // Motor control calculations can be called from here
 	if (enable_pid == 1){
 
 		int16_t position;
-
-		/*int16_t position = (int16_t)TIM1->CNT;//Uus positsioon
-		int16_t new_speed = PIDcontrol(&motor1Control, position);
-
-		if (new_speed < 0){
-				motor1Control.newspeed = -new_speed;
-				HAL_GPIO_WritePin(M1_D_GPIO_Port, M1_D_Pin, 0);
-			}
-			else{
-				motor1Control.newspeed = new_speed;
-				HAL_GPIO_WritePin(M1_D_GPIO_Port, M1_D_Pin, 1);
-			}
-
-		TIM4->CCR1 = motor1Control.newspeed;*/
 		position = (int16_t)TIM1->CNT;
 		int32_t pwmValue = PIDcontrol(&motor1Control, position);
 		HAL_GPIO_WritePin(M1_D_GPIO_Port, M1_D_Pin, (pwmValue < 0) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 		TIM4->CCR1 = (uint16_t)clamp((pwmValue < 0) ? -pwmValue : pwmValue, 0, 65535);
-		//HAL_GPIO_WritePin(M1_D_GPIO_Port, M1_D_Pin, GPIO_PIN_SET);
-		//TIM4->CCR1 = TIM4->CCR1 > 65500 ? 0 : TIM4->CCR1 + 100;
-
-		encoder.m1_pwm = (uint16_t)clamp((pwmValue < 0) ? -pwmValue : pwmValue, 0, 65535);
 
 		position = (int16_t)TIM2->CNT;
 		pwmValue = PIDcontrol(&motor2Control, position);
 		HAL_GPIO_WritePin(M2_D_GPIO_Port, M2_D_Pin, (pwmValue < 0) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 		TIM4->CCR2 = (uint16_t)clamp((pwmValue < 0) ? -pwmValue : pwmValue, 0, 65535);
 
-		encoder.m2_pwm = (uint16_t)clamp((pwmValue < 0) ? -pwmValue : pwmValue, 0, 65535);
 		position = (int16_t)TIM3->CNT;
 		pwmValue = PIDcontrol(&motor3Control, position);
 		HAL_GPIO_WritePin(M3_D_GPIO_Port, M3_D_Pin, (pwmValue < 0) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 		TIM4->CCR3 = (uint16_t)clamp((pwmValue < 0) ? -pwmValue : pwmValue, 0, 65535);
 
-		//feedback.speed2 = motor2Control.positionChange;
-
-		//CDC_Transmit_FS(&feedback, sizeof(feedback));
-		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin); // (3)
-		/*position = (int16_t)TIM3->CNT;
-		new_speed = PIDcontrol(&motor3Control, position);
-
-		if (new_speed < 0){
-						motor3Control.newspeed = -new_speed;
-						HAL_GPIO_WritePin(M2_D_GPIO_Port, M2_D_Pin, 0);
-					}
-					else{
-						motor3Control.newspeed = new_speed;
-						HAL_GPIO_WritePin(M3_D_GPIO_Port, M3_D_Pin, 1);
-					}
-
-		TIM4->CCR3 = motor3Control.newspeed;*/
-
 		timer+=1;
 		if (timer == 50){
 			timer = 0;
 			enable_pid = 0;
-
 			motor1Control.speed = 0;
 			TIM4->CCR1 = 0;
 			TIM4->CCR2 = 0;
@@ -333,27 +245,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim6) {
 			motor2Control.speed = 0;
 			motor3Control.speed = 0;
 			Thrower_Send(0);
-
-			/*encoder.speed1 = motor1Control.positionChange;
-			encoder.speed2 = motor2Control.positionChange;
-			encoder.speed3 = motor3Control.positionChange;
-			//encoder.m1_pwm = motor1Control.
-
-			CDC_Transmit_FS(&encoder, sizeof(encoder));*/
-
-
-			//CDC_Transmit_FS(&pwmValue, 4);
-			/*
-			TIM4->CCR1 = motor1Control.speed;
-			TIM4->CCR2 = motor2Control.speed;
-			TIM4->CCR3 = motor3Control.speed;
-			TIM8->CCR1 = 1800;
-			timer=0;*/
-
 		}
-
 	}
-
 }
 
 /*
@@ -399,13 +292,6 @@ int main(void)
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
 
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 1);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 0);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 1);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 0);
-  //HAL_GPIO_WritePin(DRIVER_GPIO_Port, DRIVER_Pin, 1);
-
-
 
   HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1 | TIM_CHANNEL_2);
@@ -414,9 +300,6 @@ int main(void)
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
-  //HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-
-
 
   TIM17->CCR1 = 65535;
   HAL_Delay(100);
@@ -428,10 +311,6 @@ int main(void)
   TIM4->CCR3 = 0;
 
   Thrower_Send(0);
-  //TIM4->CCR2 = 20000;
-  //TIM4->CCR1 = 10000;
-  //TIM4->CCR2 = 10000;
-  //TIM4->CCR3 = 9000;
 
   HAL_TIM_Base_Start_IT(&htim6);
 
@@ -445,68 +324,20 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  /*HAL_Delay(1000);
-	  TIM4->CCR1 = 1000;
-	  TIM4->CCR2 = 900;
-	  TIM4->CCR3 = 900;
-	  HAL_Delay(1000);
-	  TIM4->CCR1 = 5000;
-	  TIM4->CCR2 = 5000;
-	  TIM4->CCR3 = 5000;
-	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);*/
-
-	  if (sendData) {
-		  sendData = 0;
+	  if (driverReset) {
+		  driverReset = 0;
 		  TIM17->CCR1 = 61750;
 		  HAL_Delay(100);
 	   	  TIM17->CCR1 = 65535;
 
 	  }
 
-
-
 	  if (isCommandReceived) { // (2)
 	        isCommandReceived = 0;
-	        //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin); // (3)
 	        motor1Control.speed = command.speed1;
 	        motor2Control.speed = command.speed2;
 	        motor3Control.speed = command.speed3;
 
-
-	        /*if (motor1Control.speed < 0){
-					HAL_GPIO_WritePin(M1_D_GPIO_Port, M1_D_Pin, 0);
-					TIM4->CCR1 = - motor1Control.speed;
-				}
-				else{
-					TIM4->CCR1 = motor1Control.speed;
-					HAL_GPIO_WritePin(M1_D_GPIO_Port, M1_D_Pin, 1);
-				}
-
-	        if (motor2Control.speed < 0){
-					HAL_GPIO_WritePin(M2_D_GPIO_Port, M2_D_Pin, 1);
-					TIM4->CCR2 = - motor2Control.speed;
-				}
-				else{
-					TIM4->CCR2 = motor2Control.speed;
-					HAL_GPIO_WritePin(M2_D_GPIO_Port, M2_D_Pin, 0);
-				}
-
-	        if (motor3Control.speed < 0){
-					HAL_GPIO_WritePin(M3_D_GPIO_Port, M3_D_Pin, 0);
-					TIM4->CCR3 = - motor3Control.speed;
-				}
-				else{
-					TIM4->CCR3 = motor3Control.speed;
-					HAL_GPIO_WritePin(M3_D_GPIO_Port, M3_D_Pin, 1);
-				}*/
-
-
-	        /*if (command.throwerSpeed<1800 || command.throwerSpeed>3999){
-	        	TIM8->CCR1 = 1800;
-	        }
-	        else{
-	        	TIM8->CCR1 = command.throwerSpeed;
-	        }*/
 	        Thrower_Send(command.throwerSpeed);
   	        timer = 0;
   	        enable_pid = 1;
@@ -518,8 +349,6 @@ int main(void)
 	        CDC_Transmit_FS(&feedback, sizeof(feedback)); // (5)
 	      }
 	    }
-
-
 
   /* USER CODE END 3 */
 }

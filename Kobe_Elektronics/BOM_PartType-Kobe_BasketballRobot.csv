@@ -1,20 +1,20 @@
-﻿Comment;Description;Designator;Quantity;Farnell;Mouser;TME;
-100nF;;C1, C2, C3, C4, C5, C10, C12, C13, C14, C15, C16, C18, C19, C20, C21;15;;;;
-10uF;Capacitor 1206;C6, C7, C8, C17, C23, C25, C26, C27, C28;9;;;;
-1uF;;C9, C11, C22, C24;4;;;;
-CM1223;TVS diode, USB;D1;1;"	3607672";748-CM1223-02SO;;
-LED red;;D2, D3, D4, D5;4;;;;
-MicroUSB_K;microUSB port;J1;1;;;;
-37D motor;Wheel motor;J2, J3, J4;3;;;;
-ST-LINK;Programmer for microcontroller;J7;1;;200-FTSH10501LDVK;;
-Encoder;Encoder for motor;J8, J9, J10;3;;;AMP-7-215079-4;
-Thrower;Thrower motor;J11;1;;;AMP-7-215079-4;
-4,7k;;R1, R3, R4, R7;4;;;;
-3,3k;;R2, R5, R6;3;;;;
-100k;;R9, R13, R17;3;;;;
-BUK6Y10-30P;Reverse voltage protection;T1;1;"	3438512";771-BUK6Y10-30PX;;
-DRV8243H-Q1;Motor driver;U1, U2, U3;3;;;;DRV8243-Q1
-STM32G441;Microcontroller;U4;1;"	3132405";511-STM32G431KBT6;;
-MAX14930;4 channel isolator;U5, U8;2;"	3257451";700-MAX14930DASE+;;
-NCP164;TSOP-5 microcontroller voltage regulator;U6;1;"	3367831";863-NCP164CSN330T1G;;
-NCV8730;TSOP-5 Voltage regulator motor driver;U9;1;"	3463974";863-NCV8730ASN500T1G;;
+Comment,Description,Designator,Quantity,Farnell,Mouser,TME
+100nF,,C1 C2 C3 C4 C5 C10 C12 C13 C14 C15 C16 C18 C19 C20 C21,15,,,
+10uF,Capacitor 1206,C6 C7 C8 C17 C23 C25 C26 C27 C28,9,,,
+1uF,,C9 C11 C22 C24,4,,,
+CM1223,TVS diode USB,D1,1,3607672,748-CM1223-02SO,
+LED red,,D2 D3 D4 D5,4,,,
+MicroUSB_K,microUSB port,J1,1,,,
+37D motor,Wheel motor,J2 J3 J4,3,,,
+ST-LINK,Programmer for microcontroller,J7,1,,200-FTSH10501LDVK,
+Encoder,Encoder for motor,J8 J9 J10,3,,,AMP-7-215079-4
+Thrower,Thrower motor,J11,1,,,AMP-7-215079-4
+4k7,,R1 R3 R4 R7,4,,,
+3k3,,R2 R5 R6,3,,,
+100k,,R9 R13 R17,3,,,
+BUK6Y10-30P,Reverse voltage protection,T1,1,3438512,771-BUK6Y10-30PX,
+DRV8243H-Q1,Motor driver,U1 U2 U3,3,,,
+STM32G441,Microcontroller,U4,1,,511-STM32G441KBU6,
+MAX14930,4 channel isolator,U5 U8,2,3257451,700-MAX14930DASE+,
+NCP164,TSOP-5 microcontroller voltage regulator,U6,1,3367831,863-NCP164CSN330T1G,
+NCV8730,TSOP-5 Voltage regulator motor driver,U9,1,3463974,863-NCV8730ASN500T1G,
