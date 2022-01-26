@@ -102,10 +102,10 @@ def handle_patrol(state_data, gamepad):
         state_data.patrol_counter = 0
         state_data.state = State.FIND  
 
-    print(state_data.own_basket)
+    #print(state_data.own_basket)
     if state_data.own_basket:
         basket_in_frame = state_data.basket_x is not None
-        print("here", basket_in_frame)
+        #print("here", basket_in_frame)
         # if not basket_in_frame:
         #     state_data.own_basket = False
         #print(state_data.basket_bottom_y, state_data.own_basket)
@@ -134,17 +134,17 @@ def handle_patrol(state_data, gamepad):
             state_data.state = State.FIND
 
     if not state_data.own_basket:
-        print('here2')
+        #print('here2')
         basket_in_frame = state_data.opponent_basket_x is not None
         # if not basket_in_frame:
         #     state_data.own_basket = True
-        print(state_data.opponent_basket_bottom_y, state_data.own_basket)
+        #print(state_data.opponent_basket_bottom_y, state_data.own_basket)
         if basket_in_frame and state_data.opponent_basket_bottom_y < camera.camera_y*0.3:
             #rot_delta_x = camera.camera_x/2
             delta_x = state_data.opponent_basket_x - camera.camera_x / 2
 
             rot_spd = calc_speed(delta_x, camera.camera_x/2, 5, 3, 100, 20)  #* turn_direction
-            print(state_data.left_metric, state_data.right_metric)
+            #print(state_data.left_metric, state_data.right_metric)
 
             if state_data.left_metric > 0.6 and state_data.right_metric > 0.6:
                 drive.move_omni(0,40, -rot_spd, 0)
@@ -196,7 +196,7 @@ def handle_drive(state_data, gamepad):
         delta_y = (camera.camera_y * 0.77) - state_data.ball_y
         min_speed = 2
         min_delta = 5
-        front_speed = calc_speed(delta_y, camera.camera_y, min_delta, 5, 400, 60)
+        front_speed = calc_speed(delta_y, camera.camera_y, min_delta, 5, 400, 50)
         rot_spd = calc_speed(delta_x, camera.camera_x, min_delta, min_speed, 100, 30)
 
         front_delta = front_speed - state_data.prev_y_speed
@@ -208,7 +208,7 @@ def handle_drive(state_data, gamepad):
         state_data.prev_y_speed = front_speed
         state_data.prev_rot_speed = -rot_spd
 
-        print(state_data.right_metric)
+        #print(state_data.right_metric)
         if state_data.left_metric > 0.6 and state_data.right_metric > 0.6:
             drive.move_omni(0,front_speed, -rot_spd, 0)
 
@@ -264,15 +264,15 @@ def handle_find(state_data, gamepad):
 
 
 def handle_stopped(state_data, gamepad):
-    print(state_data.left_metric, "left")
-    print(state_data.right_metric, "right")
+    #print(state_data.left_metric, "left")
+    #print(state_data.right_metric, "right")
     drive.stop()
     state_data.state = State.STOPPED
 
 
 def handle_aim(state_data, gamepad):
 
-    print("attacking basket {} opponent_basket {} turn direction {}".format(state_data.last_attacking_basket_x, state_data.opponent_basket_x, state_data.turn_direction))
+    #print("attacking basket {} opponent_basket {} turn direction {}".format(state_data.last_attacking_basket_x, state_data.opponent_basket_x, state_data.turn_direction))
 
     #print(state_data.turn_direction)
 
@@ -457,7 +457,7 @@ def logic(switcher):
         while True:
             # Main code
             # Comment this line out if you are not using a referee server to send commands
-            #listen_for_referee_commands(state_data, processor)
+            listen_for_referee_commands(state_data, processor)
             #state_data.state = State.AIM
             # Align depth frame if we are in throw state
             count, y, x, center_x, center_y, basket_distance, floor_area, out_of_field, basket_size, opponent_basket_x, opponent_basket_bottom_y, basket_bottom_y, avoid_collision, left_metric, right_metric = processor.process_frame(
@@ -508,7 +508,7 @@ def logic(switcher):
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 state_data.state = State.FIND
-            print(state_data.state)
+            #print(state_data.state)
             switcher.get(state_data.state)(state_data, controller)
 
             if key == ord('q'):
