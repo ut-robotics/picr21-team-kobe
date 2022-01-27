@@ -211,7 +211,7 @@ void Thrower_Send (uint16_t command){
 	for (int i=19; i>=16; i--){
 		pwmData[i] = 0;
 	}
-	HAL_TIM_PWM_Start_DMA(&htim8, TIM_CHANNEL_1, (uint32_t *)pmwData, 20);
+	HAL_TIM_PWM_Start_DMA(&htim8, TIM_CHANNEL_1, (uint32_t *)pwmData, 20);
 }
 
 
